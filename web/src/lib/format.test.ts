@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { formatMonth, formatNum, formatPct, formatShare } from "@/lib/format";
+import { formatDay, formatMonth, formatNum, formatPct, formatShare } from "@/lib/format";
 
 describe("formatPct", () => {
   it("signs gains with a plus and one decimal", () => {
@@ -57,5 +57,16 @@ describe("formatMonth", () => {
   it("rejects anything that is not a month", () => {
     expect(() => formatMonth("2026-13")).toThrow(RangeError);
     expect(() => formatMonth("Aug 2026")).toThrow(RangeError);
+  });
+});
+
+describe("formatDay", () => {
+  it("prints a date as the design's day, short month and year in capitals", () => {
+    expect(formatDay("2026-08-31")).toBe("31 AUG 2026");
+    expect(formatDay("2026-09-02")).toBe("2 SEP 2026");
+  });
+
+  it("falls back to the month for a month-only value", () => {
+    expect(formatDay("2025-01")).toBe("JAN 2025");
   });
 });

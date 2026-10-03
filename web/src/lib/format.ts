@@ -31,3 +31,10 @@ export function formatMonth(isoMonth: string): string {
   if (!match || index < 0 || index > 11) throw new RangeError(`not a month: ${isoMonth}`);
   return `${MONTHS[index]} ${match[1]}`;
 }
+
+/** "2026-08-31" → "31 AUG 2026", as the War Room's header prints dates; "2025-01" → "JAN 2025". */
+export function formatDay(isoDate: string): string {
+  const month = formatMonth(isoDate).toUpperCase();
+  const day = /^\d{4}-\d{2}-(\d{2})/.exec(isoDate);
+  return day ? `${Number(day[1])} ${month}` : month;
+}
