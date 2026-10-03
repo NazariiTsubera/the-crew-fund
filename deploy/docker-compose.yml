@@ -6,6 +6,10 @@ services:
     restart: unless-stopped
     expose:
       - "8000"
+    # The panel cache and the JSON store live on the box, built by scripts/cache_panel.py
+    # and scripts/seed_agents.py; the directory must be writable by uid 10001.
+    volumes:
+      - ./cache:/app/cache
 
   caddy:
     image: caddy:2
