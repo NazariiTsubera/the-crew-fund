@@ -140,8 +140,9 @@ def fundamentals_asof(ticker: str, on: date) -> pd.DataFrame:
 
 
 def sectors() -> pd.DataFrame | None:
-    # The SDK raises KeyError for a missing panel; the template only caught FileNotFoundError.
+    """Ticker reference data for the sector screen, or None when it cannot be read: a missing
+    panel (KeyError), or the hosted table lacking `sic_description` (a polars column error)."""
     try:
         return dataset().sectors()
-    except (FileNotFoundError, KeyError):
+    except Exception:
         return None

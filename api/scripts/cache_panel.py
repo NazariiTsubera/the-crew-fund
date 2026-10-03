@@ -23,6 +23,7 @@ from statevector import Dataset
 from statevector.pit import holdout_cutoff
 
 from app.mirror import mirrored_scan
+from app.redact import redact
 from crew.features import CLOCK_FIELDS, CONTROL_FLAGS, FEATURES, PLANTED_TICKER
 from crew.panel import cache_dir
 
@@ -45,6 +46,21 @@ def last_trading_day(ds: Dataset) -> date:
         .item()
     )
     return recent or max(ds.trading_days())
+
+
+REFERENCE_COLUMNS = ["ticker", "name", "sic_description", "primary_exchange", "market_cap"]
+
+
+def reference(ds: Dataset, universe: list[str]) -> pl.DataFrame:
+    """Ticker reference rows, with whichever of the wanted columns the table has: the hosted
+    copy has no sic_description, which the SDK's sectors() assumes."""
+    try:
+        lf = ds._scan("reference_tickers")
+        present = [c for c in REFERENCE_COLUMNS if c in lf.collect_schema().names()]
+        return lf.select(present).filter(pl.col("ticker").is_in(universe)).collect()
+    except Exception as e:
+        progress(f"no reference table ({redact(str(e))[:200]}); sectors left empty")
+        return pl.DataFrame({"ticker": []}, schema={"ticker": pl.String})
 
 
 def build(ds: Dataset, out: Path, max_tickers: int | None = None) -> dict:
@@ -121,10 +137,7 @@ def build(ds: Dataset, out: Path, max_tickers: int | None = None) -> dict:
         .collect()
         .sort("date")
     )
-    try:
-        sectors = pl.from_pandas(ds.sectors()).filter(pl.col("ticker").is_in(universe))
-    except (FileNotFoundError, KeyError):
-        sectors = pl.DataFrame({"ticker": []}, schema={"ticker": pl.String})
+    sectors = reference(ds, universe)
 
     out.mkdir(parents=True, exist_ok=True)
     frames = {
@@ -157,7 +170,11 @@ def main() -> int:
     ap.add_argument("--out", type=Path, default=cache_dir())
     ap.add_argument("--max-tickers", type=int, default=None)
     args = ap.parse_args()
-    manifest = build(Dataset(), args.out, args.max_tickers)
+    try:
+        manifest = build(Dataset(), args.out, args.max_tickers)
+    except Exception as e:  # never print the data token that rides in remote URLs
+        progress(f"failed: {type(e).__name__}: {redact(str(e))}")
+        return 1
     print(json.dumps(manifest, indent=2))
     return 0
 

@@ -214,3 +214,14 @@ def _assert_full_marks(sv_root):
 
     score = json.loads(run.stdout)
     assert score["score"] == score["max"], score["checks"]
+
+
+def test_screen_ignores_a_sector_filter_when_the_table_lacks_sic_description(sv_root, client):
+    import polars as pl
+
+    ref = sv_root / "data/raw/massive/reference_tickers.parquet"
+    pl.DataFrame({"ticker": ["AAPL"], "name": ["Apple"]}).write_parquet(ref)
+    try:
+        assert client.get("/screen?sector_contains=software").status_code == 200
+    finally:
+        ref.unlink()

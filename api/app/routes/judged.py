@@ -12,6 +12,7 @@ from datetime import date
 from fastapi import APIRouter, HTTPException, Query
 
 from app.models import BacktestRequest
+from app.redact import redact
 from app.services import backtest as backtest_service
 from app.services import market
 
@@ -53,4 +54,4 @@ def asof(ticker: str, on: date) -> list[dict]:
     try:
         return market.fundamentals_asof(ticker, on)
     except Exception as e:
-        raise HTTPException(400, str(e)) from e
+        raise HTTPException(400, redact(str(e))) from e

@@ -91,3 +91,15 @@ def test_ticker_limit_builds_a_small_fixture(tmp_path):
 
     assert manifest["tickers"] == 3
     assert size < 5 * 1024 * 1024
+
+
+def test_a_reference_table_without_sic_description_does_not_stop_the_pull(tmp_path):
+    root = panelroot.build(tmp_path / "root", n_tickers=4)
+    ref = root / "data/raw/massive/reference_tickers.parquet"
+    pl.read_parquet(ref).drop("sic_description").write_parquet(ref)
+
+    cache_panel.build(Dataset(root), tmp_path / "out")
+
+    sectors = pl.read_parquet(tmp_path / "out" / "sectors.parquet")
+    assert sectors.height == 4
+    assert "sic_description" not in sectors.columns
