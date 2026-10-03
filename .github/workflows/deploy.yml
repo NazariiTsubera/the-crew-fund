@@ -22,6 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       API_IMAGE: ghcr.io/nazariitsubera/the-crew-fund/api
+      WEB_IMAGE: ghcr.io/nazariitsubera/the-crew-fund/web
       SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
       TARGET: ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}
     steps:
@@ -48,6 +49,19 @@ jobs:
           cache-from: type=gha,scope=api
           cache-to: type=gha,mode=max,scope=api
 
+      - name: Build and push the web image
+        uses: docker/build-push-action@v6
+        with:
+          context: web
+          push: true
+          build-args: |
+            NEXT_PUBLIC_API_URL=https://api.crewfund.vodka
+          tags: |
+            ${{ env.WEB_IMAGE }}:${{ env.SHA }}
+            ${{ env.WEB_IMAGE }}:latest
+          cache-from: type=gha,scope=web
+          cache-to: type=gha,mode=max,scope=web
+
       - name: Load the deploy key
         run: |
           install -m 700 -d ~/.ssh
@@ -64,13 +78,16 @@ jobs:
         run: |
           # The job token can pull our private images only while this job runs; log out after.
           printf '%s' "$GHCR_TOKEN" | ssh "$TARGET" "docker login ghcr.io -u ${{ github.actor }} --password-stdin"
-          ssh "$TARGET" "cd /opt/crew && export API_TAG=$SHA && docker compose pull && docker compose up -d --remove-orphans; status=\$?; docker logout ghcr.io; docker image prune -f >/dev/null; exit \$status"
+          ssh "$TARGET" "cd /opt/crew && export API_TAG=$SHA WEB_TAG=$SHA && docker compose pull && docker compose up -d --remove-orphans; status=\$?; docker logout ghcr.io; docker image prune -f >/dev/null; exit \$status"
 
       - name: Health check
         run: |
-          for i in $(seq 1 30); do
-            if curl -fsS https://api.crewfund.vodka/health; then exit 0; fi
-            sleep 5
+          for url in https://api.crewfund.vodka/health https://crewfund.vodka; do
+            ok=0
+            for i in $(seq 1 30); do
+              if curl -fsS -o /dev/null "$url"; then ok=1; break; fi
+              sleep 5
+            done
+            if [ "$ok" != 1 ]; then echo "$url did not answer within 150 s" >&2; exit 1; fi
+            echo "$url ok"
           done
-          echo "api.crewfund.vodka/health did not answer within 150 s" >&2
-          exit 1

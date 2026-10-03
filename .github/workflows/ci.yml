@@ -3,6 +3,10 @@ name: CI
 on:
   push:
     branches: [main]
+    # A docs-only push skips CI, and with it the deploy that follows a green CI run.
+    paths-ignore:
+      - "docs/**"
+      - "**/*.md"
   pull_request:
 
 concurrency:
