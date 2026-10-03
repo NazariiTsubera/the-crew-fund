@@ -18,6 +18,8 @@ concurrency:
 jobs:
   seed:
     runs-on: ubuntu-latest
+    # The first full panel pull from the organizers' server is long.
+    timeout-minutes: 120
     env:
       TARGET: ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}
     steps:
@@ -27,17 +29,19 @@ jobs:
           printf '%s\n' "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
           printf '%s\n' "${{ secrets.DEPLOY_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+          # The pull runs for many minutes; keep the connection alive while it works.
+          printf 'Host *\n  ServerAliveInterval 20\n  ServerAliveCountMax 30\n' > ~/.ssh/config
 
       - name: Build the panel cache
         if: inputs.rebuild_cache
         run: |
           # As root so the bind-mounted cache directory is writable, then hand it to the app user.
-          ssh "$TARGET" "cd /opt/crew && mkdir -p cache && docker compose run --rm --user root api \
+          ssh "$TARGET" "cd /opt/crew && mkdir -p cache && docker compose run --rm --user root -e PYTHONUNBUFFERED=1 api \
             sh -c 'python -m scripts.cache_panel && chown -R 10001:10001 /app/cache'"
 
       - name: Seed the agents and rebalance
         run: |
-          ssh "$TARGET" "cd /opt/crew && docker compose run --rm --user root api \
+          ssh "$TARGET" "cd /opt/crew && docker compose run --rm --user root -e PYTHONUNBUFFERED=1 api \
             sh -c 'python -m scripts.seed_agents && chown -R 10001:10001 /app/cache'"
 
       - name: Reload the API and check the fund
