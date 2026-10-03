@@ -9,6 +9,9 @@ dependencies = [
     "pydantic>=2.8",
     "polars>=1.0",
     "pandas>=2.2",
+    # The organizers' dataset SDK, pinned to their commit. Never install it by name:
+    # `statevector` on PyPI is an unrelated package.
+    "statevector @ git+https://github.com/orkid-labs/utsa-investment-hackathon@3c137e7#subdirectory=sdk",
 ]
 
 [dependency-groups]
