@@ -54,6 +54,9 @@ def _download(ds, rel: str, path: Path) -> None:
     try:
         with os.fdopen(fd, "wb") as out, urllib.request.urlopen(request, timeout=60) as r:
             out.write(r.read())
+        # mkstemp makes the file private to its writer; the seed runs as root and the API as
+        # another user, and both must read the mirror.
+        os.chmod(tmp, 0o644)
         os.replace(tmp, path)
     except BaseException:
         Path(tmp).unlink(missing_ok=True)

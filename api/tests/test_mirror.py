@@ -93,3 +93,11 @@ def test_an_unwritable_mirror_falls_back_to_the_remote_scan(tmp_path):
     mirrored_scan(ds, "stocks_daily", "2020-01-02", "2020-01-06", blocked)
 
     assert calls == [("stocks_daily", "2020-01-02", "2020-01-06")]
+
+
+def test_mirrored_files_are_readable_by_other_users(tmp_path):
+    ds, _ = remote(tmp_path, OLD)
+    mirrored_scan(ds, "stocks_daily", "2020-01-02", "2020-01-06", tmp_path / "m").collect()
+
+    modes = {p.stat().st_mode & 0o777 for p in (tmp_path / "m" / "stocks_daily").iterdir()}
+    assert modes == {0o644}
