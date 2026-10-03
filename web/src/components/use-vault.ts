@@ -3,11 +3,12 @@
 import { useEffect, useState } from "react";
 
 import { api, type Fund } from "@/lib/api";
+import { describeLoadError, type LoadError } from "@/lib/load-error";
 
 export type VaultState =
   | { status: "loading" }
   | { status: "ready"; vault: Fund }
-  | { status: "error"; message: string };
+  | { status: "error"; message: string; error: LoadError };
 
 // The shell mounts once per session; a page that changes the crew (a new recruit) asks every
 // mounted useVault to read /vault again rather than threading a context through the layout.
@@ -37,7 +38,8 @@ export function useVault(): VaultState {
       (vault) => setState({ status: "ready", vault }),
       (error: unknown) => {
         if (controller.signal.aborted) return;
-        setState({ status: "error", message: error instanceof Error ? error.message : String(error) });
+        const described = describeLoadError(error);
+        setState({ status: "error", message: described.title, error: described });
       },
     );
     return () => controller.abort();

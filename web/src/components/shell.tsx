@@ -18,6 +18,9 @@ function toneOf(x: number): string {
 
 function statusOf(state: VaultState): Status {
   if (state.status === "loading") return { label: "CONNECTING", tone: "var(--faint)", pulse: true };
+  // An unseeded fund is a 404 from a healthy API, not an outage.
+  if (state.status === "error" && state.error.kind === "unseeded")
+    return { label: "API ONLINE · NOT SEEDED", tone: "var(--muted)", pulse: false };
   if (state.status === "error") return { label: "API OFFLINE", tone: "var(--down)", pulse: false };
   if (API_MOCK) return { label: "MOCK DATA", tone: "var(--accent)", pulse: false };
   return { label: "API ONLINE", tone: "var(--up)", pulse: true };

@@ -55,7 +55,7 @@ export function Sidebar({ model }: { model: ShellModel }) {
         </div>
         {crew === null && (
           <div className="px-2.5 py-2 font-mono text-[11px] leading-snug text-faint">
-            {crewError ? `Could not reach the API: ${crewError}` : "OPENING THE VAULT…"}
+            {crewError ?? "OPENING THE VAULT…"}
           </div>
         )}
         {crew?.map((a) => {
