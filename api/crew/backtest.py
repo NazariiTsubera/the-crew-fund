@@ -37,7 +37,7 @@ class Run:
     recipe: dict
     kpis: dict
     curve: list[dict]  # daily {date, value}, starting at 1.0 on the first decision date
-    monthly: list[dict]  # {month, ret, invested, paper_ret}, month = holding month
+    monthly: list[dict]  # {month, ret, invested, paper_ret, value_start, value_end}
     holdings: list[dict]  # {month, ticker, weight, reason}
     log: list[dict]  # {ts, type, code, text}
     yearly_returns: dict[str, float]
@@ -300,6 +300,10 @@ def run_recipe(
                 "ret": value / start_value - 1.0,
                 "invested": invested,
                 "paper_ret": paper[-1][1] if picks else None,
+                # Before this month's costs and at its end: the boundary day of the curve
+                # carries the post-cost value, so sleeves are rebuilt from these.
+                "value_start": start_value,
+                "value_end": value,
             }
         )
         book = next_book
