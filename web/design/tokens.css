@@ -1,0 +1,68 @@
+/* Design tokens extracted from the Claude Design export (web/design/src/The Crew.dc.html).
+   Fonts: IBM Plex Mono (numerals, labels), IBM Plex Sans (body). */
+
+[data-theme="dark"]{
+  --bg:#0d0f12;
+  --side:#0a0c0f;
+  --panel:#12151a;
+  --hover:#171b21;
+  --flash:#1d222a;
+  --line-soft:#1a1e24;
+  --line:#242931;
+  --line-strong:#333943;
+  --faint:#5a606a;
+  --dim:#7a808a;
+  --muted:#9aa0a9;
+  --soft:#c4c8ce;
+  --ink:#eef0f3;
+  --accent:#f2b544;
+  --on-accent:#1a1306;
+  --fund:#f2b544;
+  --spx:#7d8a9c;
+  --bubble:#1c222b;
+  --bubble-line:#2c3440;
+  --up:oklch(0.78 0.15 152);
+  --down:oklch(0.71 0.17 22);
+  --c-amber:#f2b544;
+  --c-violet:oklch(0.74 0.14 300);
+  --c-teal:oklch(0.77 0.11 190);
+  --c-rose:oklch(0.72 0.15 12);
+  --c-green:oklch(0.77 0.14 145);
+  --c-slate:oklch(0.66 0.05 250);
+  --c-sky:oklch(0.76 0.12 235);
+  --c-orange:oklch(0.75 0.14 55);
+  --c-lime:oklch(0.82 0.15 120);
+  color-scheme:dark}
+
+[data-theme="light"]{
+  --bg:#f5f4f0;
+  --side:#edebe5;
+  --panel:#ffffff;
+  --hover:#f1efe9;
+  --flash:#ebe7dd;
+  --line-soft:#ece9e2;
+  --line:#e0ddd4;
+  --line-strong:#cdc9be;
+  --faint:#a39e92;
+  --dim:#857f74;
+  --muted:#67625a;
+  --soft:#45413a;
+  --ink:#17191d;
+  --accent:#e3a12c;
+  --on-accent:#1a1306;
+  --fund:#b97709;
+  --spx:#7f8b9c;
+  --bubble:#fbf2df;
+  --bubble-line:#efdbb0;
+  --up:oklch(0.55 0.14 152);
+  --down:oklch(0.56 0.19 25);
+  --c-amber:oklch(0.62 0.14 70);
+  --c-violet:oklch(0.55 0.17 300);
+  --c-teal:oklch(0.56 0.1 195);
+  --c-rose:oklch(0.57 0.18 12);
+  --c-green:oklch(0.56 0.14 145);
+  --c-slate:oklch(0.55 0.05 250);
+  --c-sky:oklch(0.56 0.14 240);
+  --c-orange:oklch(0.6 0.16 50);
+  --c-lime:oklch(0.6 0.15 125);
+  color-scheme:light}

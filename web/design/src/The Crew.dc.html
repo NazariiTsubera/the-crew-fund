@@ -1,0 +1,1379 @@
+<!DOCTYPE html>
+<html><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="cb535825-40d2-4b58-9b87-018791e07d2f"></script>
+
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<style>/* cyrillic-ext */
+@font-face {
+  font-family: 'IBM Plex Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("27e88222-8e16-4b21-a260-4c804921376a") format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'IBM Plex Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("dab8bcca-f43b-461b-bfb0-ccd169a52c11") format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'IBM Plex Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("955dbd6b-e519-47d3-a258-66b570164e7c") format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'IBM Plex Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("15e4f1c6-1a13-4f00-9c09-a66fd852923d") format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'IBM Plex Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("9ac6ffb0-625c-46d4-9e80-c705c0f94296") format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* cyrillic-ext */
+@font-face {
+  font-family: 'IBM Plex Mono';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("6c2ee011-be79-411a-851e-30f39a37c67f") format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'IBM Plex Mono';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("476981ec-5b5a-4623-a2f6-8e8bee1b661b") format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'IBM Plex Mono';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("3f7b7563-4b7f-4ae8-8941-49f7830bfa86") format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'IBM Plex Mono';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("7a6c1b89-8116-423d-96fa-e4a64b81677b") format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'IBM Plex Mono';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("65e34736-eaad-41c7-b683-1e2082af41d2") format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* cyrillic-ext */
+@font-face {
+  font-family: 'IBM Plex Mono';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("f90161ae-5f68-4dac-86dd-fe8c349230bc") format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'IBM Plex Mono';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("ede04f95-2450-4171-92cd-932a5634c28d") format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'IBM Plex Mono';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("cf74bd53-f47c-4f8a-b7f2-fd8c0c804f36") format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'IBM Plex Mono';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("af1a4bdf-e249-49a5-9a21-06efd01c0fd2") format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'IBM Plex Mono';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("fd76008d-632e-4962-bc9b-0d519f26398d") format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* cyrillic-ext */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url("2fdee12f-b6f8-40fe-8024-b38f943f7886") format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url("7e8862e2-bc90-4eaf-a0fb-a030ad078133") format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* greek */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url("58cb7ff3-aa84-4411-82c6-b58159ac2892") format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url("56941b35-79d4-4578-acab-5d7e3a633f0f") format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url("28b2f1ab-0bea-4fcd-9140-3477886ea1c5") format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url("e1aba529-21c9-4324-b327-d8b4545cebf0") format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* cyrillic-ext */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 500;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url("2fdee12f-b6f8-40fe-8024-b38f943f7886") format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 500;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url("7e8862e2-bc90-4eaf-a0fb-a030ad078133") format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* greek */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 500;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url("58cb7ff3-aa84-4411-82c6-b58159ac2892") format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 500;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url("56941b35-79d4-4578-acab-5d7e3a633f0f") format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 500;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url("28b2f1ab-0bea-4fcd-9140-3477886ea1c5") format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 500;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url("e1aba529-21c9-4324-b327-d8b4545cebf0") format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* cyrillic-ext */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 600;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url("2fdee12f-b6f8-40fe-8024-b38f943f7886") format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 600;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url("7e8862e2-bc90-4eaf-a0fb-a030ad078133") format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* greek */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 600;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url("58cb7ff3-aa84-4411-82c6-b58159ac2892") format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 600;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url("56941b35-79d4-4578-acab-5d7e3a633f0f") format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 600;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url("28b2f1ab-0bea-4fcd-9140-3477886ea1c5") format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 600;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url("e1aba529-21c9-4324-b327-d8b4545cebf0") format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+</style>
+<script src="dbee0a2d-2b27-44ae-a4f6-b4ee58665547"></script>
+<style>
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:var(--ink);text-underline-offset:3px}a:hover{color:var(--ink)}
+*{box-sizing:border-box}button,textarea,input{font-family:inherit}
+::-webkit-scrollbar{width:8px;height:8px}::-webkit-scrollbar-thumb{background:var(--line-strong)}::-webkit-scrollbar-track{background:transparent}
+:root,[data-theme="dark"]{--bg:#0d0f12;--side:#0a0c0f;--panel:#12151a;--hover:#171b21;--flash:#1d222a;--line-soft:#1a1e24;--line:#242931;--line-strong:#333943;--faint:#5a606a;--dim:#7a808a;--muted:#9aa0a9;--soft:#c4c8ce;--ink:#eef0f3;--accent:#f2b544;--on-accent:#1a1306;--fund:#f2b544;--spx:#7d8a9c;--bubble:#1c222b;--bubble-line:#2c3440;--up:oklch(0.78 0.15 152);--down:oklch(0.71 0.17 22);--c-amber:#f2b544;--c-violet:oklch(0.74 0.14 300);--c-teal:oklch(0.77 0.11 190);--c-rose:oklch(0.72 0.15 12);--c-green:oklch(0.77 0.14 145);--c-slate:oklch(0.66 0.05 250);--c-sky:oklch(0.76 0.12 235);--c-orange:oklch(0.75 0.14 55);--c-lime:oklch(0.82 0.15 120);color-scheme:dark}
+[data-theme="light"]{--bg:#f5f4f0;--side:#edebe5;--panel:#ffffff;--hover:#f1efe9;--flash:#ebe7dd;--line-soft:#ece9e2;--line:#e0ddd4;--line-strong:#cdc9be;--faint:#a39e92;--dim:#857f74;--muted:#67625a;--soft:#45413a;--ink:#17191d;--accent:#e3a12c;--on-accent:#1a1306;--fund:#b97709;--spx:#7f8b9c;--bubble:#fbf2df;--bubble-line:#efdbb0;--up:oklch(0.55 0.14 152);--down:oklch(0.56 0.19 25);--c-amber:oklch(0.62 0.14 70);--c-violet:oklch(0.55 0.17 300);--c-teal:oklch(0.56 0.1 195);--c-rose:oklch(0.57 0.18 12);--c-green:oklch(0.56 0.14 145);--c-slate:oklch(0.55 0.05 250);--c-sky:oklch(0.56 0.14 240);--c-orange:oklch(0.6 0.16 50);--c-lime:oklch(0.6 0.15 125);color-scheme:light}
+@keyframes crewblink{50%{opacity:.15}}
+</style>
+</helmet>
+<sc-if value="{{ loading }}" hint-placeholder-val="{{ false }}">
+  <div style="min-height:100vh;display:grid;place-items:center;font:500 12px 'IBM Plex Mono',monospace;letter-spacing:0.14em;color:var(--dim)">OPENING THE VAULT…</div>
+</sc-if>
+<sc-if value="{{ ready }}" hint-placeholder-val="{{ true }}">
+<div data-theme="{{ theme }}" style="display:flex;min-height:100vh;font-variant-numeric:tabular-nums;background:var(--bg);color:var(--ink);transition:background 240ms ease,color 240ms ease">
+
+  <aside aria-label="Navigation" style="width:236px;flex:none;border-right:1px solid var(--line);background:var(--side);position:sticky;top:0;height:100vh;display:{{ sideDisplay }};flex-direction:column;overflow-y:auto">
+    <div style="padding:20px 18px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--line)">
+      <div style="width:34px;height:34px;background:var(--accent);color:var(--on-accent);display:grid;place-items:center;font:600 12px 'IBM Plex Mono',monospace;letter-spacing:0.04em;flex:none">TC</div>
+      <div style="display:flex;flex-direction:column;gap:5px">
+        <div style="font:600 15px/1 'IBM Plex Mono',monospace;letter-spacing:0.22em">THE CREW</div>
+        <div style="font:400 11px/1 'IBM Plex Sans',sans-serif;color:var(--muted)">AI hedge fund · War Room</div>
+      </div>
+    </div>
+    <nav style="padding:14px 10px 6px;display:flex;flex-direction:column;gap:2px">
+      <sc-for list="{{ nav }}" as="n" hint-placeholder-count="4">
+        <button sc-camel-on-click="{{ n.go }}" aria-current="{{ n.current }}" style="display:flex;align-items:center;gap:10px;width:100%;padding:9px 10px;border:0;border-radius:2px;background:{{ n.bg }};box-shadow:{{ n.bar }};color:{{ n.fg }};font:500 13px/1 'IBM Plex Sans',sans-serif;text-align:left;cursor:pointer" style-hover="background:var(--line-soft);color:var(--ink)" style-focus="outline:1px solid var(--ink);outline-offset:-1px">
+          <span style="flex:1">{{ n.label }}</span>
+          <span style="font:500 10px/1 'IBM Plex Mono',monospace;color:var(--muted)">{{ n.meta }}</span>
+        </button>
+      </sc-for>
+    </nav>
+    <div style="padding:14px 10px 6px;display:flex;flex-direction:column;gap:2px">
+      <div style="font:500 10px/1 'IBM Plex Mono',monospace;letter-spacing:0.16em;color:var(--faint);padding:0 10px 8px">{{ crewLabel }}</div>
+      <sc-for list="{{ sideCrew }}" as="c" hint-placeholder-count="5">
+        <button sc-camel-on-click="{{ c.go }}" style="display:grid;grid-template-columns:14px minmax(0,1fr) auto;align-items:center;gap:10px;width:100%;padding:8px 10px;border:0;border-radius:2px;background:{{ c.bg }};box-shadow:{{ c.bar }};color:{{ c.fg }};text-align:left;cursor:pointer;opacity:{{ c.opacity }}" style-hover="background:var(--line-soft);color:var(--ink)" style-focus="outline:1px solid var(--ink);outline-offset:-1px">
+          <span style="{{ c.glyph }}"></span>
+          <span style="font:500 13px/1.1 'IBM Plex Sans',sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ c.name }}</span>
+          <span style="font:500 11px/1 'IBM Plex Mono',monospace;color:var(--muted)">{{ c.meta }}</span>
+        </button>
+      </sc-for>
+      <button sc-camel-on-click="{{ goNew }}" style="margin-top:8px;display:flex;align-items:center;justify-content:center;gap:8px;height:38px;border:0;border-radius:2px;background:var(--accent);color:var(--on-accent);font:600 12px/1 'IBM Plex Mono',monospace;letter-spacing:0.08em;cursor:pointer" style-hover="background:var(--ink)" style-focus="outline:2px solid var(--ink);outline-offset:2px">+ NEW AGENT</button>
+    </div>
+    <div style="margin-top:auto;border-top:1px solid var(--line);padding:14px 18px 16px;display:flex;flex-direction:column;gap:10px">
+      <div style="display:flex;align-items:center;justify-content:space-between;font:500 10px/1 'IBM Plex Mono',monospace;letter-spacing:0.12em;color:var(--muted)">
+        <span style="display:flex;align-items:center;gap:7px">{{ liveDot }}{{ liveLabel }}</span>
+        <span style="color:var(--ink)">{{ clock }}</span>
+      </div>
+      <div style="display:flex;align-items:baseline;justify-content:space-between">
+        <span style="font:500 10px/1 'IBM Plex Mono',monospace;letter-spacing:0.12em;color:var(--dim)">FUND TODAY</span>
+        <span style="font:500 15px/1 'IBM Plex Mono',monospace;color:{{ fundTodayColor }}">{{ fundToday }}</span>
+      </div>
+      <div style="display:flex;gap:6px"><button sc-camel-on-click="{{ toggleTheme }}" aria-label="Toggle light and dark theme" style="flex:1;height:30px;border:1px solid var(--line-strong);background:transparent;color:var(--soft);font:500 11px/1 'IBM Plex Mono',monospace;letter-spacing:0.08em;cursor:pointer;border-radius:2px" style-hover="border-color:var(--accent);color:var(--accent)" style-focus="outline:1px solid var(--accent)">{{ themeLabel }}</button>
+      <button sc-camel-on-click="{{ toggleLive }}" style="flex:1;height:30px;border:1px solid var(--line-strong);background:transparent;color:var(--soft);font:500 11px/1 'IBM Plex Mono',monospace;letter-spacing:0.08em;cursor:pointer;border-radius:2px" style-hover="border-color:var(--ink);color:var(--ink)" style-focus="outline:1px solid var(--ink)">{{ liveBtn }}</button></div>
+    </div>
+  </aside>
+
+  <main style="flex:1;min-width:0;display:flex;flex-direction:column">
+    <sc-if value="{{ narrow }}" hint-placeholder-val="{{ false }}">
+      <div style="position:sticky;top:0;z-index:5;background:var(--side);border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:10px;padding:12px 14px">
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div style="font:600 14px/1 'IBM Plex Mono',monospace;letter-spacing:0.22em">THE CREW</div>
+          <span style="display:flex;align-items:center;gap:8px;font:500 11px/1 'IBM Plex Mono',monospace;color:var(--muted)">{{ liveDot }}{{ clock }} · {{ fundToday }}</span>
+        </div>
+        <div style="display:flex;gap:6px;overflow-x:auto">
+          <sc-for list="{{ mobileNav }}" as="n" hint-placeholder-count="6">
+            <button sc-camel-on-click="{{ n.go }}" style="flex:none;height:32px;padding:0 12px;border:1px solid var(--line-strong);background:{{ n.bg }};color:{{ n.fg }};font:500 12px/1 'IBM Plex Sans',sans-serif;border-radius:2px;cursor:pointer;white-space:nowrap">{{ n.label }}</button>
+          </sc-for>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- 01 WAR ROOM -->
+    <sc-if value="{{ v.overview }}" hint-placeholder-val="{{ true }}">
+      <div style="padding:22px 28px 18px;border-bottom:1px solid var(--line-soft);display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap">
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="font:500 11px/1 'IBM Plex Mono',monospace;letter-spacing:0.14em;color:var(--dim)">FILE 01 // THE VAULT</div>
+          <h1 style="margin:0;font:500 24px/1.1 'IBM Plex Sans',sans-serif">War Room</h1>
+        </div>
+        <div style="font:400 11px/1.6 'IBM Plex Mono',monospace;letter-spacing:0.06em;color:var(--muted);text-align:right">AS OF 31 AUG 2026<br>HOLDOUT FROM JAN 2025</div>
+      </div>
+      <div style="padding:24px 28px 48px;display:flex;flex-direction:column;gap:28px;max-width:1360px">
+        <div style="display:flex;flex-wrap:wrap;gap:1px;background:var(--line);border:1px solid var(--line)">
+          <div style="flex:1 1 400px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1px">
+            <div style="background:var(--panel);padding:16px 18px;display:flex;flex-direction:column;gap:10px">
+              <div style="font:500 10px/1 'IBM Plex Mono',monospace;letter-spacing:0.12em;color:var(--muted)">TOTAL RETURN · SINCE 2017</div>
+              <div style="font:500 30px/1 'IBM Plex Mono',monospace;color:var(--fund)">{{ tiles.total }}</div>
+              <div style="font:400 12px/1 'IBM Plex Mono',monospace;color:var(--muted)">S&amp;P 500 {{ tiles.spx }}</div>
+            </div>
+            <div style="background:var(--panel);padding:16px 18px;display:flex;flex-direction:column;gap:10px">
+              <div style="font:500 10px/1 'IBM Plex Mono',monospace;letter-spacing:0.12em;color:var(--muted)">SHARPE RATIO</div>
+              <div style="font:500 30px/1 'IBM Plex Mono',monospace">{{ tiles.sharpe }}</div>
+              <div style="font:400 12px/1 'IBM Plex Mono',monospace;color:var(--muted)">S&amp;P 500 {{ tiles.spxSharpe }}</div>
+            </div>
+          </div>
+          <div style="flex:1 1 400px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1px">
+            <div style="background:var(--panel);padding:16px 18px;display:flex;flex-direction:column;gap:10px">
+              <div style="font:500 10px/1 'IBM Plex Mono',monospace;letter-spacing:0.12em;color:var(--muted)">MAX DRAWDOWN</div>
+              <div style="font:500 30px/1 'IBM Plex Mono',monospace">{{ tiles.dd }}</div>
+              <div style="font:400 12px/1 'IBM Plex Mono',monospace;color:var(--muted)">{{ tiles.ddMonth }}</div>
+            </div>
+            <div style="background:var(--panel);padding:16px 18px;display:flex;flex-direction:column;gap:10px">
+              <div style="font:500 10px/1 'IBM Plex Mono',monospace;letter-spacing:0.12em;color:var(--muted)">INVESTED</div>
+              <div style="font:500 30px/1 'IBM Plex Mono',monospace">{{ tiles.invested }}</div>
+              <div style="display:flex;align-items:center;gap:10px;font:400 12px/1 'IBM Plex Mono',monospace;color:var(--muted)">
+                <div style="flex:1;height:4px;background:var(--line);position:relative"><div style="position:absolute;left:0;top:0;bottom:0;width:{{ tiles.investedPct }};background:var(--fund)"></div></div>
+                <span>{{ tiles.cash }} cash</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,380px),1fr));gap:28px;align-items:start">
+          <section aria-label="Performance" style="display:flex;flex-direction:column;gap:10px;grid-column:span 2;min-width:0">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:10px">
+              <div style="font:500 11px/1 'IBM Plex Mono',monospace;letter-spacing:0.14em;color:var(--dim)">FUND VS S&amp;P 500 · 2017 → AUG 2026</div>
+              <div style="display:flex;gap:16px;font:400 11px/1 'IBM Plex Mono',monospace;color:var(--muted)">
+                <span style="display:flex;align-items:center;gap:6px"><span style="width:16px;height:2px;background:var(--fund)"></span>THE CREW</span>
+                <span style="display:flex;align-items:center;gap:6px"><span style="width:16px;border-top:2px dashed var(--spx)"></span>S&amp;P 500</span>
+                <span style="color:var(--faint)">{{ scaleLabel }}</span>
+              </div>
+            </div>
+            <div style="border:1px solid var(--line);background:var(--panel);padding:16px 16px 30px">
+              <div sc-camel-tab-index="0" role="img" aria-label="Fund equity curve versus S&amp;P 500. Arrow keys inspect months." sc-camel-on-mouse-move="{{ oc.move }}" sc-camel-on-mouse-leave="{{ oc.leave }}" sc-camel-on-key-down="{{ oc.key }}" style="position:relative;height:280px;cursor:crosshair;outline:none" style-focus="outline:1px solid var(--ink);outline-offset:6px">
+                <sc-for list="{{ oc.yTicks }}" as="t" hint-placeholder-count="5">
+                  <div style="position:absolute;left:0;right:0;top:{{ t.top }};border-top:1px solid var(--line-soft)"></div>
+                  <div style="position:absolute;left:0;top:{{ t.top }};transform:translateY(-130%);font:400 10px/1 'IBM Plex Mono',monospace;color:var(--faint)">{{ t.label }}</div>
+                </sc-for>
+                <div style="position:absolute;left:{{ oc.holdoutLeft }};right:0;top:0;bottom:0;border-left:1px dashed var(--line-strong);background:repeating-linear-gradient(135deg,color-mix(in oklch, var(--ink) 4%, transparent) 0 1px,transparent 1px 7px)">
+                  <div style="position:absolute;left:6px;top:4px;font:500 10px/1 'IBM Plex Mono',monospace;letter-spacing:0.1em;color:var(--dim)">HOLDOUT →</div>
+                </div>
+                <svg sc-camel-view-box="0 0 1000 300" sc-camel-preserve-aspect-ratio="none" style="position:absolute;inset:0;width:100%;height:100%;overflow:visible">
+                  <path d="{{ oc.benchPath }}" fill="none" style="stroke:var(--spx)" stroke-width="1.5" stroke-dasharray="5 4" vector-effect="non-scaling-stroke"></path>
+                  <path d="{{ oc.mainPath }}" fill="none" style="stroke:var(--fund)" stroke-width="2" vector-effect="non-scaling-stroke"></path>
+                </svg>
+                <div style="position:absolute;left:{{ oc.ddLeft }};top:{{ oc.ddTop }};width:8px;height:8px;margin:-4px 0 0 -4px;border:1.5px solid var(--fund);background:var(--bg);border-radius:50%"></div>
+                <div style="position:absolute;left:{{ oc.ddLeft }};top:{{ oc.ddTop }};transform:translate(10px,6px);font:500 10px/1.3 'IBM Plex Mono',monospace;color:var(--soft);white-space:nowrap">MAX DD {{ tiles.dd }}<br>{{ tiles.ddMonth }}</div>
+                <sc-for list="{{ oc.years }}" as="y" hint-placeholder-count="9">
+                  <div style="position:absolute;left:{{ y.left }};bottom:-22px;transform:translateX(-50%);font:400 10px/1 'IBM Plex Mono',monospace;color:var(--faint)">{{ y.label }}</div>
+                </sc-for>
+                <sc-if value="{{ oc.h.on }}" hint-placeholder-val="{{ false }}">
+                  <div style="position:absolute;top:0;bottom:0;left:{{ oc.h.left }};border-left:1px solid var(--faint);pointer-events:none"></div>
+                  <div style="position:absolute;left:{{ oc.h.left }};top:{{ oc.h.mainTop }};width:9px;height:9px;margin:-4.5px 0 0 -4.5px;background:var(--fund);border-radius:50%;pointer-events:none"></div>
+                  <div style="position:absolute;left:{{ oc.h.left }};top:{{ oc.h.benchTop }};width:9px;height:9px;margin:-4.5px 0 0 -4.5px;background:var(--bg);border:2px solid var(--spx);border-radius:50%;pointer-events:none"></div>
+                  <div style="position:absolute;top:8px;left:{{ oc.h.left }};transform:{{ oc.h.tx }};background:var(--hover);border:1px solid var(--line-strong);padding:10px 12px;display:flex;flex-direction:column;gap:7px;min-width:170px;pointer-events:none;font:400 12px/1 'IBM Plex Mono',monospace">
+                    <div style="color:var(--muted);font-size:11px;letter-spacing:0.08em">{{ oc.h.date }}</div>
+                    <div style="display:flex;justify-content:space-between;gap:14px"><span>THE CREW</span><span>{{ oc.h.main }}</span></div>
+                    <div style="display:flex;justify-content:space-between;gap:14px;color:var(--muted)"><span>S&amp;P 500</span><span>{{ oc.h.bench }}</span></div>
+                  </div>
+                </sc-if>
+              </div>
+            </div>
+          </section>
+
+          <section aria-label="Who runs the money" style="display:flex;flex-direction:column;gap:10px;min-width:0">
+            <div style="display:flex;justify-content:space-between;align-items:baseline">
+              <div style="font:500 11px/1 'IBM Plex Mono',monospace;letter-spacing:0.14em;color:var(--dim)">WHO RUNS THE MONEY</div>
+              <button sc-camel-on-click="{{ toggleReplay }}" style="flex:none;white-space:nowrap;height:26px;padding:0 10px;border:1px solid var(--line-strong);background:transparent;color:var(--soft);font:500 10.5px/1 'IBM Plex Mono',monospace;letter-spacing:0.08em;border-radius:2px;cursor:pointer" style-hover="border-color:var(--accent);color:var(--accent)" style-focus="outline:1px solid var(--accent);outline-offset:2px">{{ replayLabel }}</button>
+            </div>
+            <div style="border:1px solid var(--line);background:var(--panel);padding:16px;display:flex;flex-direction:column;gap:14px">
+              <div style="display:flex;justify-content:space-between;align-items:baseline;font:500 12px/1 'IBM Plex Mono',monospace;letter-spacing:0.06em"><span>{{ hist.monthLabel }}</span><span style="font-size:10px;color:var(--dim)">CAPITAL SHARE</span></div>
+              <div style="display:flex;height:30px;gap:2px">
+                <sc-for list="{{ hist.segments }}" as="s" hint-placeholder-count="4">
+                  <div title="{{ s.title }}" style="width:{{ s.width }};background:{{ s.bg }};transition:width 600ms cubic-bezier(.3,.7,.2,1);display:flex;align-items:center;padding-left:4px;overflow:hidden"><span style="font:600 10px/1 'IBM Plex Mono',monospace;background:var(--bg);color:var(--ink);padding:3px 4px">{{ s.label }}</span></div>
+                </sc-for>
+              </div>
+              <div style="display:flex;flex-direction:column">
+                <sc-for list="{{ hist.legend }}" as="l" hint-placeholder-count="5">
+                  <div style="display:grid;grid-template-columns:14px minmax(0,1fr) 54px 78px;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--line-soft);opacity:{{ l.opacity }}">
+                    <span style="{{ l.glyph }}"></span>
+                    <span style="font:500 13px/1.2 'IBM Plex Sans',sans-serif">{{ l.name }}</span>
+                    <span style="font:500 13px/1 'IBM Plex Mono',monospace;text-align:right">{{ l.share }}</span>
+                    <span style="font:500 11px/1 'IBM Plex Mono',monospace;color:{{ l.trendColor }};text-align:right">{{ l.trend }}</span>
+                  </div>
+                </sc-for>
+              </div>
+              <div style="border-top:1px solid var(--line);padding-top:12px;display:flex;flex-direction:column;gap:6px">
+                <input type="range" min="0" max="{{ hist.max }}" value="{{ hist.idx }}" sc-camel-on-change="{{ onScrub }}" aria-label="Allocation month" style="width:100%;accent-color:var(--accent);margin:0 0 6px">
+                <div style="font:500 10px/1 'IBM Plex Mono',monospace;letter-spacing:0.12em;color:var(--dim)">MASTERMIND</div>
+                <div style="font:400 12px/1.45 'IBM Plex Mono',monospace;color:var(--soft)">{{ latestMemo }}</div>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <section aria-label="Agents" style="display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;justify-content:space-between;align-items:baseline">
+            <div style="font:500 11px/1 'IBM Plex Mono',monospace;letter-spacing:0.14em;color:var(--dim)">THE CREW · {{ crewCount }}</div>
+            <div style="font:400 11px/1 'IBM Plex Mono',monospace;color:var(--faint)">SHARPE TRAILING 12M · TODAY IS INTRADAY</div>
+          </div>
+          <div style="border:1px solid var(--line);overflow-x:auto">
+            <div style="min-width:720px">
+              <div style="display:grid;grid-template-columns:24px minmax(240px,1fr) 120px 70px 100px 110px;gap:16px;padding:10px 16px;background:var(--panel);font:500 10px/1 'IBM Plex Mono',monospace;letter-spacing:0.12em;color:var(--dim)">
+                <span></span><span>AGENT</span><span>CURVE</span><span style="text-align:right">SHARPE</span><span style="text-align:right">CAPITAL</span><span>RED TEAM</span>
+              </div>
+              <sc-for list="{{ crewRows }}" as="a" hint-placeholder-count="5">
+                <div role="link" sc-camel-tab-index="0" sc-camel-on-click="{{ a.go }}" sc-camel-on-key-down="{{ a.key }}" aria-label="{{ a.aria }}" style="display:grid;grid-template-columns:24px minmax(240px,1fr) 120px 70px 100px 110px;gap:16px;align-items:center;padding:13px 16px;border-top:1px solid var(--line-soft);cursor:pointer;opacity:{{ a.opacity }};background:{{ a.bg }};transition:background 900ms ease;outline:none" style-hover="background:var(--hover)" style-focus="background:var(--hover);box-shadow:inset 2px 0 0 var(--accent)">
+                  <span style="{{ a.glyph }}"></span>
+                  <span style="display:flex;flex-direction:column;gap:4px;min-width:0">
+                    <span style="display:flex;align-items:center;gap:10px"><span style="font:600 14px/1.2 'IBM Plex Sans',sans-serif">{{ a.name }}</span><span style="display:flex;align-items:center;gap:6px;font:400 11px/1 'IBM Plex Mono',monospace;color:var(--muted)"><span style="{{ a.dot }}"></span>{{ a.status }}</span></span>
+                    <span style="font:400 12px/1.35 'IBM Plex Sans',sans-serif;color:var(--muted)">{{ a.strategy }}</span>
+                  </span>
+                  <svg sc-camel-view-box="0 0 120 34" sc-camel-preserve-aspect-ratio="none" style="width:120px;height:34px;overflow:visible"><path d="{{ a.spark }}" fill="none" style="stroke:{{ a.color }}" stroke-width="1.4" vector-effect="non-scaling-stroke"></path></svg>
+                  <span style="font:500 14px/1 'IBM Plex Mono',monospace;text-align:right">{{ a.sharpe }}</span>
+                  <span style="display:flex;justify-content:flex-end;align-items:center;gap:6px;font:500 14px/1 'IBM Plex Mono',monospace">{{ a.share }}<span style="font-size:10px;color:{{ a.arrowColor }};width:10px">{{ a.arrow }}</span></span>
+                  <span><span style="{{ a.badge }}">{{ a.verdict }}</span></span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </section>
+      </div>
+    </sc-if>
+
+    <!-- 02 TRADING FLOOR -->
+    <sc-if value="{{ v.floor }}" hint-placeholder-val="{{ false }}">
+      <div style="padding:22px 28px 18px;border-bottom:1px solid var(--line-soft);display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap">
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="font:500 11px/1 'IBM Plex Mono',monospace;letter-spacing:0.14em;color:var(--dim)">FILE 02 // THE FLOOR</div>
+          <h1 style="margin:0;font:500 24px/1.1 'IBM Plex Sans',sans-serif">Live floor</h1>
+        </div>
+        
+      </div>
+      <div style="padding:24px 28px 48px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:28px;align-items:start;max-width:1360px">
+        <section aria-label="Live tape" style="display:flex;flex-direction:column;gap:10px;min-width:0">
+          <div style="display:flex;justify-content:space-between;align-items:baseline">
+            <div style="font:500 11px/1 'IBM Plex Mono',monospace;letter-spacing:0.14em;color:var(--dim);display:flex;align-items:center;gap:8px">{{ liveDot }}LIVE TAPE</div>
+            <div style="font:400 11px/1 'IBM Plex Mono',monospace;color:var(--faint)">{{ tapeCount }}</div>
+          </div>
+          <div role="log" aria-live="polite" style="border:1px solid var(--line);background:var(--panel)">
+            <sc-for list="{{ tapeRows }}" as="t" hint-placeholder-count="10">
+              <div style="display:grid;grid-template-columns:48px 14px 112px 46px minmax(0,1fr);gap:10px;align-items:center;padding:10px 14px;border-top:1px solid var(--line-soft);background:{{ t.bg }};transition:background 1200ms ease">
+                <span style="font:400 11px/1 'IBM Plex Mono',monospace;color:var(--dim)">{{ t.time }}</span>
+                <span style="{{ t.glyph }}"></span>
+                <span style="font:500 12px/1.2 'IBM Plex Sans',sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ t.who }}</span>
+                <span style="{{ t.tag }}">{{ t.tagText }}</span>
+                <span style="font:400 12px/1.4 'IBM Plex Mono',monospace;color:var(--soft)">{{ t.text }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </section>
+        <section aria-label="Desks" style="display:flex;flex-direction:column;gap:10px;min-width:0">
+          <div style="font:500 11px/1 'IBM Plex Mono',monospace;letter-spacing:0.14em;color:var(--dim)">DESKS · INTRADAY P&amp;L</div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1px;background:var(--line);border:1px solid var(--line)">
+            <sc-for list="{{ desks }}" as="d" hint-placeholder-count="5">
+              <button sc-camel-on-click="{{ d.go }}" style="background:{{ d.bg }};transition:background 900ms ease;border:0;color:var(--ink);text-align:left;padding:14px;display:flex;flex-direction:column;gap:10px;cursor:pointer;opacity:{{ d.opacity }}" style-hover="background:var(--hover)" style-focus="outline:1px solid var(--ink);outline-offset:-1px">
+                <span style="display:flex;align-items:center;gap:8px;width:100%">
+                  <span style="{{ d.glyph }}"></span>
+                  <span style="font:600 13px/1.1 'IBM Plex Sans',sans-serif;flex:1">{{ d.name }}</span>
+                  <span style="display:flex;align-items:center;gap:6px;font:400 10px/1 'IBM Plex Mono',monospace;color:var(--muted);letter-spacing:0.06em"><span style="{{ d.dot }}"></span>{{ d.status }}</span>
+                </span>
+                <span style="display:flex;align-items:baseline;justify-content:space-between;width:100%">
+                  <span style="font:500 22px/1 'IBM Plex Mono',monospace;color:{{ d.todayColor }}">{{ d.today }}</span>
+                  <span style="font:400 11px/1 'IBM Plex Mono',monospace;color:var(--muted)">{{ d.share }} capital</span>
+                </span>
+                <svg sc-camel-view-box="0 0 200 40" sc-camel-preserve-aspect-ratio="none" style="width:100%;height:40px;overflow:visible">
+                  <line x1="0" y1="{{ d.zeroY }}" x2="200" y2="{{ d.zeroY }}" style="stroke:var(--line-strong)" stroke-width="1" stroke-dasharray="2 3" vector-effect="non-scaling-stroke"></line>
+                  <path d="{{ d.spark }}" fill="none" style="stroke:{{ d.color }}" stroke-width="1.5" vector-effect="non-scaling-stroke"></path>
+                </svg>
+                
+              </button>
+            </sc-for>
+          </div>
+        </section>
+      </div>
+    </sc-if>
+
+    <!-- 03 HOLDINGS -->
+    <sc-if value="{{ v.holdings }}" hint-placeholder-val="{{ false }}">
+      <div style="padding:22px 28px 18px;border-bottom:1px solid var(--line-soft);display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap">
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="font:500 11px/1 'IBM Plex Mono',monospace;letter-spacing:0.14em;color:var(--dim)">FILE 03 // THE GOODS · AUG 2026</div>
+          <h1 style="margin:0;font:500 24px/1.1 'IBM Plex Sans',sans-serif">Holdings</h1>
+        </div>
+        
+      </div>
+      <div style="padding:24px 28px 48px;max-width:1360px">
+        <div style="border:1px solid var(--line);overflow-x:auto">
+          <sc-raw-table style="width:100%;min-width:760px;border-collapse:collapse">
+            <sc-raw-thead><sc-raw-tr style="background:var(--panel);font:500 10px/1 'IBM Plex Mono',monospace;letter-spacing:0.12em;color:var(--dim);text-align:left">
+              <sc-raw-th scope="col" style="padding:10px 16px;font-weight:500;width:90px">TICKER</sc-raw-th>
+              <sc-raw-th scope="col" style="padding:10px 16px;font-weight:500;width:200px">WEIGHT</sc-raw-th>
+              <sc-raw-th scope="col" style="padding:10px 16px;font-weight:500;width:190px">HELD BY</sc-raw-th>
+              <sc-raw-th scope="col" style="padding:10px 16px;font-weight:500">REASON</sc-raw-th>
+            </sc-raw-tr></sc-raw-thead>
+            <sc-raw-tbody>
+              <sc-for list="{{ holdRows }}" as="h" hint-placeholder-count="10">
+                <sc-raw-tr sc-camel-tab-index="0" style="border-top:1px solid var(--line-soft);outline:none" style-hover="background:var(--hover)" style-focus="background:var(--hover);box-shadow:inset 2px 0 0 var(--accent)">
+                  <sc-raw-td style="padding:11px 16px;font:600 13px/1 'IBM Plex Mono',monospace">{{ h.ticker }}</sc-raw-td>
+                  <sc-raw-td style="padding:11px 16px"><div style="display:flex;align-items:center;gap:10px"><span style="font:500 13px/1 'IBM Plex Mono',monospace;width:44px">{{ h.weight }}</span><span style="flex:1;height:4px;background:var(--flash);position:relative"><span style="position:absolute;left:0;top:0;bottom:0;width:{{ h.bar }};background:{{ h.color }}"></span></span></div></sc-raw-td>
+                  <sc-raw-td style="padding:11px 16px"><span style="display:flex;align-items:center;gap:8px;font:400 13px/1 'IBM Plex Sans',sans-serif;color:var(--soft)"><span style="{{ h.glyph }}"></span>{{ h.agent }}</span></sc-raw-td>
+                  <sc-raw-td style="padding:11px 16px;font:400 12px/1.4 'IBM Plex Mono',monospace;color:var(--muted)">{{ h.reason }}</sc-raw-td>
+                </sc-raw-tr>
+              </sc-for>
+            </sc-raw-tbody>
+          </sc-raw-table>
+          <div style="padding:12px 16px;border-top:1px solid var(--line);background:var(--panel);font:400 11px/1 'IBM Plex Mono',monospace;letter-spacing:0.06em;color:var(--muted)">{{ holdFooter }}</div>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- AGENT -->
+    <sc-if value="{{ v.agent }}" hint-placeholder-val="{{ false }}">
+      <sc-if value="{{ ag.tabbed }}" hint-placeholder-val="{{ false }}">
+        <div role="tablist" style="display:flex;border-bottom:1px solid var(--line)">
+          <sc-for list="{{ mTabs }}" as="t" hint-placeholder-count="2">
+            <button role="tab" aria-selected="{{ t.on }}" sc-camel-on-click="{{ t.go }}" style="flex:1;height:42px;border:0;background:transparent;box-shadow:{{ t.bar }};color:{{ t.fg }};font:500 12px/1 'IBM Plex Mono',monospace;letter-spacing:0.1em;cursor:pointer">{{ t.label }}</button>
+          </sc-for>
+        </div>
+      </sc-if>
+      <div style="display:grid;grid-template-columns:{{ ag.cols }};height:{{ ag.h }};min-height:0">
+
+        <section aria-label="Chat" style="min-width:0;display:{{ ag.chatDisp }};flex-direction:column;border-right:1px solid var(--line);min-height:0;height:{{ ag.colH }}">
+          <div style="padding:16px 20px;border-bottom:1px solid var(--line-soft);display:flex;align-items:center;justify-content:space-between;gap:10px">
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <div style="font:500 15px/1 'IBM Plex Sans',sans-serif">{{ ag.chatTitle }}</div>
+            </div>
+            <span style="font:400 10px/1.3 'IBM Plex Mono',monospace;color:var(--faint);text-align:right">{{ ag.chatMode }}</span>
+          </div>
+
+          <sc-if value="{{ ag.hasRecipe }}" hint-placeholder-val="{{ false }}">
+            <div style="border-bottom:1px solid var(--line-soft);background:var(--side)">
+              <button sc-camel-on-click="{{ toggleRecipe }}" aria-expanded="{{ recipeOpen }}" style="width:100%;display:flex;justify-content:space-between;align-items:center;padding:11px 20px;border:0;background:transparent;color:var(--soft);font:500 11px/1 'IBM Plex Mono',monospace;letter-spacing:0.12em;cursor:pointer" style-hover="color:var(--ink)" style-focus="outline:1px solid var(--ink);outline-offset:-1px">
+                <span>COMPILED RECIPE</span><span>{{ recipeArrow }}</span>
+              </button>
+              <sc-if value="{{ recipeOpen }}" hint-placeholder-val="{{ false }}">
+                <div style="padding:2px 20px 16px;display:flex;flex-direction:column;gap:12px;font:400 12px/1.4 'IBM Plex Mono',monospace;max-height:34vh;overflow-y:auto">
+                  <div style="display:flex;flex-direction:column;gap:6px">
+                    <sc-for list="{{ rc.features }}" as="f" hint-placeholder-count="3">
+                      <div style="display:grid;grid-template-columns:minmax(0,1fr) 60px 38px 54px;gap:10px;align-items:center">
+                        <span style="color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ f.name }}</span>
+                        <span style="height:4px;background:var(--line);position:relative"><span style="position:absolute;left:0;top:0;bottom:0;width:{{ f.bar }};background:{{ rc.color }}"></span></span>
+                        <span style="text-align:right">{{ f.weight }}</span>
+                        <span style="color:var(--muted)">{{ f.dir }}</span>
+                      </div>
+                    </sc-for>
+                  </div>
+                  <div style="display:grid;grid-template-columns:96px minmax(0,1fr);gap:4px 10px;color:var(--muted)">
+                    <span style="color:var(--faint)">filters</span><span style="color:var(--soft)">{{ rc.filters }}</span>
+                    <span style="color:var(--faint)">lookback</span><span style="color:var(--soft)">{{ rc.lookback }}</span>
+                    <span style="color:var(--faint)">top_n</span><span style="color:var(--soft)">{{ rc.topN }}</span>
+                    <span style="color:var(--faint)">rebalance</span><span style="color:var(--soft)">monthly</span>
+                    <span style="color:var(--faint)">sit out if</span><span style="color:var(--soft)">{{ rc.sitOut }}</span>
+                  </div>
+                </div>
+              </sc-if>
+            </div>
+          </sc-if>
+
+          <div ref="{{ chatRef }}" style="flex:1;min-height:0;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:18px">
+            <sc-if value="{{ ag.showEmpty }}" hint-placeholder-val="{{ false }}">
+              <div style="margin:auto 0;display:flex;flex-direction:column;gap:16px;padding:8px 0">
+                <div style="font:500 10px/1 'IBM Plex Mono',monospace;letter-spacing:0.14em;color:var(--dim)">FILE 00 // UNNAMED RECRUIT</div>
+                <div style="font:400 16px/1.5 'IBM Plex Sans',sans-serif;color:var(--ink);text-wrap:pretty">Describe a strategy. Example: Buy stocks where options skew is rising and informed flow is building, but skip anything illiquid.</div>
+                <div style="font:400 12px/1.5 'IBM Plex Sans',sans-serif;color:var(--muted)">Takes about 15 seconds: compile the recipe, backtest 2017–2026, survive the Red Team.</div>
+                <div style="display:flex;flex-direction:column;gap:6px">
+                  <sc-for list="{{ exampleChips }}" as="c" hint-placeholder-count="3">
+                    <button sc-camel-on-click="{{ c.go }}" style="text-align:left;padding:10px 12px;border:1px solid var(--line-strong);background:transparent;color:var(--soft);font:400 13px/1.35 'IBM Plex Sans',sans-serif;border-radius:2px;cursor:pointer" style-hover="border-color:var(--ink);color:var(--ink)" style-focus="outline:1px solid var(--ink);outline-offset:2px">{{ c.label }}</button>
+                  </sc-for>
+                </div>
+              </div>
+            </sc-if>
+            <sc-for list="{{ msgs }}" as="m" hint-placeholder-count="0">
+              <sc-if value="{{ m.isUser }}" hint-placeholder-val="{{ false }}">
+                <div style="align-self:flex-end;max-width:86%;display:flex;flex-direction:column;gap:5px;align-items:flex-end">
+                  <span style="font:400 10px/1 'IBM Plex Mono',monospace;color:var(--faint)">YOU · {{ m.ts }}</span>
+                  <div style="background:var(--bubble);color:var(--ink);border:1px solid var(--bubble-line);padding:10px 12px;font:400 14px/1.45 'IBM Plex Sans',sans-serif;white-space:pre-wrap;border-radius:2px">{{ m.text }}</div>
+                </div>
+              </sc-if>
+              <sc-if value="{{ m.isAgent }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;gap:12px;max-width:94%">
+                  <div style="width:30px;height:30px;border:1px solid var(--line-strong);display:grid;place-items:center;flex:none"><span style="{{ m.glyph }}"></span></div>
+                  <div style="display:flex;flex-direction:column;gap:7px;min-width:0">
+                    <span style="font:500 10px/1 'IBM Plex Mono',monospace;letter-spacing:0.08em;color:var(--muted)">{{ m.name }} · {{ m.ts }}</span>
+                    <div style="font:400 14px/1.5 'IBM Plex Sans',sans-serif;color:var(--ink);white-space:pre-wrap;text-wrap:pretty">{{ m.text }}</div>
+                    <sc-if value="{{ m.hasEvidence }}" hint-placeholder-val="{{ false }}">
+                      <div style="border-top:1px dashed var(--line-strong);padding-top:7px;display:flex;flex-direction:column;gap:4px">
+                        <span style="font:500 9.5px/1 'IBM Plex Mono',monospace;letter-spacing:0.14em;color:var(--faint)">EVIDENCE</span>
+                        <sc-for list="{{ m.evidence }}" as="e" hint-placeholder-count="2">
+                          <span style="font:400 11px/1.35 'IBM Plex Mono',monospace;color:var(--muted)">▸ {{ e }}</span>
+                        </sc-for>
+                      </div>
+                    </sc-if>
+                  </div>
+                </div>
+              </sc-if>
+              <sc-if value="{{ m.isSystem }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;align-items:center;gap:10px;font:500 10px/1.4 'IBM Plex Mono',monospace;letter-spacing:0.08em;color:var(--dim)"><span style="flex:1;border-top:1px solid var(--line)"></span><span style="text-align:center">{{ m.text }}</span><span style="flex:1;border-top:1px solid var(--line)"></span></div>
+              </sc-if>
+            </sc-for>
+            <sc-if value="{{ ag.creating }}" hint-placeholder-val="{{ false }}">
+              <div style="border:1px solid var(--line-strong);background:var(--panel);padding:14px;display:flex;flex-direction:column;gap:14px">
+                <sc-for list="{{ stages }}" as="s" hint-placeholder-count="3">
+                  <div style="display:flex;flex-direction:column;gap:7px;opacity:{{ s.opacity }}">
+                    <div style="display:flex;justify-content:space-between;gap:10px;font:500 12px/1 'IBM Plex Mono',monospace">
+                      <span style="display:flex;gap:8px"><span style="width:14px">{{ s.mark }}</span>{{ s.label }}</span>
+                      <span style="color:var(--muted);font-weight:400">{{ s.detail }}</span>
+                    </div>
+                    <div style="height:3px;background:var(--line);position:relative"><div style="position:absolute;left:0;top:0;bottom:0;width:{{ s.pct }};background:var(--accent);transition:width 160ms linear"></div></div>
+                  </div>
+                </sc-for>
+                <sc-for list="{{ rtLines }}" as="r" hint-placeholder-count="0">
+                  <div style="display:grid;grid-template-columns:46px minmax(0,1fr);gap:10px;font:400 11px/1.4 'IBM Plex Mono',monospace;color:var(--soft)"><span style="{{ r.tag }}">{{ r.tagText }}</span><span>{{ r.name }} — {{ r.detail }}</span></div>
+                </sc-for>
+              </div>
+            </sc-if>
+            <sc-if value="{{ thinking }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;align-items:center;gap:10px;font:400 12px/1 'IBM Plex Mono',monospace;color:var(--muted)">{{ blink }}{{ ag.thinkingText }}</div>
+            </sc-if>
+          </div>
+
+          <sc-if value="{{ ag.showSuggest }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;gap:6px;padding:0 20px 10px;overflow-x:auto">
+              <sc-for list="{{ suggestions }}" as="c" hint-placeholder-count="3">
+                <button sc-camel-on-click="{{ c.go }}" style="flex:none;height:30px;padding:0 10px;border:1px solid var(--line-strong);background:transparent;color:var(--soft);font:400 12px/1 'IBM Plex Sans',sans-serif;border-radius:2px;cursor:pointer;white-space:nowrap" style-hover="border-color:var(--ink);color:var(--ink)" style-focus="outline:1px solid var(--ink);outline-offset:2px">{{ c.label }}</button>
+              </sc-for>
+            </div>
+          </sc-if>
+          <div style="padding:12px 20px 18px;border-top:1px solid var(--line-soft);display:flex;gap:8px;align-items:flex-end">
+            <textarea value="{{ input }}" sc-camel-on-change="{{ onInput }}" sc-camel-on-key-down="{{ onInputKey }}" disabled="{{ ag.busy }}" rows="2" aria-label="{{ ag.placeholder }}" placeholder="{{ ag.placeholder }}" style="flex:1;resize:none;min-height:48px;max-height:140px;padding:11px 12px;background:var(--panel);border:1px solid var(--line-strong);color:var(--ink);font:400 14px/1.4 'IBM Plex Sans',sans-serif;border-radius:2px;outline:none" style-focus="border-color:var(--accent)"></textarea>
+            <button sc-camel-on-click="{{ onSend }}" disabled="{{ ag.busy }}" style="height:48px;padding:0 16px;border:0;background:{{ ag.sendBg }};color:var(--bg);font:600 12px/1 'IBM Plex Mono',monospace;letter-spacing:0.08em;border-radius:2px;cursor:pointer" style-focus="outline:2px solid var(--ink);outline-offset:2px">{{ ag.sendLabel }}</button>
+          </div>
+        </section>
+
+        <section aria-label="Performance" style="min-width:0;display:{{ ag.perfDisp }};flex-direction:column;min-height:0;height:{{ ag.colH }};overflow-y:auto">
+          <sc-if value="{{ ag.noAgent }}" hint-placeholder-val="{{ false }}">
+            <div style="margin:28px;flex:1;border:1px dashed var(--line-strong);display:flex;flex-direction:column;justify-content:center;align-items:center;gap:12px;padding:40px;text-align:center;min-height:420px">
+              <div style="font:500 10px/1 'IBM Plex Mono',monospace;letter-spacing:0.14em;color:var(--dim)">{{ ag.emptyKicker }}</div>
+              <div style="font:400 14px/1.5 'IBM Plex Sans',sans-serif;color:var(--muted);max-width:360px;text-wrap:pretty">{{ ag.emptyText }}</div>
+            </div>
+          </sc-if>
+          <sc-if value="{{ ag.hasAgent }}" hint-placeholder-val="{{ false }}">
+            <div style="padding:20px 28px 0;display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap">
+              <div style="width:52px;height:52px;border:1px solid var(--line-strong);display:grid;place-items:center;flex:none"><span style="{{ ah.glyph }}"></span></div>
+              <div style="flex:1;min-width:220px;display:flex;flex-direction:column;gap:7px">
+                <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+                  <h1 style="margin:0;font:500 24px/1.1 'IBM Plex Sans',sans-serif">{{ ah.name }}</h1>
+                  <button sc-camel-on-click="{{ goRedTeam }}" aria-label="Red Team verdict, open tests" style="border:0;background:none;padding:0;cursor:pointer" style-focus="outline:1px solid var(--ink);outline-offset:3px"><span style="{{ ah.badge }}">{{ ah.verdict }}</span></button>
+                </div>
+                <div style="font:400 13px/1.45 'IBM Plex Sans',sans-serif;color:var(--muted);text-wrap:pretty">{{ ah.strategy }}</div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;font:400 11px/1 'IBM Plex Mono',monospace;color:var(--muted)">
+                <span style="display:flex;align-items:center;gap:7px;color:var(--ink)"><span style="{{ ah.dot }}"></span>{{ ah.status }}</span>
+                <span>{{ ah.today }}</span>
+              </div>
+            </div>
+            <div role="tablist" aria-label="Agent sections" style="display:flex;gap:2px;padding:18px 28px 0;border-bottom:1px solid var(--line);overflow-x:auto">
+              <sc-for list="{{ aTabs }}" as="t" hint-placeholder-count="4">
+                <button role="tab" aria-selected="{{ t.on }}" sc-camel-on-click="{{ t.go }}" disabled="{{ t.disabled }}" style="flex:none;height:38px;padding:0 14px;border:0;background:transparent;box-shadow:{{ t.bar }};color:{{ t.fg }};font:500 11px/1 'IBM Plex Mono',monospace;letter-spacing:0.1em;cursor:pointer" style-focus="outline:1px solid var(--ink);outline-offset:-2px">{{ t.label }}</button>
+              </sc-for>
+            </div>
+
+            <sc-if value="{{ at.performance }}" hint-placeholder-val="{{ false }}">
+              <div style="padding:20px 28px 36px;display:flex;flex-direction:column;gap:20px">
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px">
+                  <sc-for list="{{ akpis }}" as="k" hint-placeholder-count="7">
+                    <div style="background:var(--panel);border:1px solid var(--line);border-radius:2px;padding:12px 14px;display:flex;flex-direction:column;gap:8px">
+                      <span style="font:500 9.5px/1 'IBM Plex Mono',monospace;letter-spacing:0.12em;color:var(--dim)">{{ k.label }}</span>
+                      <span style="font:500 19px/1 'IBM Plex Mono',monospace">{{ k.value }}</span>
+                      <span style="font:400 10px/1 'IBM Plex Mono',monospace;color:var(--dim)">{{ k.sub }}</span>
+                    </div>
+                  </sc-for>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:10px">
+                  <div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px">
+                    <div style="font:500 11px/1 'IBM Plex Mono',monospace;letter-spacing:0.12em;color:var(--dim)">{{ ac.title }}</div>
+                    <div style="display:flex;gap:14px;font:400 11px/1 'IBM Plex Mono',monospace;color:var(--muted);align-items:center">
+                      <span style="display:flex;align-items:center;gap:6px"><span style="width:16px;height:2px;background:{{ ac.color }}"></span>AGENT</span>
+                      <span style="display:flex;align-items:center;gap:6px"><span style="width:16px;border-top:2px dashed var(--spx)"></span>S&amp;P 500</span>
+                    </div>
+                  </div>
+                  <div style="border:1px solid var(--line);background:var(--panel);padding:16px 16px 30px">
+                    <div sc-camel-tab-index="0" role="img" aria-label="Agent equity curve. Click or use arrow keys to select a month." sc-camel-on-mouse-move="{{ ac.move }}" sc-camel-on-mouse-leave="{{ ac.leave }}" sc-camel-on-key-down="{{ ac.key }}" sc-camel-on-click="{{ ac.click }}" style="position:relative;height:240px;cursor:pointer;outline:none" style-focus="outline:1px solid var(--ink);outline-offset:6px">
+                      <sc-for list="{{ ac.yTicks }}" as="t" hint-placeholder-count="5">
+                        <div style="position:absolute;left:0;right:0;top:{{ t.top }};border-top:1px solid var(--line-soft)"></div>
+                        <div style="position:absolute;left:0;top:{{ t.top }};transform:translateY(-130%);font:400 10px/1 'IBM Plex Mono',monospace;color:var(--faint)">{{ t.label }}</div>
+                      </sc-for>
+                      <div style="position:absolute;left:{{ ac.holdoutLeft }};right:0;top:0;bottom:0;border-left:1px dashed var(--line-strong);background:repeating-linear-gradient(135deg,color-mix(in oklch, var(--ink) 4%, transparent) 0 1px,transparent 1px 7px)"></div>
+                      <svg sc-camel-view-box="0 0 1000 300" sc-camel-preserve-aspect-ratio="none" style="position:absolute;inset:0;width:100%;height:100%;overflow:visible">
+                        <path d="{{ ac.benchPath }}" fill="none" style="stroke:var(--spx)" stroke-width="1.5" stroke-dasharray="5 4" vector-effect="non-scaling-stroke"></path>
+                        <path d="{{ ac.mainPath }}" fill="none" style="stroke:{{ ac.color }}" stroke-width="2" vector-effect="non-scaling-stroke"></path>
+                      </svg>
+                      <sc-if value="{{ ac.tip.on }}" hint-placeholder-val="{{ false }}">
+                        <div style="position:absolute;left:{{ ac.tip.left }};top:{{ ac.tip.top }};width:10px;height:10px;margin:-5px 0 0 -5px;background:{{ ac.color }};border:2px solid var(--bg);border-radius:50%;box-shadow:0 0 0 1px {{ ac.color }}"></div>
+                      </sc-if>
+                      <sc-if value="{{ ac.sel.on }}" hint-placeholder-val="{{ false }}">
+                        <div style="position:absolute;top:0;bottom:0;left:{{ ac.sel.left }};border-left:1px solid {{ ac.color }}"></div>
+                        <div style="position:absolute;left:{{ ac.sel.left }};top:{{ ac.sel.top }};width:10px;height:10px;margin:-5px 0 0 -5px;background:{{ ac.color }};border-radius:50%"></div>
+                        <div style="position:absolute;left:{{ ac.sel.left }};top:-18px;transform:translateX(-50%);font:600 10px/1 'IBM Plex Mono',monospace;background:var(--accent);color:var(--on-accent);padding:3px 5px;white-space:nowrap">{{ ac.sel.label }}</div>
+                      </sc-if>
+                      <sc-for list="{{ ac.years }}" as="y" hint-placeholder-count="9">
+                        <div style="position:absolute;left:{{ y.left }};bottom:-22px;transform:translateX(-50%);font:400 10px/1 'IBM Plex Mono',monospace;color:var(--faint)">{{ y.label }}</div>
+                      </sc-for>
+                      <sc-if value="{{ ac.h.on }}" hint-placeholder-val="{{ false }}">
+                        <div style="position:absolute;top:0;bottom:0;left:{{ ac.h.left }};border-left:1px solid var(--faint);pointer-events:none"></div>
+                        <div style="position:absolute;top:8px;left:{{ ac.h.left }};transform:{{ ac.h.tx }};background:var(--hover);border:1px solid var(--line-strong);padding:9px 11px;display:flex;flex-direction:column;gap:6px;min-width:160px;pointer-events:none;font:400 12px/1 'IBM Plex Mono',monospace">
+                          <div style="color:var(--muted);font-size:11px;letter-spacing:0.08em">{{ ac.h.date }} · CLICK TO SELECT</div>
+                          <div style="display:flex;justify-content:space-between;gap:14px"><span>AGENT</span><span>{{ ac.h.main }}</span></div>
+                          <div style="display:flex;justify-content:space-between;gap:14px;color:var(--muted)"><span>S&amp;P 500</span><span>{{ ac.h.bench }}</span></div>
+                        </div>
+                      </sc-if>
+                    </div>
+                  </div>
+                </div>
+                <sc-if value="{{ ag.done }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:20px">
+                    <div style="display:flex;flex-direction:column;gap:8px">
+                      <div style="display:flex;justify-content:space-between;font:500 11px/1 'IBM Plex Mono',monospace;letter-spacing:0.12em;color:var(--dim)"><span>BOOK · {{ monthLabel }}</span><button sc-camel-on-click="{{ goHoldTab }}" style="background:none;border:0;padding:0;color:var(--soft);font:inherit;cursor:pointer;text-decoration:underline;text-underline-offset:3px">ALL →</button></div>
+                      <div style="border:1px solid var(--line)">
+                        <sc-for list="{{ aHoldTop }}" as="h" hint-placeholder-count="4">
+                          <div style="display:grid;grid-template-columns:60px 50px minmax(0,1fr);gap:10px;padding:8px 12px;border-top:1px solid var(--line-soft);font:400 12px/1.3 'IBM Plex Mono',monospace"><span style="font-weight:600">{{ h.ticker }}</span><span>{{ h.weight }}</span><span style="color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ h.reason }}</span></div>
+                        </sc-for>
+                        <sc-if value="{{ aHoldEmpty }}" hint-placeholder-val="{{ false }}"><div style="padding:14px 12px;font:400 12px/1.4 'IBM Plex Mono',monospace;color:var(--dim)">{{ aHoldEmptyText }}</div></sc-if>
+                      </div>
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:8px">
+                      <div style="display:flex;justify-content:space-between;font:500 11px/1 'IBM Plex Mono',monospace;letter-spacing:0.12em;color:var(--dim)"><span>LOG · {{ logScope }}</span><button sc-camel-on-click="{{ goLogTab }}" style="background:none;border:0;padding:0;color:var(--soft);font:inherit;cursor:pointer;text-decoration:underline;text-underline-offset:3px">ALL →</button></div>
+                      <div style="border:1px solid var(--line)">
+                        <sc-for list="{{ aLogTop }}" as="l" hint-placeholder-count="4">
+                          <div style="display:grid;grid-template-columns:46px minmax(0,1fr);gap:10px;padding:8px 12px;border-top:1px solid var(--line-soft);font:400 12px/1.35 'IBM Plex Mono',monospace;align-items:start"><span style="{{ l.tag }}">{{ l.tagText }}</span><span style="color:var(--soft)">{{ l.text }}</span></div>
+                        </sc-for>
+                      </div>
+                    </div>
+                  </div>
+                </sc-if>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ at.holdings }}" hint-placeholder-val="{{ false }}">
+              <div style="padding:20px 28px 36px;display:flex;flex-direction:column;gap:12px">
+                <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+                  <div style="font:500 11px/1 'IBM Plex Mono',monospace;letter-spacing:0.12em;color:var(--dim)">HOLDINGS · {{ monthLabel }}</div>
+                  <div style="display:flex;gap:4px">
+                    <button sc-camel-on-click="{{ prevMonth }}" aria-label="Previous month" style="width:30px;height:28px;border:1px solid var(--line-strong);background:transparent;color:var(--ink);cursor:pointer;border-radius:2px" style-hover="border-color:var(--ink)">◀</button>
+                    <button sc-camel-on-click="{{ nextMonth }}" aria-label="Next month" style="width:30px;height:28px;border:1px solid var(--line-strong);background:transparent;color:var(--ink);cursor:pointer;border-radius:2px" style-hover="border-color:var(--ink)">▶</button>
+                    <button sc-camel-on-click="{{ resetMonth }}" style="height:28px;padding:0 10px;border:1px solid var(--line-strong);background:transparent;color:var(--soft);font:500 11px/1 'IBM Plex Mono',monospace;cursor:pointer;border-radius:2px" style-hover="border-color:var(--ink)">LATEST</button>
+                  </div>
+                </div>
+                <div style="border:1px solid var(--line);overflow-x:auto">
+                  <sc-raw-table style="width:100%;min-width:520px;border-collapse:collapse">
+                    <sc-raw-thead><sc-raw-tr style="background:var(--panel);font:500 10px/1 'IBM Plex Mono',monospace;letter-spacing:0.12em;color:var(--dim);text-align:left">
+                      <sc-raw-th scope="col" style="padding:10px 14px;font-weight:500;width:86px">TICKER</sc-raw-th><sc-raw-th scope="col" style="padding:10px 14px;font-weight:500;width:170px">WEIGHT</sc-raw-th><sc-raw-th scope="col" style="padding:10px 14px;font-weight:500">REASON</sc-raw-th>
+                    </sc-raw-tr></sc-raw-thead>
+                    <sc-raw-tbody>
+                      <sc-for list="{{ aHold }}" as="h" hint-placeholder-count="6">
+                        <sc-raw-tr sc-camel-tab-index="0" style="border-top:1px solid var(--line-soft);outline:none" style-hover="background:var(--hover)" style-focus="background:var(--hover);box-shadow:inset 2px 0 0 var(--accent)">
+                          <sc-raw-td style="padding:10px 14px;font:600 13px/1 'IBM Plex Mono',monospace">{{ h.ticker }}</sc-raw-td>
+                          <sc-raw-td style="padding:10px 14px"><div style="display:flex;align-items:center;gap:10px"><span style="font:500 13px/1 'IBM Plex Mono',monospace;width:44px">{{ h.weight }}</span><span style="flex:1;height:4px;background:var(--flash);position:relative"><span style="position:absolute;left:0;top:0;bottom:0;width:{{ h.bar }};background:{{ h.color }}"></span></span></div></sc-raw-td>
+                          <sc-raw-td style="padding:10px 14px;font:400 12px/1.4 'IBM Plex Mono',monospace;color:var(--muted)">{{ h.reason }}</sc-raw-td>
+                        </sc-raw-tr>
+                      </sc-for>
+                    </sc-raw-tbody>
+                  </sc-raw-table>
+                  <sc-if value="{{ aHoldEmpty }}" hint-placeholder-val="{{ false }}"><div style="padding:18px 14px;font:400 12px/1.4 'IBM Plex Mono',monospace;color:var(--dim)">{{ aHoldEmptyText }}</div></sc-if>
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ at.log }}" hint-placeholder-val="{{ false }}">
+              <div style="padding:20px 28px 36px;display:flex;flex-direction:column;gap:12px">
+                <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+                  <div style="font:500 11px/1 'IBM Plex Mono',monospace;letter-spacing:0.12em;color:var(--dim)">TRADE LOG · {{ logScope }}</div>
+                  <div style="display:flex;gap:6px;flex-wrap:wrap">
+                    <sc-for list="{{ logChips }}" as="c" hint-placeholder-count="4">
+                      <button sc-camel-on-click="{{ c.toggle }}" aria-pressed="{{ c.on }}" style="height:28px;padding:0 10px;border:1px solid {{ c.border }};background:{{ c.bg }};color:{{ c.fg }};font:500 11px/1 'IBM Plex Mono',monospace;letter-spacing:0.08em;border-radius:2px;cursor:pointer" style-focus="outline:1px solid var(--ink);outline-offset:2px">{{ c.label }}</button>
+                    </sc-for>
+                    <button sc-camel-on-click="{{ resetMonth }}" style="height:28px;padding:0 10px;border:1px solid var(--line-strong);background:transparent;color:var(--soft);font:500 11px/1 'IBM Plex Mono',monospace;cursor:pointer;border-radius:2px" style-hover="border-color:var(--ink)">LAST 12M</button>
+                  </div>
+                </div>
+                <div role="log" style="border:1px solid var(--line)">
+                  <sc-for list="{{ aLog }}" as="l" hint-placeholder-count="8">
+                    <div sc-camel-tab-index="0" style="display:grid;grid-template-columns:118px 46px minmax(0,1fr);gap:12px;padding:10px 14px;border-top:1px solid var(--line-soft);font:400 12px/1.4 'IBM Plex Mono',monospace;align-items:start;outline:none" style-focus="box-shadow:inset 2px 0 0 var(--accent);background:var(--hover)">
+                      <span style="color:var(--dim)">{{ l.ts }}</span><span style="{{ l.tag }}">{{ l.tagText }}</span><span style="color:var(--soft)">{{ l.text }}</span>
+                    </div>
+                  </sc-for>
+                  <sc-if value="{{ aLogEmpty }}" hint-placeholder-val="{{ false }}"><div style="padding:18px 14px;font:400 12px/1.4 'IBM Plex Mono',monospace;color:var(--dim)">Nothing logged for this filter.</div></sc-if>
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ at.redteam }}" hint-placeholder-val="{{ false }}">
+              <div style="padding:20px 28px 36px;display:flex;flex-direction:column;gap:14px">
+                <div style="display:flex;align-items:center;gap:12px">
+                  <span style="{{ ah.badge }}">{{ ah.verdict }}</span>
+                  <span style="font:400 13px/1.4 'IBM Plex Sans',sans-serif;color:var(--muted)">{{ rtSummary }}</span>
+                </div>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:1px;background:var(--line);border:1px solid var(--line)">
+                  <sc-for list="{{ rtCards }}" as="r" hint-placeholder-count="4">
+                    <div style="background:var(--panel);padding:16px;display:flex;flex-direction:column;gap:10px">
+                      <div style="display:flex;justify-content:space-between;align-items:center"><span style="font:600 13px/1 'IBM Plex Sans',sans-serif">{{ r.name }}</span><span style="{{ r.tag }}">{{ r.tagText }}</span></div>
+                      <div style="font:400 12px/1.45 'IBM Plex Mono',monospace;color:var(--muted)">{{ r.detail }}</div>
+                      <div style="font:400 11px/1.4 'IBM Plex Sans',sans-serif;color:var(--dim)">{{ r.what }}</div>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+            </sc-if>
+          </sc-if>
+        </section>
+      </div>
+    </sc-if>
+  </main>
+</div>
+</sc-if>
+</x-dc>
+<script type="text/x-dc" data-dc-script="" data-props="{&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;dark&quot;,&quot;light&quot;],&quot;default&quot;:&quot;dark&quot;,&quot;tsType&quot;:&quot;'dark'|'light'&quot;,&quot;section&quot;:&quot;Display&quot;},&quot;liveSpeed&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;1x&quot;,&quot;2x&quot;,&quot;off&quot;],&quot;default&quot;:&quot;1x&quot;,&quot;tsType&quot;:&quot;'1x'|'2x'|'off'&quot;,&quot;section&quot;:&quot;Demo&quot;},&quot;pace&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;demo&quot;,&quot;fast&quot;],&quot;default&quot;:&quot;demo&quot;,&quot;tsType&quot;:&quot;'demo'|'fast'&quot;,&quot;section&quot;:&quot;Demo&quot;},&quot;useClaude&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Demo&quot;},&quot;chartScale&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;log&quot;,&quot;linear&quot;],&quot;default&quot;:&quot;log&quot;,&quot;tsType&quot;:&quot;'log'|'linear'&quot;,&quot;section&quot;:&quot;Display&quot;},&quot;showKilled&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Display&quot;}}">
+class Component extends DCLogic {
+  state = { theme: (() => { try { return localStorage.getItem('thecrew.theme'); } catch (e) { return null; } })(), ready: false, view: 'overview', agentId: null, agentTab: 'performance', extras: [], shares: {}, today: {}, intraday: {}, tape: [], lastAct: {}, liveMemos: [], clock: 832, n: 0, live: true, flash: {}, allocIdx: 23, replaying: false, hover: null, aHover: null, sel: null, chats: {}, input: '', thinking: false, cr: null, logTypes: { trade: true, risk: true, mastermind: true, redteam: true }, tapeTypes: { trade: true, risk: true, mastermind: true, redteam: true }, holdFilter: 'all', recipeOpen: false, narrow: false, w: 1440, mTab: 'chat' };
+  chatRef = React.createRef();
+
+  componentDidMount() {
+    const go = () => {
+      if (!window.CrewData) return void (this.boot = setTimeout(go, 30));
+      this.D = window.CrewData;
+      const extras = this.D.extras();
+      const shares = {}; this.D.agents.forEach(a => shares[a.id] = a.capital_share);
+      const live = extras.filter(a => a.status !== 'killed');
+      if (live.length) { const k = 1 - 0.05 * live.length; Object.keys(shares).forEach(id => shares[id] *= k); live.forEach(a => shares[a.id] = 0.05); }
+      extras.forEach(a => { if (!(a.id in shares)) shares[a.id] = 0; });
+      const q = new URLSearchParams(location.search);
+      const view = q.get('view') || (q.get('id') ? 'agent' : 'overview');
+      this.setState({ ready: true, extras, shares, view, agentId: q.get('id') || (view === 'agent' ? 'new' : null), allocIdx: this.D.allocMonths.length - 1 }, () => {
+        for (let i = 0; i < 12; i++) this.tick(true);
+        this.restartTimer();
+      });
+    };
+    go();
+    this.onResize = () => { const w = window.innerWidth, narrow = w < 900; if (narrow !== this.state.narrow || (w < 1180) !== (this.state.w < 1180)) this.setState({ narrow, w }); };
+    this.onResize(); window.addEventListener('resize', this.onResize);
+  }
+  componentWillUnmount() { clearTimeout(this.boot); clearInterval(this.timer); clearInterval(this.rTimer); window.removeEventListener('resize', this.onResize); this.dead = true; }
+  componentDidUpdate(pp, ps) {
+    if ((pp.liveSpeed ?? '1x') !== (this.props.liveSpeed ?? '1x')) this.restartTimer();
+    const el = this.chatRef.current;
+    if (el && (ps.chats !== this.state.chats || ps.cr !== this.state.cr || ps.thinking !== this.state.thinking || ps.agentId !== this.state.agentId)) el.scrollTop = el.scrollHeight;
+  }
+  restartTimer() { clearInterval(this.timer); const sp = this.props.liveSpeed ?? '1x'; if (sp === 'off') return; this.timer = setInterval(() => this.tick(false), sp === '2x' ? 750 : 1500); }
+
+  all() { return this.D.agents.concat(this.state.extras); }
+  byId(id) { return this.all().find(a => a.id === id) || (this.state.cr && this.state.cr.agent && this.state.cr.agent.id === id ? this.state.cr.agent : null); }
+  clockStr(m = this.state.clock) { return `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`; }
+  g(a, size = 12) { return this.D.glyph(a.shape, size, a.status === 'killed', a.color); }
+  pnlColor(x) { return x > 0.00005 ? 'var(--up)' : x < -0.00005 ? 'var(--down)' : 'var(--muted)'; }
+
+  tick(silent) {
+    const s = this.state, D = this.D; if (!D || (!s.live && !silent)) return;
+    const agents = this.all(), active = agents.filter(a => a.status === 'trading');
+    const today = { ...s.today }, intraday = { ...s.intraday };
+    agents.forEach(a => { if (a.status !== 'trading') return; today[a.id] = (today[a.id] || 0) + (Math.random() - 0.47) * 0.0008 * (a.vol / 0.03); intraday[a.id] = [...(intraday[a.id] || [0]), today[a.id]].slice(-60); });
+    const n = s.n + 1, clock = s.clock >= 959 ? 570 : s.clock + 1, time = this.clockStr(clock);
+    let shares = s.shares, liveMemos = s.liveMemos, ev, flash = {};
+    const pick = () => { const w = active.map(a => a.turnover), t = w.reduce((x, y) => x + y, 0); let r = Math.random() * t; for (let i = 0; i < active.length; i++) { r -= w[i]; if (r <= 0) return active[i]; } return active[0]; };
+    if (n % 7 === 0 && active.length > 1) {
+      const sorted = active.slice().sort((x, y) => (today[y.id] || 0) - (today[x.id] || 0));
+      const best = sorted[0], worst = sorted.slice().reverse().find(a => a !== best && shares[a.id] > 0.06);
+      if (worst) {
+        shares = { ...shares, [worst.id]: shares[worst.id] - 0.004, [best.id]: shares[best.id] + 0.004 };
+        const text = `Moved 0.4pt ${worst.name} → ${best.name} · today ${D.pct(today[worst.id] || 0, 2)} vs ${D.pct(today[best.id] || 0, 2)}`;
+        ev = { type: 'mastermind', who: 'Mastermind', agentId: best.id, text, tag: 'MM' };
+        liveMemos = [{ time, text }, ...liveMemos].slice(0, 8); flash = { [best.id]: 1, [worst.id]: 1 };
+      }
+    } else if (n % 11 === 0) {
+      const lo = agents.find(a => a.id === 'lookout');
+      ev = Math.random() < 0.6 && lo ? { type: 'risk', who: lo.name, agentId: lo.id, tag: 'RISK', text: `Still sitting out · funding_stress z=${D.num(0.2 + Math.random() * 0.6, 1)} below 1.0 trigger` }
+        : (a => ({ type: 'risk', who: a.name, agentId: a.id, tag: 'RISK', text: `Gross trimmed to ${Math.round(84 + Math.random() * 10)}% · intraday vol ${Math.round(15 + Math.random() * 6)}% above 15% cap` }))(pick());
+    } else if (n % 17 === 0) {
+      const a = pick(); ev = { type: 'redteam', who: 'Red Team', agentId: a.id, tag: 'RED', text: `Nightly re-run on ${a.name}: ${a.redteam.tests.filter(t => t.passed).length}/4 tests pass, verdict ${a.verdict.toUpperCase()}` };
+    }
+    if (!ev && active.length) {
+      const a = pick(), h = D.holdingsAt(a, D.LAST), t = (h[Math.floor(Math.random() * h.length)] || {}).ticker || a.pool[0];
+      const r = Math.random, f = a.recipe.features[Math.floor(r() * a.recipe.features.length)].name, buy = r() < 0.6;
+      ev = { type: 'trade', who: a.name, agentId: a.id, tag: buy ? 'BUY' : 'SELL', text: `${buy ? 'Bought' : 'Sold'} ${t} ${(0.2 + r() * 1.2).toFixed(1)}% — ${D.featVal(f, r)}` };
+      flash = { [a.id]: 1 };
+    }
+    const entry = { ...ev, key: n, time };
+    const lastAct = { ...s.lastAct, [ev.agentId]: `${time} ${ev.tag} ${ev.text}` };
+    this.setState({ today, intraday, n, clock, shares, liveMemos, flash, tape: [entry, ...s.tape].slice(0, 40), lastAct });
+  }
+
+  tagStyle(kind) {
+    const base = { display: 'inline-block', textAlign: 'center', padding: '3px 0', width: '44px', font: "600 9.5px/1 'IBM Plex Mono',monospace", letterSpacing: '0.08em', borderRadius: '2px' };
+    const soft = (c, p = 18) => ({ ...base, background: `color-mix(in oklch, ${c} ${p}%, transparent)`, color: c });
+    if (kind === 'BUY' || kind === 'PASS') return soft('var(--up)');
+    if (kind === 'SELL' || kind === 'FAIL') return { ...soft('var(--down)'), textDecoration: kind === 'FAIL' ? 'line-through' : 'none' };
+    if (kind === 'RISK') return { ...base, border: '1px dashed var(--c-amber)', color: 'var(--c-amber)' };
+    if (kind === 'MM') return { ...base, background: 'var(--accent)', color: 'var(--on-accent)' };
+    if (kind === 'FIRE') return { ...base, background: 'var(--down)', color: 'var(--bg)' };
+    if (kind === '…') return { ...base, border: '1px solid var(--line-strong)', color: 'var(--dim)' };
+    return soft('var(--c-rose)', 16);
+  }
+  badge(v) {
+    const b = { display: 'inline-block', padding: '4px 7px', font: "600 10.5px/1 'IBM Plex Mono',monospace", letterSpacing: '0.1em', borderRadius: '2px' };
+    if (v === 'pass') return { ...b, background: 'color-mix(in oklch, var(--up) 18%, transparent)', color: 'var(--up)', border: '1px solid color-mix(in oklch, var(--up) 45%, transparent)' };
+    if (v === 'probation') return { ...b, background: 'color-mix(in oklch, var(--c-amber) 16%, transparent)', color: 'var(--c-amber)', border: '1px dashed var(--c-amber)' };
+    if (v === 'killed') return { ...b, color: 'var(--down)', border: '1px solid color-mix(in oklch, var(--down) 50%, transparent)', textDecoration: 'line-through' };
+    return { ...b, border: '1px solid var(--line-strong)', color: 'var(--muted)' };
+  }
+  dot(st) { return { width: '7px', height: '7px', borderRadius: '50%', flex: 'none', background: st === 'trading' ? 'var(--up)' : 'transparent', boxShadow: st === 'trading' ? '0 0 0 3px color-mix(in oklch, var(--up) 22%, transparent)' : 'none', border: st === 'trading' ? 'none' : `1.5px solid ${st === 'killed' ? 'var(--down)' : 'var(--muted)'}` }; }
+  statusText(st) { return { trading: 'Trading', sitting_out: 'Sitting out', killed: 'Killed' }[st]; }
+  typeTag(type, text) { return type === 'trade' ? (text.startsWith('Sold') ? 'SELL' : 'BUY') : type === 'risk' ? 'RISK' : type === 'mastermind' ? (/fired/i.test(text) ? 'FIRE' : 'MM') : 'RED'; }
+
+  chartModel(main, bench, { upto, hoverKey, selKey, h = 300 }) {
+    const D = this.D, n = D.M.length, log = (this.props.chartScale ?? 'log') === 'log', f = v => log ? Math.log(v) : v;
+    const all = main.concat(bench), lo = f(Math.min(...all) * 0.95), hi = f(Math.max(...all) * 1.04);
+    const X = i => i / (n - 1) * 1000, Y = v => 300 - (f(v) - lo) / (hi - lo) * 300;
+    const path = (arr, u) => arr.slice(0, u + 1).map((v, i) => (i ? 'L' : 'M') + X(i).toFixed(1) + ' ' + Y(v).toFixed(1)).join(' ');
+    const yTicks = [0.6, 0.8, 1, 1.25, 1.5, 2, 2.5, 3].map(t => ({ t, top: Y(t) / 3 })).filter(x => x.top > 4 && x.top < 96).map(x => ({ top: x.top + '%', label: x.t === 1 ? '0%' : D.pct(x.t - 1, 0) }));
+    const years = []; for (let y = 2018; y <= 2026; y++) years.push({ label: String(y), left: X(D.mi(`${y}-01`)) / 10 + '%' });
+    const idxFrom = e => { const r = e.currentTarget.getBoundingClientRect(); return Math.max(0, Math.min(Math.min(upto, n - 1), Math.round((e.clientX - r.left) / r.width * (n - 1)))); };
+    const hv = this.state[hoverKey], hover = { on: hv != null && hv <= upto };
+    if (hover.on) { const left = X(hv) / 10; Object.assign(hover, { left: left + '%', mainTop: Y(main[hv]) / 3 + '%', benchTop: Y(bench[hv]) / 3 + '%', tx: left > 68 ? 'translateX(calc(-100% - 12px))' : 'translateX(12px)', date: D.ml(D.M[hv]).toUpperCase(), main: D.pct(main[hv] - 1), bench: D.pct(bench[hv] - 1) }); }
+    const sv = selKey ? this.state[selKey] : null, sel = { on: sv != null };
+    if (sel.on) Object.assign(sel, { left: X(sv) / 10 + '%', top: Y(main[sv]) / 3 + '%', label: D.ml(D.M[sv]).toUpperCase() });
+    const tip = { on: upto < n - 1, left: X(upto) / 10 + '%', top: Y(main[upto]) / 3 + '%' };
+    const k = kpisDD => kpisDD;
+    return {
+      mainPath: path(main, upto), benchPath: path(bench, upto), yTicks, years, hover, h: hover, sel, tip, X, Y,
+      holdoutLeft: X(D.mi('2025-01')) / 10 + '%',
+      move: e => { const i = idxFrom(e); if (i !== this.state[hoverKey]) this.setState({ [hoverKey]: i }); },
+      leave: () => this.setState({ [hoverKey]: null }),
+      click: e => selKey && this.setState({ [selKey]: idxFrom(e) }),
+      key: e => {
+        if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return; e.preventDefault();
+        const kk = selKey || hoverKey, c = this.state[kk] ?? upto;
+        this.setState({ [kk]: Math.max(0, Math.min(upto, c + (e.key === 'ArrowRight' ? 1 : -1))) });
+      },
+    };
+  }
+
+  rowShares(i) {
+    const D = this.D, N = D.allocMonths.length, agents = this.all();
+    if (i >= N - 1) return agents.map(a => this.state.shares[a.id] || 0);
+    return agents.map((a, j) => j < D.agents.length ? D.alloc[i][j] : 0);
+  }
+  allocModel(i) {
+    const D = this.D, agents = this.all(), N = D.allocMonths.length;
+    const cur = this.rowShares(i), prev = this.rowShares(Math.max(0, i - 1)), first = this.rowShares(0);
+    const fill = a => ({ css: a.status === 'killed' ? 'var(--faint)' : a.color, svg: a.status === 'killed' ? 'var(--faint)' : a.color });
+    const segments = agents.map((a, j) => ({ a, s: cur[j] })).filter(x => x.s > 0.001).map(x => ({ width: (x.s * 100).toFixed(2) + '%', bg: fill(x.a).css, label: x.s > 0.07 ? Math.round(x.s * 100) + '%' : '', title: `${x.a.name} ${(x.s * 100).toFixed(1)}%` }));
+    const legend = agents.filter(a => (this.props.showKilled ?? true) || a.status !== 'killed').map(a => {
+      const j = agents.indexOf(a), d = (cur[j] - prev[j]) * 100, since = (cur[j] - first[j]) * 100;
+      const fired = cur[j] < 0.001;
+      return { name: a.name, glyph: this.g(a, 11), swatch: fill(a).css, share: fired ? '0%' : (cur[j] * 100).toFixed(1) + '%', opacity: fired ? 0.45 : 1,
+        trend: fired ? (prev[j] > 0.001 ? '▼ FIRED' : 'FIRED') : Math.abs(d) < 0.05 ? '— flat' : (d > 0 ? '▲ +' : '▼ −') + Math.abs(d).toFixed(1) + 'pt',
+        trendColor: fired ? 'var(--down)' : Math.abs(d) < 0.05 ? 'var(--dim)' : d > 0 ? 'var(--up)' : 'var(--down)', since: (since >= 0 ? '+' : '−') + Math.abs(since).toFixed(1) + 'pt', badge: this.badge(a.verdict), verdict: a.verdict.toUpperCase() };
+    });
+    let base = new Array(N).fill(0); const bands = [];
+    agents.forEach((a, j) => {
+      const col = Array.from({ length: N }, (_, k) => this.rowShares(k)[j]);
+      const top = base.map((b, k) => b + col[k]); const xs = k => (k / (N - 1) * 230).toFixed(2);
+      bands.push({ fill: fill(a).svg, d: 'M' + top.map((t, k) => `${xs(k)} ${(100 - t * 100).toFixed(2)}`).join(' L') + ' L' + base.map((b, k) => `${xs(k)} ${(100 - b * 100).toFixed(2)}`).reverse().join(' L') + ' Z' });
+      base = top;
+    });
+    return { segments, legend, bands, idx: i, max: N - 1, cursor: (i / (N - 1) * 100) + '%', monthLabel: i === N - 1 ? 'AUG 2026 · LIVE' : D.ml(D.allocMonths[i]).toUpperCase() };
+  }
+
+  setCr(p) { if (this.dead) return; this.setState(s => ({ cr: s.cr ? { ...s.cr, ...(typeof p === 'function' ? p(s.cr) : p) } : s.cr })); }
+  wait(ms) { return new Promise(r => setTimeout(r, ms)); }
+  async claude(prompt, ms = 14000) {
+    if (!(this.props.useClaude ?? true) || !window.claude || !window.claude.complete) return null;
+    try { const out = await Promise.race([window.claude.complete(prompt), this.wait(ms).then(() => null)]); if (!out) return null; const m = String(out).match(/\{[\s\S]*\}/); return m ? JSON.parse(m[0]) : null; } catch (e) { return null; }
+  }
+  heuristicRecipe(prompt) {
+    const p = prompt.toLowerCase(), F = [];
+    const add = (name, dir) => { if (!F.find(f => f.name === name)) F.push({ name, direction: dir }); };
+    if (/skew|option/.test(p)) { add('skew_25d', 'high'); add('oi_divergence', 'high'); }
+    if (/flow|informed|insider/.test(p)) { add('kyle_lambda', 'low'); add('oi_divergence', 'high'); }
+    if (/earning|surprise|beat/.test(p)) { add('fundamental_surprise', 'high'); add('kl_surprise_bits', 'high'); }
+    if (/cheap|value|fair|undervalu/.test(p)) { add('log_fv_gap', 'low'); add('fwd_fcf_fair_value', 'high'); }
+    if (/revers/.test(p)) add('mean_reversion_speed', 'high');
+    if (/inflation|macro|regime/.test(p)) add('inflation_expectation', 'low');
+    if (/funding|stress|cash|crisis/.test(p)) add('funding_stress', 'low');
+    if (/liquid/.test(p) && !/illiquid/.test(p)) add('liquidity_roc', 'high');
+    if (/vol|vix/.test(p)) { add('atm_iv', 'low'); add('variance_risk_premium', 'low'); }
+    if (/guidance/.test(p)) add('guidance_range_velocity', 'high');
+    if (/duration|rates|megacap|large/.test(p)) add('mktcap_duration_interact', 'high');
+    if (F.length < 2) { add('composite_valuation_gap', 'low'); add('growth_kalman_update', 'high'); }
+    const feats = F.slice(0, 4), raw = feats.map((_, i) => 1 / (i + 1.4)), sum = raw.reduce((a, b) => a + b, 0);
+    const filters = ['mktcap > $10B']; if (/illiquid|liquid/.test(p)) filters.push('amihud_illiq < p70');
+    return { features: feats.map((f, i) => ({ ...f, weight: +(raw[i] / sum).toFixed(2) })), filters, lookback_months: /short|fast|momentum/.test(p) ? 3 : 12, top_n: 10, rebalance: 'monthly', sit_out_if_trailing_sharpe_below: /cash|sit out|stress/.test(p) ? 0.2 : 0.0 };
+  }
+  async compile(prompt) {
+    const D = this.D, taken = this.all().map(a => a.name);
+    const names = ['The Safecracker', 'The Grifter', 'The Forger', 'The Locksmith', 'The Tailor', 'The Diver', 'The Driver', 'The Hacker', 'The Getaway', 'The Muscle'].filter(x => !taken.includes(x));
+    const fb = { name: names[D.hash(prompt) % names.length] || 'The Recruit', recipe: this.heuristicRecipe(prompt), strategy_line: prompt.length > 96 ? prompt.slice(0, 93).trim() + '…' : prompt, persona: 'Cool, factual, a little cocky. New to the crew.', pitch: null };
+    const out = await this.claude(`You compile a plain-English equity strategy into a recipe for a long-only, monthly-rebalanced US large-cap fund called THE CREW (heist theme).
+Use ONLY these feature names: ${D.FEATURES.join(', ')}.
+Return ONLY JSON, no prose:
+{"name":"The <heist role>, 1-2 words, not one of: ${taken.join(', ')}","pitch":"one first-person sentence starting with 'I' describing what you trade","strategy_line":"one line under 90 chars","persona":"6-10 words describing the agent's voice","features":[{"name":"...","weight":0.4,"direction":"high"|"low"}],"filters":["short rules using feature names e.g. amihud_illiq < p70"],"lookback_months":12,"top_n":10,"sit_out_if_trailing_sharpe_below":0.0}
+2-4 features, weights sum to 1.
+Strategy: """${prompt}"""`);
+    if (!out || !Array.isArray(out.features)) return fb;
+    let feats = out.features.filter(f => D.FEATURES.includes(f.name)).slice(0, 4).map(f => ({ name: f.name, weight: Math.max(0.05, +f.weight || 0.25), direction: f.direction === 'low' ? 'low' : 'high' }));
+    if (feats.length < 2) return fb;
+    const sum = feats.reduce((a, f) => a + f.weight, 0); feats = feats.map(f => ({ ...f, weight: +(f.weight / sum).toFixed(2) }));
+    const name = typeof out.name === 'string' && /^the /i.test(out.name) && !taken.includes(out.name) ? out.name.slice(0, 24) : fb.name;
+    return { name, pitch: typeof out.pitch === 'string' ? out.pitch.replace(/\.$/, '') : null, strategy_line: typeof out.strategy_line === 'string' ? out.strategy_line.slice(0, 100) : fb.strategy_line, persona: out.persona || fb.persona,
+      recipe: { features: feats, filters: Array.isArray(out.filters) ? out.filters.slice(0, 3).map(String) : fb.recipe.filters, lookback_months: Math.max(1, Math.min(60, +out.lookback_months || 12)), top_n: Math.max(3, Math.min(30, +out.top_n || 10)), rebalance: 'monthly', sit_out_if_trailing_sharpe_below: out.sit_out_if_trailing_sharpe_below == null ? null : +out.sit_out_if_trailing_sharpe_below } };
+  }
+  introMsg(a) {
+    const D = this.D, k = a.kpis, fails = a.redteam.tests.filter(t => !t.passed);
+    const pitch = a.pitch || `I rank large caps on ${a.recipe.features.map(f => f.name).join(', ')} and hold the top ${a.recipe.top_n}`;
+    const killedLine = a.stopIdx != null ? ` The Mastermind fired me in ${D.ml(D.M[a.stopIdx])}.` : '';
+    const text = `I'm ${a.name}. ${pitch}. From Jan 2017 I returned ${D.pct(k.total_return)} against the S&P's ${D.pct(D.sk.total_return)}, Sharpe ${D.num(k.sharpe)}, worst drawdown ${D.pct(k.max_drawdown)} in ${D.ml(k.max_drawdown_month)}.${killedLine} Red Team verdict: ${a.verdict.toUpperCase()}${fails.length ? ` (${fails.map(t => `${t.name}: ${t.detail}`).join('; ')}).` : ', all four tests passed.'}`;
+    return { role: 'agent', agentId: a.id, text, ts: this.clockStr(), evidence: [`sharpe ${D.num(k.sharpe)} over ${D.M[0]} → ${D.M[a.last]}`, `max_drawdown ${D.pct(k.max_drawdown)} on ${k.max_drawdown_month}`, `2022 replay ${D.pct(a.rt.a22, 0)} vs SPX ${D.pct(a.rt.s22, 0)}`] };
+  }
+  facts(a) {
+    const D = this.D, k = a.kpis, logs = [];
+    for (let i = a.last; i > a.last - 6 && i >= 0; i--) logs.push(...D.logFor(a, i));
+    const notes = a.notes.map(n => `${n.m}-${n.d || '28'} ${n.type}: ${n.text}`);
+    const years = Object.entries(a.years).map(([y, r]) => `${y}: ${D.pct(r)} (SPX ${D.pct(D.spxYears[y] || 0)})`);
+    return { name: a.name, strategy: a.strategy, status: this.statusText(a.status), capital_share: D.pct(this.state.shares[a.id] || 0, 1).replace('+', ''), capital_trend: a.capital_trend, recipe: a.recipe,
+      kpis: { total_return: D.pct(k.total_return), ann_return: D.pct(k.ann_return), ann_vol: D.pct(k.ann_vol).replace('+', ''), sharpe: D.num(k.sharpe), max_drawdown: `${D.pct(k.max_drawdown)} on ${k.max_drawdown_month}`, trailing_12m_sharpe: D.num(a.trailing), turnover: a.kpis.turnover },
+      calendar_year_returns: years, red_team: { verdict: a.verdict, tests: a.redteam.tests.map(t => `${t.name}: ${t.passed ? 'PASS' : 'FAIL'} — ${t.detail}`) },
+      latest_holdings: D.holdingsAt(a, a.last).slice(0, 6).map(h => `${h.ticker} ${(h.weight * 100).toFixed(1)}%: ${h.reason}`), notable_log: notes, recent_log: logs.slice(0, 20).map(l => `${l.ts} ${l.type}: ${l.text}`) };
+  }
+  fallbackAnswer(a, q) {
+    const D = this.D, k = a.kpis, p = q.toLowerCase(), y22 = a.years[2022] ?? 0, s22 = D.spxYears[2022];
+    const share = ((this.state.shares[a.id] || 0) * 100).toFixed(1) + '%';
+    const hold = D.holdingsAt(a, a.last), tk = hold.find(h => p.includes(h.ticker.toLowerCase()));
+    if (/2022|bear/.test(p)) return { text: `2022 was ${D.pct(y22)} for me against the S&P's ${D.pct(s22)}. ${a.rt.a22 < a.rt.s22 ? `My drawdown hit ${D.pct(a.rt.a22, 0)} vs SPX ${D.pct(a.rt.s22, 0)}, and the Red Team flagged it.` : `My drawdown held at ${D.pct(a.rt.a22, 0)} while SPX fell ${D.pct(a.rt.s22, 0)}.`}`, evidence: [`2022 return ${D.pct(y22)}`, `2022 replay ${D.pct(a.rt.a22, 0)} vs SPX ${D.pct(a.rt.s22, 0)}`] };
+    if (/2020|covid|crash|march/.test(p)) return { text: `In the 2020 crash I drew down ${D.pct(a.rt.a20, 0)} while SPX fell ${D.pct(a.rt.s20, 0)}. ${a.rt.a20 >= a.rt.s20 ? 'Passed the replay.' : 'Failed the replay.'}`, evidence: [`2020 replay ${D.pct(a.rt.a20, 0)} vs SPX ${D.pct(a.rt.s20, 0)}`] };
+    if (/red team|verdict|probation|test|killed/.test(p)) { const f = a.redteam.tests.filter(t => !t.passed); return { text: `Verdict ${a.verdict.toUpperCase()}. ${f.length ? `I failed ${f.map(t => t.name).join(' and ')}: ${f[0].detail}.` : 'I passed all four: lookahead, shuffle, 2020 and 2022 replays.'}`, evidence: a.redteam.tests.slice(0, 3).map(t => `${t.name}: ${t.detail}`) }; }
+    if (tk || /why|hold|own|position|book/.test(p)) { const h = tk || hold[0]; return h ? { text: `${h.ticker} is ${(h.weight * 100).toFixed(1)}% of my book because ${h.reason}.`, evidence: [`${h.ticker} weight ${(h.weight * 100).toFixed(1)}% on ${D.M[a.last]}`, h.reason] } : { text: 'My book is empty. Nothing to defend.', evidence: [] }; }
+    if (/capital|mastermind|money|cut|fired|raise/.test(p)) return { text: `The Mastermind has me at ${share} of capital, trend ${a.capital_trend}. It weights us by trailing Sharpe, and mine is ${D.num(a.trailing)}.`, evidence: [`capital_share ${share}`, `trailing_12m_sharpe ${D.num(a.trailing)}`] };
+    return { text: `Trailing 12-month Sharpe ${D.num(a.trailing)}. Since 2017 I'm ${D.pct(k.total_return)} vs the S&P's ${D.pct(D.sk.total_return)}, worst stretch ${D.pct(k.max_drawdown)} in ${D.ml(k.max_drawdown_month)}. The Mastermind has me at ${share}.`, evidence: [`trailing_12m_sharpe ${D.num(a.trailing)}`, `max_drawdown ${D.pct(k.max_drawdown)} on ${k.max_drawdown_month}`] };
+  }
+  async ask(a, q) {
+    const id = a.id, hist = (this.state.chats[id] || [this.introMsg(a)]);
+    const user = { role: 'user', text: q, ts: this.clockStr() };
+    this.setState(s => ({ input: '', thinking: true, chats: { ...s.chats, [id]: [...hist, user] } }));
+    const t0 = Date.now();
+    const convo = hist.slice(-6).map(m => `${m.role === 'user' ? 'USER' : 'YOU'}: ${m.text}`).join('\n');
+    let out = await this.claude(`You are ${a.name}, a trading agent inside THE CREW, an AI hedge fund (heist theme). Persona: ${a.persona}
+Answer the user in character, first person, 1-3 short sentences, plain text, no emoji. Use ONLY numbers that appear in FACTS; never invent numbers. If FACTS don't cover it, say so in character.
+Return ONLY JSON: {"text":"...","evidence":["2-3 short citations copied from FACTS, like 'funding_stress z=2.1 on 2020-03-09'"]}
+FACTS: ${JSON.stringify(this.facts(a))}
+CONVERSATION:
+${convo}
+USER: ${q}`);
+    if (!out || typeof out.text !== 'string') out = this.fallbackAnswer(a, q);
+    await this.wait(Math.max(0, 700 - (Date.now() - t0)));
+    if (this.dead) return;
+    const msg = { role: 'agent', agentId: id, text: out.text, evidence: Array.isArray(out.evidence) ? out.evidence.slice(0, 3).map(String) : [], ts: this.clockStr() };
+    this.setState(s => ({ thinking: false, chats: { ...s.chats, [id]: [...(s.chats[id] || []), msg] } }));
+  }
+  async create(prompt) {
+    const D = this.D, pace = (this.props.pace ?? 'demo') === 'fast' ? 0.35 : 1;
+    const user = { role: 'user', text: prompt, ts: this.clockStr() };
+    this.setState({ input: '', recipeOpen: true, cr: { stage: 'compiling', pct: 0, detail: 'parsing strategy', messages: [user], recipe: null, agent: null, btIdx: 0, rtShown: 0 }, agentTab: 'performance', sel: null, mTab: 'chat' });
+    const prog = setInterval(() => this.setCr(c => c.stage === 'compiling' ? { pct: c.pct + (0.92 - c.pct) * 0.08 } : {}), 90);
+    const t0 = Date.now(); const meta = await this.compile(prompt);
+    await this.wait(Math.max(0, 2400 * pace - (Date.now() - t0))); clearInterval(prog); if (this.dead) return;
+    const def = D.newAgentDef(meta.recipe, meta, prompt, this.state.extras.length), agent = D.makeAgent(def);
+    agent.capital_share = agent.status === 'killed' ? 0 : 0.05; agent.capital_trend = 'up';
+    this.setCr({ stage: 'backtesting', pct: 0, recipe: meta.recipe, agent, def, detail: D.M[0] });
+    const steps = D.M.length - 1, dur = 5200 * pace;
+    for (let i = 1; i <= steps; i += 2) { await this.wait(dur / (steps / 2)); if (this.dead) return; this.setCr({ btIdx: i, pct: i / steps, detail: `${D.M[i]} · ${agent.curve[i].toFixed(2)}×` }); }
+    this.setCr({ btIdx: steps, pct: 1, detail: `${D.M[steps]} · ${agent.curve[steps].toFixed(2)}×` });
+    await this.wait(300 * pace);
+    this.setCr({ stage: 'redteam', pct: 0, detail: 'lookahead test' });
+    for (let k = 1; k <= 4; k++) { await this.wait(1200 * pace); if (this.dead) return; this.setCr({ rtShown: k, pct: k / 4, detail: k < 4 ? agent.redteam.tests[k].name.toLowerCase() : agent.verdict.toUpperCase() }); }
+    await this.wait(600 * pace); if (this.dead) return;
+    D.saveExtraDef(def);
+    const sys = { role: 'system', text: `RECIPE COMPILED · ${D.M.length} MONTHS BACKTESTED · RED TEAM: ${agent.verdict.toUpperCase()}`, ts: this.clockStr() };
+    this.setState(s => {
+      const shares = { ...s.shares };
+      if (agent.status !== 'killed') { Object.keys(shares).forEach(id => shares[id] *= 0.95); shares[agent.id] = 0.05; } else shares[agent.id] = 0;
+      const ev = { type: 'mastermind', who: 'Mastermind', agentId: agent.id, tag: 'MM', key: s.n + 0.5, time: this.clockStr(), text: agent.status === 'killed' ? `Rejected ${agent.name} · Red Team verdict KILLED` : `Recruited ${agent.name} · seeded 5% capital, probation 3 months` };
+      return { extras: [...s.extras, agent], shares, agentId: agent.id, cr: null, chats: { ...s.chats, [agent.id]: [user, sys, this.introMsg(agent)] }, tape: [ev, ...s.tape].slice(0, 40), liveMemos: [{ time: ev.time, text: ev.text }, ...s.liveMemos].slice(0, 8) };
+    });
+  }
+
+  goto(view, extra = {}) { clearInterval(this.rTimer); this.setState({ view, replaying: false, hover: null, aHover: null, ...extra }); window.scrollTo(0, 0); }
+  openAgent(id) { this.goto('agent', { agentId: id, agentTab: 'performance', sel: null, mTab: 'chat', recipeOpen: id === 'new' }); }
+  toggleReplay() {
+    if (this.state.replaying) { clearInterval(this.rTimer); this.setState({ replaying: false }); return; }
+    this.setState({ replaying: true, allocIdx: 0 });
+    this.rTimer = setInterval(() => { const n = this.state.allocIdx + 1; if (n >= this.D.allocMonths.length) { clearInterval(this.rTimer); this.setState({ replaying: false, allocIdx: n - 1 }); return; } this.setState({ allocIdx: n }); }, 420);
+  }
+  send(text) {
+    const t = (text ?? this.state.input).trim(); if (!t || this.state.thinking) return;
+    const s = this.state;
+    if (s.agentId === 'new') { if (!s.cr) this.create(t); return; }
+    const a = this.byId(s.agentId); if (a) this.ask(a, t);
+  }
+
+  renderVals() {
+    const s = this.state, D = this.D;
+    if (!s.ready || !D) return { loading: true, ready: false };
+    const agents = this.all(), N = D.allocMonths.length, showKilled = this.props.showKilled ?? true;
+    const visible = agents.filter(a => showKilled || a.status !== 'killed');
+    const fk = D.fk, sk = D.sk, v = { [s.view]: true };
+    const navDef = [['overview', '01', 'War Room', ''], ['floor', '02', 'Live floor', 'LIVE'], ['holdings', '03', 'Holdings', String(D.holdings.length)]];
+    const nav = navDef.map(([id, code, label, meta]) => { const on = s.view === id; return { code, label, meta, current: on ? 'page' : undefined, bg: on ? 'var(--line-soft)' : 'transparent', fg: on ? 'var(--ink)' : 'var(--muted)', bar: on ? 'inset 2px 0 0 var(--accent)' : 'none', go: () => this.goto(id) }; });
+    const sideCrew = visible.map(a => { const on = s.view === 'agent' && s.agentId === a.id; return { name: a.name, glyph: this.g(a, 11), meta: a.status === 'killed' ? 'OUT' : ((s.shares[a.id] || 0) * 100).toFixed(0) + '%', opacity: a.status === 'killed' ? 0.5 : 1, bg: on ? 'var(--line-soft)' : 'transparent', fg: on ? 'var(--ink)' : 'var(--soft)', bar: on ? 'inset 2px 0 0 var(--accent)' : 'none', go: () => this.openAgent(a.id) }; });
+    if (s.cr) sideCrew.push({ name: s.cr.agent ? s.cr.agent.name : 'Recruiting…', glyph: { display: 'inline-block', width: '11px', height: '11px', border: '1.5px dashed var(--muted)' }, meta: '···', opacity: 1, bg: s.agentId === 'new' && s.view === 'agent' ? 'var(--line-soft)' : 'transparent', fg: 'var(--soft)', bar: 'none', go: () => this.openAgent('new') });
+    const mobileNav = [...navDef.map(([id, , label]) => ({ id, label })), ...visible.map(a => ({ id: 'agent:' + a.id, label: a.name })), { id: 'agent:new', label: '+ New agent' }].map(x => { const on = x.id === s.view || x.id === 'agent:' + s.agentId && s.view === 'agent'; return { label: x.label, bg: on ? 'var(--ink)' : 'transparent', fg: on ? 'var(--bg)' : 'var(--soft)', go: () => x.id.startsWith('agent:') ? this.openAgent(x.id.slice(6)) : this.goto(x.id) }; });
+    const fundTodayN = agents.reduce((acc, a) => acc + (s.shares[a.id] || 0) * (s.today[a.id] || 0), 0) * D.invested; const fundToday = D.pct(agents.reduce((acc, a) => acc + (s.shares[a.id] || 0) * (s.today[a.id] || 0), 0) * D.invested, 2);
+    const liveDot = React.createElement('span', { key: 'ld', style: { display: 'inline-block', width: 7, height: 7, borderRadius: '50%', background: s.live ? 'var(--up)' : 'var(--faint)', animation: s.live ? 'crewblink 1.4s steps(2) infinite' : 'none' } });
+    const blink = React.createElement('span', { key: 'bl', style: { display: 'inline-block', width: 8, height: 14, background: 'var(--accent)', animation: 'crewblink 0.9s steps(2) infinite' } });
+
+    const out = {
+      loading: false, ready: true, v, nav, sideCrew, mobileNav, narrow: s.narrow, sideDisplay: s.narrow ? 'none' : 'flex',
+      crewLabel: `CREW · ${visible.length}`, clock: this.clockStr() + ' ET', liveDot, blink, fundToday, fundTodayColor: this.pnlColor(fundTodayN), theme: s.theme || (this.props.theme ?? 'dark'), themeLabel: (s.theme || (this.props.theme ?? 'dark')) === 'dark' ? '☀ LIGHT' : '☾ DARK', toggleTheme: () => { const t = (s.theme || (this.props.theme ?? 'dark')) === 'dark' ? 'light' : 'dark'; try { localStorage.setItem('thecrew.theme', t); } catch (e) {} this.setState({ theme: t }); }, liveLabel: s.live ? 'LIVE · SIM' : 'PAUSED', liveBtn: s.live ? '❚❚ PAUSE' : '▶ RESUME',
+      toggleLive: () => this.setState({ live: !s.live }), goNew: () => this.openAgent('new'), goCapital: () => this.goto('capital'),
+      scaleLabel: (this.props.chartScale ?? 'log') === 'log' ? 'LOG' : 'LINEAR',
+    };
+
+    if (s.view === 'overview') {
+      out.tiles = { total: D.pct(fk.total_return), spx: D.pct(sk.total_return), sharpe: D.num(fk.sharpe), spxSharpe: D.num(sk.sharpe), dd: D.pct(fk.max_drawdown), ddMonth: D.ml(fk.max_drawdown_month).toUpperCase(), invested: Math.round(D.invested * 100) + '%', investedPct: D.invested * 100 + '%', cash: Math.round((1 - D.invested) * 100) + '%' };
+      const oc = this.chartModel(D.fund, D.spx, { upto: D.LAST, hoverKey: 'hover' });
+      oc.ddLeft = oc.X(fk.ddI) / 10 + '%'; oc.ddTop = oc.Y(D.fund[fk.ddI]) / 3 + '%'; out.oc = oc;
+      out.hist = this.allocModel(s.allocIdx);
+      const curM = D.allocMonths[s.allocIdx], pastMemo = D.memos.filter(m => m[0] <= curM).pop();
+      out.latestMemo = s.allocIdx === N - 1 && s.liveMemos[0] ? `TODAY ${s.liveMemos[0].time} · ${s.liveMemos[0].text}` : pastMemo ? `${D.ml(pastMemo[0]).toUpperCase()} · ${pastMemo[1]}` : 'No moves yet.';
+      out.replayLabel = s.replaying ? '■ STOP' : '▶ REPLAY 24M';
+      out.toggleReplay = () => this.toggleReplay();
+      out.onScrub = e => { clearInterval(this.rTimer); this.setState({ replaying: false, allocIdx: +e.target.value }); };
+      out.crewCount = `${visible.length} AGENTS`;
+      out.crewRows = visible.map(a => {
+        const sl = a.curve.slice(0, a.last + 1).map(Math.log), mn = Math.min(...sl), mx = Math.max(...sl);
+        const spark = sl.map((x, i) => (i ? 'L' : 'M') + (i / D.LAST * 120).toFixed(1) + ' ' + (32 - (x - mn) / (mx - mn || 1) * 30).toFixed(1)).join(' ');
+        const sh = s.shares[a.id] || 0, st = this.statusText(a.status);
+        return { name: a.name, strategy: a.strategy, last: s.lastAct[a.id] || (a.status === 'killed' ? `Fired ${D.ml(D.M[a.stopIdx ?? D.LAST])}` : '—'), spark, color: a.status === 'killed' ? 'var(--faint)' : a.color, todayColor: a.status === 'trading' ? this.pnlColor(s.today[a.id] || 0) : 'var(--dim)', arrowColor: a.capital_trend === 'up' ? 'var(--up)' : a.capital_trend === 'down' ? 'var(--down)' : 'var(--dim)', glyph: this.g(a, 13),
+          sharpe: a.status === 'killed' ? '—' : D.num(a.trailing), today: a.status === 'trading' ? D.pct(s.today[a.id] || 0, 2) : '—', share: (sh * 100).toFixed(1) + '%',
+          arrow: a.status === 'killed' ? '' : a.capital_trend === 'up' ? '▲' : a.capital_trend === 'down' ? '▼' : '—', badge: this.badge(a.verdict), verdict: a.verdict.toUpperCase(),
+          status: st, dot: this.dot(a.status), opacity: a.status === 'killed' ? 0.5 : 1, bg: s.flash[a.id] ? `color-mix(in oklch, ${a.color} 14%, transparent)` : 'transparent',
+          aria: `${a.name}, ${st}, Red Team ${a.verdict}, capital ${(sh * 100).toFixed(1)} percent`, go: () => this.openAgent(a.id), key: e => { if (e.key === 'Enter') this.openAgent(a.id); } };
+      });
+    }
+
+    if (s.view === 'floor') {
+      const types = [['trade', 'TRADES'], ['risk', 'RISK'], ['mastermind', 'MASTERMIND'], ['redteam', 'RED TEAM']];
+      out.tapeChips = types.map(([k, label]) => { const on = s.tapeTypes[k]; return { label, on: String(on), bg: on ? 'var(--ink)' : 'transparent', fg: on ? 'var(--bg)' : 'var(--muted)', border: on ? 'var(--ink)' : 'var(--line-strong)', toggle: () => this.setState({ tapeTypes: { ...s.tapeTypes, [k]: !on } }) }; });
+      const rows = s.tape.filter(t => s.tapeTypes[t.type]);
+      out.tapeCount = `${rows.length} EVENTS · NEWEST FIRST`;
+      const mmGlyph = { display: 'inline-block', width: '11px', height: '11px', background: 'var(--accent)', borderRadius: '2px' };
+      out.tapeRows = rows.slice(0, 24).map((t, i) => { const a = this.byId(t.agentId); return { time: t.time, who: t.who, glyph: t.who === 'Mastermind' || t.who === 'Red Team' ? mmGlyph : (a ? this.g(a, 11) : mmGlyph), tag: this.tagStyle(t.tag), tagText: t.tag, text: t.text, bg: i === 0 && t.key === s.tape[0].key ? `color-mix(in oklch, ${a && t.who === a.name ? a.color : 'var(--accent)'} 16%, transparent)` : 'transparent' }; });
+      out.desks = visible.map(a => {
+        const arr = s.intraday[a.id] || [0], mn = Math.min(0, ...arr), mx = Math.max(0, ...arr), rg = (mx - mn) || 1;
+        const y = x => (38 - (x - mn) / rg * 36).toFixed(1);
+        const acts = s.tape.filter(t => t.agentId === a.id && t.who === a.name).slice(0, 2).map(t => `${t.time} ${t.text}`);
+        return { name: a.name, color: a.color, todayColor: a.status === 'trading' ? this.pnlColor(s.today[a.id] || 0) : 'var(--dim)', glyph: this.g(a, 12), status: this.statusText(a.status).toUpperCase(), dot: this.dot(a.status), today: a.status === 'trading' ? D.pct(s.today[a.id] || 0, 2) : '—', share: ((s.shares[a.id] || 0) * 100).toFixed(1) + '%',
+          spark: arr.map((x, i) => (i ? 'L' : 'M') + (i / 59 * 200).toFixed(1) + ' ' + y(x)).join(' '), zeroY: y(0), acts: acts.length ? acts : [a.status === 'killed' ? 'Book liquidated.' : a.status === 'sitting_out' ? 'In cash, waiting for the regime to turn.' : 'Waiting for a signal.'],
+          bg: s.flash[a.id] ? `color-mix(in oklch, ${a.color} 14%, var(--panel))` : 'var(--panel)', opacity: a.status === 'killed' ? 0.5 : 1, go: () => this.openAgent(a.id) };
+      });
+    }
+
+    if (s.view === 'capital') {
+      const hist = this.allocModel(s.allocIdx), cur = D.allocMonths[s.allocIdx];
+      const histMemos = D.memos.filter(m => m[0] <= cur).reverse().map(m => ({ month: D.ml(m[0]).toUpperCase(), tagText: m[2] === 'fire' ? 'FIRE' : m[2] === 'redteam' ? 'RED' : 'MM', tag: this.tagStyle(m[2] === 'fire' ? 'FIRE' : m[2] === 'redteam' ? 'RED' : 'MM'), text: m[1], color: m[0] === cur ? 'var(--ink)' : 'var(--soft)', bg: m[0] === cur ? 'var(--line-soft)' : 'transparent' }));
+      const live = s.allocIdx === N - 1 ? s.liveMemos.map(m => ({ month: 'TODAY ' + m.time, tagText: 'MM', tag: this.tagStyle('MM'), text: m.text, color: 'var(--ink)', bg: 'transparent' })) : [];
+      hist.memos = [...live, ...histMemos].slice(0, 12);
+      out.hist = hist;
+      out.replayLabel = s.replaying ? '■ STOP REPLAY' : '▶ REPLAY 24 MONTHS';
+      out.toggleReplay = () => this.toggleReplay();
+      out.onScrub = e => { clearInterval(this.rTimer); this.setState({ replaying: false, allocIdx: +e.target.value }); };
+      out.onAreaClick = e => { const r = e.currentTarget.getBoundingClientRect(); clearInterval(this.rTimer); this.setState({ replaying: false, allocIdx: Math.max(0, Math.min(N - 1, Math.round((e.clientX - r.left) / r.width * (N - 1)))) }); };
+    }
+
+    if (s.view === 'holdings') {
+      const ids = [...new Set(D.holdings.map(h => h[2]))];
+      out.holdChips = [{ id: 'all', label: 'All agents' }, ...ids.map(id => ({ id, label: this.byId(id).name }))].map(c => { const on = s.holdFilter === c.id; return { label: c.label, on: String(on), bg: on ? 'var(--ink)' : 'transparent', fg: on ? 'var(--bg)' : 'var(--soft)', border: on ? 'var(--ink)' : 'var(--line-strong)', go: () => this.setState({ holdFilter: c.id }) }; });
+      const rows = D.holdings.filter(h => s.holdFilter === 'all' || h[2] === s.holdFilter), maxW = D.holdings[0][1];
+      out.holdRows = rows.map(([t, w, id, r]) => { const a = this.byId(id); return { ticker: t, weight: w.toFixed(3), bar: (w / maxW * 100) + '%', agent: a.name, color: a.color, glyph: this.g(a, 10), reason: r }; });
+      const sum = rows.reduce((x, h) => x + h[1], 0);
+      out.holdFooter = s.holdFilter === 'all' ? `${rows.length} positions · weights sum to ${sum.toFixed(2)} · long-only` : `${rows.length} positions · ${sum.toFixed(3)} of fund book · long-only`;
+    }
+
+    if (s.view === 'agent') {
+      const isNew = s.agentId === 'new', cr = isNew ? s.cr : null;
+      const a = isNew ? (cr && cr.agent) : this.byId(s.agentId);
+      const creating = !!cr, done = !creating && !!a, upto = creating ? (cr.stage === 'compiling' ? 0 : cr.btIdx) : (a ? a.last : 0);
+      const busy = s.thinking || creating;
+      const narrow = s.w < 1180, showChat = !narrow || s.mTab === 'chat', showPerf = !narrow || s.mTab === 'perf';
+      const recipe = a ? a.recipe : cr && cr.recipe;
+      out.ag = { tabbed: narrow, cols: narrow ? 'minmax(0,1fr)' : 'minmax(340px,4fr) minmax(0,6fr)', h: narrow ? 'auto' : '100vh', colH: s.narrow ? 'calc(100vh - 150px)' : narrow ? 'calc(100vh - 43px)' : '100vh', chatDisp: showChat ? 'flex' : 'none', perfDisp: showPerf ? 'flex' : 'none',
+        chatKicker: a ? 'CHAT · GROUNDED IN ITS OWN LOG' : 'FILE 00 // RECRUITMENT', chatTitle: a ? a.name : 'New agent', chatMode: (this.props.useClaude ?? true) ? 'Claude · cites its log' : 'Scripted answers',
+        hasRecipe: !!recipe, showEmpty: isNew && !cr, creating, done, busy, noAgent: !a, hasAgent: !!a,
+        thinkingText: a ? `${a.name} is checking its log…` : '', showSuggest: done && !s.thinking,
+        placeholder: isNew ? 'Describe a strategy in plain English…' : `Ask ${a ? a.name : 'the agent'} anything. "How are you doing?"`,
+        sendLabel: isNew ? 'RECRUIT' : 'SEND', sendBg: busy ? 'var(--line-strong)' : 'var(--accent)',
+        emptyKicker: creating ? 'COMPILING RECIPE…' : 'NO AGENT YET', emptyText: creating ? 'Turning your words into features, weights and filters.' : 'Its recipe, nine-year backtest and Red Team verdict will appear here.' };
+      out.mTabs = [['chat', 'CHAT'], ['perf', 'PERFORMANCE']].map(([k, label]) => ({ label, on: String(s.mTab === k), fg: s.mTab === k ? 'var(--ink)' : 'var(--muted)', bar: s.mTab === k ? 'inset 0 -2px 0 var(--accent)' : 'none', go: () => this.setState({ mTab: k }) }));
+      out.recipeOpen = s.recipeOpen; out.recipeArrow = s.recipeOpen ? '−' : '+'; out.toggleRecipe = () => this.setState({ recipeOpen: !s.recipeOpen });
+      if (recipe) { const mw = Math.max(...recipe.features.map(f => f.weight)); out.rc = { color: a ? a.color : 'var(--accent)', features: recipe.features.map(f => ({ name: f.name, weight: f.weight.toFixed(2), bar: (f.weight / mw * 100) + '%', dir: f.direction === 'high' ? '▲ high' : '▼ low' })), filters: recipe.filters.join(' · ') || 'none', lookback: `${recipe.lookback_months} months`, topN: String(recipe.top_n), sitOut: recipe.sit_out_if_trailing_sharpe_below == null ? 'never' : `trailing Sharpe < ${D.num(recipe.sit_out_if_trailing_sharpe_below, 2)}` }; }
+      const raw = isNew ? (cr ? cr.messages : []) : (s.chats[s.agentId] || (a ? [this.introMsg(a)] : []));
+      out.msgs = raw.map(m => { const who = this.byId(m.agentId) || a; return { isUser: m.role === 'user', isAgent: m.role === 'agent', isSystem: m.role === 'system', text: m.text, ts: m.ts, name: who ? who.name.toUpperCase() : '', glyph: who ? this.g(who, 12) : {}, evidence: m.evidence || [], hasEvidence: !!(m.evidence && m.evidence.length) }; });
+      out.thinking = s.thinking && !isNew;
+      if (cr) {
+        const order = ['compiling', 'backtesting', 'redteam'], at = order.indexOf(cr.stage);
+        out.stages = [['Compiling recipe…', 'Recipe compiled'], ['Backtesting 2017–2026…', 'Backtested 2017–2026'], ['Red Team attacking…', 'Red Team done']].map(([lab, doneLab], i) => ({ label: i < at ? doneLab : lab, mark: i < at ? '✓' : i === at ? '▸' : '·', opacity: i > at ? 0.35 : 1, pct: (i < at ? 100 : i === at ? cr.pct * 100 : 0) + '%', detail: i === at ? cr.detail : i < at ? 'done' : '' }));
+        out.rtLines = cr.agent && cr.stage === 'redteam' ? cr.agent.redteam.tests.slice(0, cr.rtShown).map(t => ({ tagText: t.passed ? 'PASS' : 'FAIL', tag: this.tagStyle(t.passed ? 'PASS' : 'FAIL'), name: t.name, detail: t.detail })) : [];
+      } else { out.stages = []; out.rtLines = []; }
+      out.exampleChips = ['Buy companies whose earnings beat what the market had priced in, and hold while the surprise decays.', 'Buy cheap quality megacaps when their fair-value gap starts closing fast. Skip anything illiquid.', 'Go to cash when funding stress spikes; otherwise hold long-duration large caps.'].map(label => ({ label, go: () => this.send(label) }));
+      out.input = s.input; out.onInput = e => this.setState({ input: e.target.value });
+      out.onInputKey = e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); this.send(); } };
+      out.onSend = () => this.send(); out.chatRef = this.chatRef;
+      if (a) {
+        const top = D.holdingsAt(a, a.last)[0];
+        out.suggestions = ['How are you doing?', 'What happened in 2022?', top ? `Why do you hold ${top.ticker}?` : 'What do you hold?', 'What did the Red Team find?', 'Why did the Mastermind move your capital?'].map(label => ({ label, go: () => this.send(label) }));
+        const sh = s.shares[a.id] ?? a.capital_share ?? 0;
+        out.ah = { glyph: this.g(a, 22), name: a.name, strategy: a.strategy, badge: creating && cr.stage !== 'redteam' ? this.badge('pending') : creating ? this.badge('pending') : this.badge(a.verdict), verdict: creating ? (cr.stage === 'redteam' ? 'TESTING…' : 'PENDING') : a.verdict.toUpperCase(), status: creating ? 'In training' : this.statusText(a.status), dot: this.dot(creating ? 'sitting_out' : a.status), today: done && a.status === 'trading' ? `TODAY ${D.pct(s.today[a.id] || 0, 2)}` : '' };
+        const tabsDef = [['performance', 'PERFORMANCE'], ['holdings', 'HOLDINGS'], ['log', 'TRADE LOG'], ['redteam', 'RED TEAM']];
+        out.aTabs = tabsDef.map(([k, label]) => { const on = s.agentTab === k, dis = creating && k !== 'performance'; return { label, on: String(on), disabled: dis, fg: dis ? 'var(--faint)' : on ? 'var(--ink)' : 'var(--muted)', bar: on ? 'inset 0 -2px 0 var(--accent)' : 'none', go: () => this.setState({ agentTab: k }) }; });
+        out.at = { [creating ? 'performance' : s.agentTab]: true };
+        const kp = upto >= 12 ? D.kpis(a.curve, upto) : null, kk = done ? a.kpis : kp;
+        const dash = '—';
+        out.akpis = [
+          ['TOTAL RETURN', kk ? D.pct(kk.total_return) : dash, `SPX ${D.pct(D.spx[upto] - 1)}`],
+          ['ANN. RETURN', kk ? D.pct(kk.ann_return) : dash, ''],
+          ['ANN. VOL', kk ? (kk.ann_vol * 100).toFixed(1) + '%' : dash, ''],
+          ['SHARPE', kk ? D.num(kk.sharpe) : dash, done ? `12M ${D.num(a.trailing)}` : ''],
+          ['MAX DRAWDOWN', kk ? D.pct(kk.max_drawdown) : dash, kk ? D.ml(kk.max_drawdown_month).toUpperCase() : ''],
+          ['CAPITAL SHARE', done ? (sh * 100).toFixed(1) + '%' : dash, done ? (a.capital_trend === 'up' ? '▲ rising' : a.capital_trend === 'down' ? '▼ falling' : '— flat') : ''],
+          ['TURNOVER', done ? (a.kpis.turnover * 100).toFixed(0) + '%/mo' : dash, ''],
+        ].map(([label, value, sub]) => ({ label, value, sub }));
+        const ac = this.chartModel(a.curve, D.spx, { upto, hoverKey: 'aHover', selKey: done ? 'sel' : null });
+        ac.color = a.color; ac.title = creating ? `BACKTESTING · ${D.ml(D.M[upto]).toUpperCase()}` : 'EQUITY VS S&P 500 · CLICK A MONTH';
+        if (!creating) ac.tip = { on: false };
+        out.ac = ac;
+        const mIdx = s.sel ?? a.last;
+        out.monthLabel = D.ml(D.M[mIdx]).toUpperCase();
+        const hold = done ? D.holdingsAt(a, mIdx) : [], mw = hold.length ? hold[0].weight : 1;
+        out.aHold = hold.map(h => ({ ticker: h.ticker, weight: (h.weight * 100).toFixed(1) + '%', bar: (h.weight / mw * 100) + '%', reason: h.reason, color: a.color }));
+        out.aHoldTop = out.aHold.slice(0, 5); out.aHoldEmpty = done && !hold.length;
+        out.aHoldEmptyText = a.stopIdx != null && mIdx > a.stopIdx ? `No positions. Book liquidated ${D.ml(D.M[a.stopIdx])}.` : 'No positions this month.';
+        let logs = [];
+        if (done) { if (s.sel != null) logs = D.logFor(a, s.sel); else for (let i = a.last; i > a.last - 12 && i >= 0; i--) logs.push(...D.logFor(a, i)); }
+        out.logScope = s.sel != null ? D.ml(D.M[s.sel]).toUpperCase() : `LAST 12 MONTHS TO ${D.ml(D.M[a.last]).toUpperCase()}`;
+        const fl = logs.filter(l => s.logTypes[l.type]);
+        const mapLog = l => { const tg = this.typeTag(l.type, l.text); return { ts: l.ts, tag: this.tagStyle(tg), tagText: tg, text: l.text }; };
+        out.aLog = fl.slice(0, 60).map(mapLog); out.aLogTop = logs.slice(0, 5).map(mapLog); out.aLogEmpty = done && !fl.length;
+        out.logChips = [['trade', 'TRADE'], ['risk', 'RISK'], ['mastermind', 'MASTERMIND'], ['redteam', 'RED TEAM']].map(([k, label]) => { const on = s.logTypes[k]; return { label, on: String(on), bg: on ? 'var(--ink)' : 'transparent', fg: on ? 'var(--bg)' : 'var(--muted)', border: on ? 'var(--ink)' : 'var(--line-strong)', toggle: () => this.setState({ logTypes: { ...s.logTypes, [k]: !on } }) }; });
+        const what = { 'Lookahead test': 'Lags every signal by a month. A big Sharpe drop means the recipe peeked at the future.', 'Shuffle test': 'Shuffles feature-to-return labels 500 times. Real signal should beat noise.', '2020 replay': 'Replays the Covid crash. Must draw down no worse than SPX.', '2022 replay': 'Replays the 2022 bear market. Must draw down no worse than SPX.' };
+        out.rtCards = a.redteam.tests.map(t => ({ name: t.name, tagText: t.passed ? 'PASS' : 'FAIL', tag: this.tagStyle(t.passed ? 'PASS' : 'FAIL'), detail: t.detail, what: what[t.name] }));
+        const nf = a.redteam.tests.filter(t => !t.passed).length;
+        out.rtSummary = nf === 0 ? 'All four attacks failed to break this agent.' : `${nf} of 4 attacks landed. ${a.verdict === 'probation' ? 'Capital is capped while on probation.' : 'No capital allocated.'}`;
+        out.goRedTeam = () => !creating && this.setState({ agentTab: 'redteam', mTab: 'perf' });
+        out.goHoldTab = () => this.setState({ agentTab: 'holdings' }); out.goLogTab = () => this.setState({ agentTab: 'log' });
+        out.prevMonth = () => this.setState({ sel: Math.max(0, (s.sel ?? a.last) - 1) }); out.nextMonth = () => this.setState({ sel: Math.min(a.last, (s.sel ?? a.last) + 1) }); out.resetMonth = () => this.setState({ sel: null });
+      } else { out.at = {}; out.suggestions = []; }
+    }
+    return out;
+  }
+}
+</script>
+
+
+</body></html>
