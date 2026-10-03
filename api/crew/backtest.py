@@ -158,20 +158,38 @@ def _reason(row: dict, recipe: Recipe) -> str:
     return ", ".join(parts) or "ranked on recipe"
 
 
+def rank_month(m: Market, recipe: Recipe, i: int, lag_months: int = 0) -> pl.DataFrame | None:
+    """Every eligible name at decision `i`, best first, or None when nothing is eligible.
+
+    Eligible: a clean vector row visible on the decision date, a price at the entry close,
+    and every recipe filter passed."""
+    d, entry = m.decisions[i], m.entry[i]
+    source = m.decisions[i - lag_months] if i >= lag_months else None
+    rows = m.vectors.get(source) if source is not None else None
+    if rows is None:
+        return None
+    rows = clean_rows(visible_rows(rows, d))
+    priced = np.isfinite(m.prices[entry])
+    rows = rows.filter(
+        pl.col("ticker").is_in([t for t, ok in zip(m.tickers, priced, strict=True) if ok])
+    )
+    for f in recipe.parsed_filters():
+        rows = rows.filter(_passes(rows, f))
+    if not rows.height:
+        return None
+    return score(rows, recipe).sort(["_score", "ticker"], descending=[True, False])
+
+
 def run_recipe(
     recipe: Recipe,
     panel: Panel,
     *,
     costs: bool = True,
     lag_months: int = 0,
-    shuffle_seed: int | None = None,
 ) -> Run:
     """Walk the recipe forward over the cached panel. `lag_months` scores each month on an
-    older vector (the red team's lookahead test); `shuffle_seed` scrambles the scores within
-    each date (its shuffle test)."""
+    older vector (the red team's lookahead test)."""
     m = market_for(panel)
-    rng = np.random.default_rng(shuffle_seed) if shuffle_seed is not None else None
-    filters = recipe.parsed_filters()
     floor = recipe.sit_out_if_trailing_sharpe_below
 
     curve = np.full(len(m.dates), np.nan)
@@ -187,28 +205,8 @@ def run_recipe(
         entry, exit_ = m.entry[i], m.exit[i]
         month = m.dates[entry].strftime("%Y-%m")
         ts = f"{m.dates[entry]} {CLOSE}"
-        source = m.decisions[i - lag_months] if i >= lag_months else None
-        rows = m.vectors.get(source) if source is not None else None
-
-        picks: list[str] = []
-        ranked = None
-        if rows is not None:
-            rows = clean_rows(visible_rows(rows, d))
-            # Only names with a price at the entry close can be bought.
-            priced = np.isfinite(m.prices[entry])
-            rows = rows.filter(
-                pl.col("ticker").is_in([t for t, ok in zip(m.tickers, priced, strict=True) if ok])
-            )
-            for f in filters:
-                rows = rows.filter(_passes(rows, f))
-            if rows.height:
-                ranked = score(rows, recipe)
-                if rng is not None:
-                    ranked = ranked.with_columns(
-                        pl.Series("_score", rng.permutation(ranked["_score"].to_numpy()))
-                    )
-                ranked = ranked.sort(["_score", "ticker"], descending=[True, False])
-                picks = ranked["ticker"].head(recipe.top_n).to_list()
+        ranked = rank_month(m, recipe, i, lag_months)
+        picks = ranked["ticker"].head(recipe.top_n).to_list() if ranked is not None else []
 
         settled = [r for x, r in paper if m.dates[x] <= d][-recipe.lookback_months :]
         trailing = None
