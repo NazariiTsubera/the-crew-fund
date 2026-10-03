@@ -18,3 +18,8 @@ class BacktestRequest(BaseModel):
 
 class CreateAgentRequest(BaseModel):
     prompt: str = Field(min_length=1, max_length=2000)
+
+
+class ChatRequest(BaseModel):
+    # Omitted: the agent introduces itself (the creation flow's first message).
+    message: str | None = Field(default=None, min_length=1, max_length=1000)

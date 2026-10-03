@@ -7,10 +7,10 @@ import json
 from collections.abc import Callable, Iterator
 from typing import Annotated
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import StreamingResponse
 
-from app.models import CreateAgentRequest
+from app.models import ChatRequest, CreateAgentRequest
 from app.services import agents
 from crew.gemini import LLM, default_llm
 
@@ -35,3 +35,22 @@ def create_agent(req: CreateAgentRequest, llm: Annotated[Callable[[], LLM], Depe
         media_type="text/event-stream",
         headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
     )
+
+
+@router.post("/agents/{agent_id}/chat")
+def chat(
+    agent_id: str, req: ChatRequest, llm: Annotated[Callable[[], LLM], Depends(get_llm)]
+) -> dict:
+    """{text, evidence, source, ts}: the agent's answer and the stored facts it cites."""
+    try:
+        return agents.chat(agent_id, req.message, llm)
+    except agents.AgentNotFound as e:
+        raise HTTPException(404, f"no agent {e}") from e
+
+
+@router.get("/agents/{agent_id}/chat")
+def chat_history(agent_id: str) -> list[dict]:
+    try:
+        return agents.chat_history(agent_id)
+    except agents.AgentNotFound as e:
+        raise HTTPException(404, f"no agent {e}") from e

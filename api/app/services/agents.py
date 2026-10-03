@@ -11,6 +11,7 @@ import threading
 from collections.abc import Callable, Iterator
 
 from app import crew_repository
+from crew import chat as crew_chat
 from crew.compiler import CompileError, compile_strategy
 from crew.gemini import LLM, LLMError
 from crew.pipeline import evaluate, publish, rebalance
@@ -71,3 +72,26 @@ def create(prompt: str, llm_factory: Callable[[], LLM]) -> Iterator[tuple[str, d
         rebalance(store, panel)
         agent = store.get_agent(agent["id"])
     yield "done", {"agent": agent}
+
+
+class AgentNotFound(LookupError):
+    pass
+
+
+def chat(agent_id: str, message: str | None, llm_factory: Callable[[], LLM]) -> dict:
+    store = crew_repository.store()
+    agent = store.get_agent(agent_id)
+    if agent is None:
+        raise AgentNotFound(agent_id)
+    try:
+        llm = llm_factory()
+    except LLMError:
+        llm = None  # no key: the agent still answers, from its facts alone
+    return crew_chat.answer(store, agent, message, llm)
+
+
+def chat_history(agent_id: str) -> list[dict]:
+    store = crew_repository.store()
+    if store.get_agent(agent_id) is None:
+        raise AgentNotFound(agent_id)
+    return store.chats(agent_id)
