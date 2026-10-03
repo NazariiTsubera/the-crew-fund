@@ -27,7 +27,9 @@ log = logging.getLogger(__name__)
 
 SETTLED_AFTER = timedelta(days=3)
 RECENT_TTL_SECONDS = 6 * 3600
-WORKERS = 16
+# Their server drops connections under heavy parallel load; 8 at a time with retries holds up.
+WORKERS = 8
+RETRY_DELAYS = (1.0, 2.0, 4.0)
 _DAY = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 
 
@@ -46,14 +48,32 @@ def _fresh(path: Path, rel: str) -> bool:
     return _is_settled(rel) or time.time() - path.stat().st_mtime < RECENT_TTL_SECONDS
 
 
-def _download(ds, rel: str, path: Path) -> None:
+def _fetch(ds, rel: str) -> bytes:
     headers = {"Authorization": f"Bearer {ds.token}"} if ds.token else {}
     request = urllib.request.Request(ds._url(rel), headers=headers)
+    with urllib.request.urlopen(request, timeout=60) as r:
+        return r.read()
+
+
+def _download(ds, rel: str, path: Path) -> bool:
+    """Fetch one file into the mirror, retrying dropped connections; False if it never came."""
+    for attempt, delay in enumerate((0.0, *RETRY_DELAYS)):
+        time.sleep(delay)
+        try:
+            _write(path, _fetch(ds, rel))
+            return True
+        except Exception as e:
+            if attempt == len(RETRY_DELAYS):
+                log.warning("could not mirror %s (%s); reading it remotely", rel, e)
+    return False
+
+
+def _write(path: Path, data: bytes) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     fd, tmp = tempfile.mkstemp(dir=path.parent, suffix=".part")
     try:
-        with os.fdopen(fd, "wb") as out, urllib.request.urlopen(request, timeout=60) as r:
-            out.write(r.read())
+        with os.fdopen(fd, "wb") as out:
+            out.write(data)
         # mkstemp makes the file private to its writer; the seed runs as root and the API as
         # another user, and both must read the mirror.
         os.chmod(tmp, 0o644)
@@ -77,14 +97,17 @@ def mirrored_scan(ds, name: str, start: str | None, end: str | None, mirror: Pat
         ]
         local = {rel: Path(mirror) / rel for rel in files}
         missing = [rel for rel, path in local.items() if not _fresh(path, rel)]
+        failed: set[str] = set()
         if missing:
             with ThreadPoolExecutor(WORKERS) as pool:
-                list(pool.map(lambda rel: _download(ds, rel, local[rel]), missing))
+                ok = pool.map(lambda rel: _download(ds, rel, local[rel]), missing)
+                failed = {rel for rel, done in zip(missing, ok, strict=True) if not done}
         if not local:
             return ds._scan(name, start, end)
         scans = []
-        for path in local.values():
-            lf = pl.scan_parquet(path)
+        for rel, path in local.items():
+            # A file that would not download is read remotely; the rest stay local.
+            lf = pl.scan_parquet(ds._url(rel) if rel in failed else path)
             if lf.collect_schema().get("volume") not in (None, pl.Float64):
                 lf = lf.with_columns(pl.col("volume").cast(pl.Float64))
             scans.append(lf)

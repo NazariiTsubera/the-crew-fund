@@ -83,16 +83,17 @@ def test_a_local_dataset_is_scanned_directly(tmp_path):
     assert calls == [("stocks_daily", "2020-01-02", "2020-01-06")]
 
 
-def test_an_unwritable_mirror_falls_back_to_the_remote_scan(tmp_path):
+def test_an_unwritable_mirror_reads_every_file_remotely(tmp_path, monkeypatch):
+    import app.mirror as mirror_mod
+
+    monkeypatch.setattr(mirror_mod, "RETRY_DELAYS", (0.0, 0.0, 0.0))
     ds, _ = remote(tmp_path, OLD)
-    calls = []
-    ds._scan = lambda *a, **k: calls.append(a) or pl.LazyFrame()
     blocked = tmp_path / "blocked"
     blocked.write_text("a file where the mirror directory should be")
 
-    mirrored_scan(ds, "stocks_daily", "2020-01-02", "2020-01-06", blocked)
+    frame = mirrored_scan(ds, "stocks_daily", "2020-01-02", "2020-01-06", blocked).collect()
 
-    assert calls == [("stocks_daily", "2020-01-02", "2020-01-06")]
+    assert frame.height == 3
 
 
 def test_mirrored_files_are_readable_by_other_users(tmp_path):
@@ -101,3 +102,44 @@ def test_mirrored_files_are_readable_by_other_users(tmp_path):
 
     modes = {p.stat().st_mode & 0o777 for p in (tmp_path / "m" / "stocks_daily").iterdir()}
     assert modes == {0o644}
+
+
+def test_a_dropped_connection_is_retried(tmp_path, monkeypatch):
+    import app.mirror as mirror_mod
+
+    ds, _ = remote(tmp_path, OLD)
+    real, calls = mirror_mod._fetch, []
+
+    def flaky(ds_, rel):
+        calls.append(rel)
+        if calls.count(rel) < 3:
+            raise OSError("UNEXPECTED_EOF_WHILE_READING")
+        return real(ds_, rel)
+
+    monkeypatch.setattr(mirror_mod, "_fetch", flaky)
+    monkeypatch.setattr(mirror_mod, "RETRY_DELAYS", (0.0, 0.0, 0.0))
+
+    frame = mirrored_scan(ds, "stocks_daily", "2020-01-02", "2020-01-06", tmp_path / "m").collect()
+
+    assert frame.height == 3
+    assert len(list((tmp_path / "m" / "stocks_daily").iterdir())) == 3
+
+
+def test_a_file_that_never_downloads_is_read_remotely_alone(tmp_path, monkeypatch):
+    import app.mirror as mirror_mod
+
+    ds, _ = remote(tmp_path, OLD)
+    real = mirror_mod._fetch
+
+    def broken_for_one(ds_, rel):
+        if rel.endswith("2020-01-03.parquet"):
+            raise OSError("UNEXPECTED_EOF_WHILE_READING")
+        return real(ds_, rel)
+
+    monkeypatch.setattr(mirror_mod, "_fetch", broken_for_one)
+    monkeypatch.setattr(mirror_mod, "RETRY_DELAYS", (0.0, 0.0, 0.0))
+
+    frame = mirrored_scan(ds, "stocks_daily", "2020-01-02", "2020-01-06", tmp_path / "m").collect()
+
+    assert frame.height == 3  # all three days, one of them read remotely
+    assert len(list((tmp_path / "m" / "stocks_daily").iterdir())) == 2
