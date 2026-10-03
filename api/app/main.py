@@ -8,13 +8,24 @@ Layers, top to bottom (docs/decisions/0001-layered-api.md):
 """
 
 import os
+import threading
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app import repository
 from app.routes import crew, judged
 
-app = FastAPI(title="THE CREW", version="0.1.0")
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    # Fill the day-file mirror in the background; requests never wait on it.
+    threading.Thread(target=repository.warm_mirror, daemon=True).start()
+    yield
+
+
+app = FastAPI(title="THE CREW", version="0.1.0", lifespan=lifespan)
 # The War Room is served from its own origin; the judged checker sends no Origin header.
 app.add_middleware(
     CORSMiddleware,

@@ -14,6 +14,9 @@ import pandas as pd
 import polars as pl
 from statevector import Dataset
 
+from app.mirror import mirrored_scan
+from crew.panel import cache_dir
+
 # Planted in the price panel to catch anyone who trades outside the universe.
 PLANTED_TICKER = "ORKD"
 
@@ -28,6 +31,20 @@ def dataset() -> Dataset:
     return Dataset()
 
 
+def stocks_daily(start: str | None, end: str | None = None) -> pl.LazyFrame:
+    """stocks_daily between two dates, through the local day-file mirror when remote."""
+    return mirrored_scan(dataset(), "stocks_daily", start, end, cache_dir() / "mirror")
+
+
+def warm_mirror() -> None:
+    """Fetch the day-files the scorer's public checks read, so its first request is fast."""
+    try:
+        stocks_daily("2020-01-01", "2020-12-31").select("date").head(1).collect()
+        stocks_daily(str(date.today() - timedelta(days=45))).select("date").head(1).collect()
+    except Exception:  # warming is best effort; the queries still work without it
+        pass
+
+
 @lru_cache(maxsize=1)
 def universe() -> frozenset[str]:
     return frozenset(dataset().universe()) - {PLANTED_TICKER}
@@ -37,11 +54,7 @@ def recent_universe_trades(days: int = 45) -> pl.LazyFrame:
     """Universe stock prints over the trailing `days` (ticker, date, close, volume)."""
     # A bounded window keeps the remote client to ~30 day-files.
     cutoff = str(date.today() - timedelta(days=days))
-    return (
-        dataset()
-        ._scan("stocks_daily", start=cutoff)
-        .filter(pl.col("ticker").is_in(list(universe())))
-    )
+    return stocks_daily(cutoff).filter(pl.col("ticker").is_in(list(universe())))
 
 
 def closes(tickers: list[str], start: date, end: date) -> pl.DataFrame:
@@ -52,11 +65,7 @@ def closes(tickers: list[str], start: date, end: date) -> pl.DataFrame:
     stocks = [t for t in tickers if not is_option(t)]
     scans = []
     if stocks:
-        scans.append(
-            ds._scan("stocks_daily", start=str(start), end=str(end)).filter(
-                pl.col("ticker").is_in(stocks)
-            )
-        )
+        scans.append(stocks_daily(str(start), str(end)).filter(pl.col("ticker").is_in(stocks)))
     if opts:
         scans.append(
             ds._scan("options_daily", start=str(start), end=str(end)).filter(

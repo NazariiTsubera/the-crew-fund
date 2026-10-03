@@ -78,8 +78,9 @@ jobs:
         run: |
           # The job token can pull our private images only while this job runs; log out after.
           printf '%s' "$GHCR_TOKEN" | ssh "$TARGET" "docker login ghcr.io -u ${{ github.actor }} --password-stdin"
-          # Caddy reads its Caddyfile only at start, and the file is bind-mounted, so restart it.
-          ssh "$TARGET" "cd /opt/crew && export API_TAG=$SHA WEB_TAG=$SHA && docker compose pull && docker compose up -d --remove-orphans && docker compose restart caddy; status=\$?; docker logout ghcr.io; docker image prune -f >/dev/null; exit \$status"
+          # The cache directory (panel, store file, day-file mirror) must belong to the app user,
+          # and Caddy reads its bind-mounted Caddyfile only at start: fix both, then restart.
+          ssh "$TARGET" "cd /opt/crew && export API_TAG=$SHA WEB_TAG=$SHA && docker compose pull && mkdir -p cache && docker compose up -d --remove-orphans && docker compose exec -T --user root api chown -R 10001:10001 /app/cache && docker compose restart api caddy; status=\$?; docker logout ghcr.io; docker image prune -f >/dev/null; exit \$status"
 
       - name: Health check
         run: |
