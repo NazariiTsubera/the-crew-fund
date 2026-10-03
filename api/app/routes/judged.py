@@ -26,7 +26,7 @@ def health() -> dict:
 
 @router.get("/portfolio/holdings")
 def holdings(n: int = Query(10, ge=1, le=100)) -> dict:
-    return market.top_liquidity_holdings(n)
+    return market.holdings(n)
 
 
 @router.post("/backtest")

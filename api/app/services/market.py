@@ -8,7 +8,7 @@ from datetime import date
 
 import polars as pl
 
-from app import repository
+from app import crew_repository, repository
 
 
 def _adv20() -> pl.LazyFrame:
@@ -21,9 +21,46 @@ def _adv20() -> pl.LazyFrame:
     )
 
 
+def holdings(n: int) -> dict:
+    """The Mastermind's latest fund book; the template method while the store has none."""
+    return mastermind_holdings() or top_liquidity_holdings(n)
+
+
+def mastermind_holdings() -> dict | None:
+    """The fund's book at its last decision (always before the holdout cutoff). A month the
+    whole crew spent in cash has no book, so the last book the fund actually held is served,
+    dated by its own month."""
+    store = crew_repository.store()
+    fund = store.latest_run("fund")
+    if not fund:
+        return None
+    universe = repository.universe()
+    by_month: dict[str, list[dict]] = {}
+    for h in store.holdings("fund"):
+        if h["month"] <= fund["as_of"] and h["ticker"] in universe:
+            by_month.setdefault(h["month"], []).append(h)
+    if not by_month:
+        return None
+    month = max(by_month)
+    rows = by_month[month]
+    total = sum(h["weight"] for h in rows)
+    return {
+        "as_of": month,
+        "method": "mastermind",
+        "holdings": [
+            {
+                "ticker": h["ticker"],
+                "weight": h["weight"] / total,
+                "agent_id": h.get("agent_id"),
+                "reason": h.get("reason"),
+            }
+            for h in sorted(rows, key=lambda h: -h["weight"])
+        ],
+    }
+
+
 def top_liquidity_holdings(n: int) -> dict:
-    """Template fallback until the Mastermind allocates (CREW-14): equal weight over the
-    top-N universe names by ADV20."""
+    """The template's method: equal weight over the top-N universe names by ADV20."""
     top = _adv20().sort("adv20", descending=True).limit(n).collect()
     w = round(1.0 / len(top), 8) if len(top) else 0.0
     return {

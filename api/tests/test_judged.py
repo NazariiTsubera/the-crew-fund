@@ -166,6 +166,25 @@ def _free_port() -> int:
 
 
 def test_organizers_checker_scores_full_marks(sv_root):
+    _assert_full_marks(sv_root)
+
+
+def test_organizers_checker_scores_full_marks_on_the_mastermind_book(sv_root):
+    from app.crew_repository import store
+
+    store().put_holdings(
+        "fund",
+        [
+            {"month": "2026-08", "ticker": t, "weight": w, "agent_id": "accountant", "reason": "r"}
+            for t, w in [("NVDA", 0.4), ("MSFT", 0.35), ("AAPL", 0.25)]
+        ],
+    )
+    store().put_run("fund", {"as_of": "2026-08", "holdout_cutoff": "2026-09-01"})
+
+    _assert_full_marks(sv_root)
+
+
+def _assert_full_marks(sv_root):
     env = dict(os.environ, SV_DATA_ROOT=str(sv_root))
     base = f"http://127.0.0.1:{_free_port()}"
     server = subprocess.Popen(
