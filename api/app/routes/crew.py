@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import json
 from collections.abc import Callable, Iterator
+from typing import Annotated
 
 from fastapi import APIRouter, Depends
 from fastapi.responses import StreamingResponse
@@ -27,7 +28,7 @@ def _sse(events: Iterator[tuple[str, dict]]) -> Iterator[str]:
 
 
 @router.post("/agents")
-def create_agent(req: CreateAgentRequest, llm: Callable[[], LLM] = Depends(get_llm)):
+def create_agent(req: CreateAgentRequest, llm: Annotated[Callable[[], LLM], Depends(get_llm)]):
     """Server-sent events: compiling, backtesting, redteam, then done {agent} or error."""
     return StreamingResponse(
         _sse(agents.create(req.prompt, llm)),
