@@ -28,7 +28,6 @@ function Notice({ kicker, title, children }: { kicker: string; title: string; ch
 /** /agents/[id]: chat on the left, performance on the right; tabs when there is no room for both. */
 export function AgentFile({ id }: { id: string }) {
   const [state, setState] = useState<State>({ status: "loading" });
-  const [tab, setTab] = useState<Tab>("chat");
 
   useEffect(() => {
     const controller = new AbortController();
@@ -70,6 +69,28 @@ export function AgentFile({ id }: { id: string }) {
   }
 
   const { agent } = state;
+  return (
+    <FileLayout
+      chat={(className) => <ChatColumn agent={agent} className={className} />}
+      perf={(className) => <PerformanceColumn agent={agent} className={className} />}
+    />
+  );
+}
+
+/**
+ * Chat on the left, performance on the right; tabs when there is no room for both. Shared by
+ * the agent file and the recruit screen, which fills the same two columns before the agent exists.
+ */
+export function FileLayout({
+  chat,
+  perf,
+  label = "Agent file",
+}: {
+  chat: (className: string) => ReactNode;
+  perf: (className: string) => ReactNode;
+  label?: string;
+}) {
+  const [tab, setTab] = useState<Tab>("chat");
   const tabs: [Tab, string][] = [
     ["chat", "CHAT"],
     ["perf", "PERFORMANCE"],
@@ -77,8 +98,8 @@ export function AgentFile({ id }: { id: string }) {
 
   return (
     <div className="flex min-w-0 flex-col min-[1100px]:h-screen">
-      <div role="tablist" aria-label="Agent file" className="flex border-b border-line min-[1100px]:hidden">
-        {tabs.map(([key, label]) => (
+      <div role="tablist" aria-label={label} className="flex border-b border-line min-[1100px]:hidden">
+        {tabs.map(([key, text]) => (
           <button
             key={key}
             type="button"
@@ -87,19 +108,15 @@ export function AgentFile({ id }: { id: string }) {
             onClick={() => setTab(key)}
             className={`h-[42px] flex-1 cursor-pointer border-0 bg-transparent font-mono text-xs leading-none font-medium tracking-[0.1em] ${tab === key ? "text-ink shadow-[inset_0_-2px_0_var(--accent)]" : "text-muted"}`}
           >
-            {label}
+            {text}
           </button>
         ))}
       </div>
       <div className="grid min-h-0 min-w-0 flex-1 grid-cols-[minmax(0,1fr)] min-[1100px]:grid-cols-[minmax(340px,4fr)_minmax(0,6fr)]">
-        <ChatColumn
-          agent={agent}
-          className={`${tab === "chat" ? "flex" : "hidden"} h-[calc(100dvh-140px)] wide:h-[calc(100dvh-43px)] min-[1100px]:flex min-[1100px]:h-full min-[1100px]:border-r min-[1100px]:border-line`}
-        />
-        <PerformanceColumn
-          agent={agent}
-          className={`${tab === "perf" ? "flex" : "hidden"} min-[1100px]:flex min-[1100px]:h-full min-[1100px]:overflow-y-auto`}
-        />
+        {chat(
+          `${tab === "chat" ? "flex" : "hidden"} h-[calc(100dvh-140px)] wide:h-[calc(100dvh-43px)] min-[1100px]:flex min-[1100px]:h-full min-[1100px]:border-r min-[1100px]:border-line`,
+        )}
+        {perf(`${tab === "perf" ? "flex" : "hidden"} min-[1100px]:flex min-[1100px]:h-full min-[1100px]:overflow-y-auto`)}
       </div>
     </div>
   );

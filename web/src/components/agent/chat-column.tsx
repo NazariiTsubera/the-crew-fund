@@ -6,13 +6,13 @@ import { RecipeCard } from "@/components/agent/recipe-card";
 import { Glyph, agentColorVar } from "@/components/glyph";
 import { api, type Agent, type ChatMessage } from "@/lib/api";
 
-type Line = ChatMessage | { role: "system"; ts: string; text: string };
+export type ChatLine = ChatMessage | { role: "system"; ts: string; text: string };
 
 function errorText(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
 
-function localStamp(): string {
+export function localStamp(): string {
   const d = new Date();
   const pad = (n: number) => String(n).padStart(2, "0");
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
@@ -29,7 +29,7 @@ function suggestionsFor(agent: Agent): string[] {
   ];
 }
 
-function SystemLine({ text }: { text: string }) {
+export function SystemLine({ text }: { text: string }) {
   return (
     <div role="status" className="flex items-center gap-2.5 font-mono text-[10px] leading-snug font-medium tracking-[0.08em] text-dim">
       <span className="flex-1 border-t border-line" />
@@ -39,7 +39,15 @@ function SystemLine({ text }: { text: string }) {
   );
 }
 
-function AgentLine({ agent, message, dim }: { agent: Agent; message: ChatMessage; dim: boolean }) {
+export function AgentLine({
+  agent,
+  message,
+  dim,
+}: {
+  agent: Pick<Agent, "name" | "shape" | "color">;
+  message: ChatMessage;
+  dim: boolean;
+}) {
   const evidence = message.evidence ?? [];
   return (
     <div className="flex max-w-[94%] gap-3">
@@ -67,7 +75,7 @@ function AgentLine({ agent, message, dim }: { agent: Agent; message: ChatMessage
   );
 }
 
-function UserLine({ message }: { message: ChatMessage }) {
+export function UserLine({ message }: { message: ChatMessage }) {
   return (
     <div className="flex max-w-[86%] flex-col items-end gap-[5px] self-end">
       <span className="font-mono text-[10px] leading-none text-faint">YOU · {message.ts}</span>
@@ -79,15 +87,26 @@ function UserLine({ message }: { message: ChatMessage }) {
 }
 
 /** The agent answers from its own file; every reply lists the stored facts it cited. */
-export function ChatColumn({ agent, className = "" }: { agent: Agent; className?: string }) {
-  const [lines, setLines] = useState<Line[]>([]);
-  const [loading, setLoading] = useState(true);
+export function ChatColumn({
+  agent,
+  className = "",
+  initialLines,
+}: {
+  agent: Agent;
+  className?: string;
+  /** A transcript the caller already holds (the recruit flow's); skips reading the history. */
+  initialLines?: ChatLine[];
+}) {
+  const [lines, setLines] = useState<ChatLine[]>(initialLines ?? []);
+  const [loading, setLoading] = useState(!initialLines);
+  const preloaded = initialLines !== undefined;
   const [busy, setBusy] = useState(false);
   const [input, setInput] = useState("");
   const scroller = useRef<HTMLDivElement>(null);
   const dim = agent.status === "killed";
 
   useEffect(() => {
+    if (preloaded) return;
     const controller = new AbortController();
     const { signal } = controller;
     (async () => {
@@ -108,7 +127,7 @@ export function ChatColumn({ agent, className = "" }: { agent: Agent; className?
       }
     })();
     return () => controller.abort();
-  }, [agent.id]);
+  }, [agent.id, preloaded]);
 
   useEffect(() => {
     const el = scroller.current;
