@@ -13,6 +13,7 @@ dependencies = [
     # `statevector` on PyPI is an unrelated package.
     "statevector @ git+https://github.com/orkid-labs/utsa-investment-hackathon@3c137e7#subdirectory=sdk",
     "psycopg[binary]>=3.2",
+    "google-genai>=1.0",
 ]
 
 [dependency-groups]
