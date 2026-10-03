@@ -116,6 +116,10 @@ def market_for(panel: Panel) -> Market:
     return hit[1]
 
 
+def known(x) -> bool:
+    return x is not None and not (isinstance(x, float) and np.isnan(x))
+
+
 def fmt(x: float, digits: int = 2) -> str:
     return f"{x:.{digits}f}".replace("-", "−")
 
@@ -154,7 +158,7 @@ def score(rows: pl.DataFrame, recipe: Recipe) -> pl.DataFrame:
 
 def _reason(row: dict, recipe: Recipe) -> str:
     top = sorted(recipe.features, key=lambda f: row[f"_c_{f.name}"], reverse=True)[:2]
-    parts = [f"{f.name} {fmt(row[f.name])}" for f in top if row.get(f.name) is not None]
+    parts = [f"{f.name} {fmt(row[f.name])}" for f in top if known(row.get(f.name))]
     return ", ".join(parts) or "ranked on recipe"
 
 
@@ -169,6 +173,8 @@ def rank_month(m: Market, recipe: Recipe, i: int, lag_months: int = 0) -> pl.Dat
     if rows is None:
         return None
     rows = clean_rows(visible_rows(rows, d))
+    # A NaN reading is a missing one; left as NaN it would rank above every real value.
+    rows = rows.with_columns(pl.col(pl.Float32, pl.Float64).fill_nan(None))
     priced = np.isfinite(m.prices[entry])
     rows = rows.filter(
         pl.col("ticker").is_in([t for t, ok in zip(m.tickers, priced, strict=True) if ok])
@@ -264,7 +270,9 @@ def run_recipe(
         for t in sorted(set(book) - set(new_book)):
             if invested and t in by_ticker:
                 lead = recipe.features[0].name
-                why = f"out of the top {recipe.top_n}; {lead} now {fmt(by_ticker[t][lead])}"
+                reading = by_ticker[t].get(lead)
+                now = fmt(reading) if known(reading) else "not reported"
+                why = f"out of the top {recipe.top_n}; {lead} now {now}"
             elif sitting:
                 why = "sitting out"
             else:

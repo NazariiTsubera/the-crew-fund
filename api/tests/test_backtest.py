@@ -187,3 +187,24 @@ def test_a_full_universe_run_takes_under_10_seconds():
     run_recipe(recipe(top_n=12), big)
 
     assert time.monotonic() - t0 < 10
+
+
+def test_missing_feature_values_never_break_a_run(panel):
+    # Real vectors have gaps: null and NaN readings in the very features a recipe ranks on.
+    holes = (
+        panel.vectors.with_row_index()
+        .with_columns(
+            pl.when(pl.col("index") % 3 == 0)
+            .then(None)
+            .when(pl.col("index") % 3 == 1)
+            .then(float("nan"))
+            .otherwise(pl.col(SIGNAL))
+            .alias(SIGNAL)
+        )
+        .drop("index")
+    )
+    run = run_recipe(recipe(top_n=8), replace(panel, vectors=holes))
+
+    texts = [e["text"] for e in run.log] + [h["reason"] for h in run.holdings]
+    assert run.monthly
+    assert not any("nan" in t or "None" in t for t in texts)
