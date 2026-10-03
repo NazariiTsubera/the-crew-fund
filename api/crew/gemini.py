@@ -8,7 +8,7 @@ import json
 import os
 from typing import Protocol
 
-DEFAULT_MODEL = "gemini-2.5-flash"
+DEFAULT_MODEL = "gemini-3.8-flash"
 
 
 class LLMError(RuntimeError):
