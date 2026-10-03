@@ -1,0 +1,268 @@
+{
+  "months": [
+    {
+      "month": "2024-09",
+      "shares": {
+        "accountant": 0.26,
+        "fence": 0.26,
+        "insideman": 0.28,
+        "lookout": 0.1,
+        "wheelman": 0.1
+      },
+      "invested": 0.78
+    },
+    {
+      "month": "2024-10",
+      "shares": {
+        "accountant": 0.265,
+        "fence": 0.2625,
+        "insideman": 0.2775,
+        "lookout": 0.105,
+        "wheelman": 0.09
+      },
+      "invested": 0.78
+    },
+    {
+      "month": "2024-11",
+      "shares": {
+        "accountant": 0.27,
+        "fence": 0.265,
+        "insideman": 0.275,
+        "lookout": 0.11,
+        "wheelman": 0.08
+      },
+      "invested": 0.78
+    },
+    {
+      "month": "2024-12",
+      "shares": {
+        "accountant": 0.275,
+        "fence": 0.2675,
+        "insideman": 0.2725,
+        "lookout": 0.115,
+        "wheelman": 0.07
+      },
+      "invested": 0.78
+    },
+    {
+      "month": "2025-01",
+      "shares": {
+        "accountant": 0.28,
+        "fence": 0.27,
+        "insideman": 0.27,
+        "lookout": 0.12,
+        "wheelman": 0.06
+      },
+      "invested": 0.78
+    },
+    {
+      "month": "2025-02",
+      "shares": {
+        "accountant": 0.295,
+        "fence": 0.275,
+        "insideman": 0.27,
+        "lookout": 0.13,
+        "wheelman": 0.03
+      },
+      "invested": 0.78
+    },
+    {
+      "month": "2025-03",
+      "shares": {
+        "accountant": 0.31,
+        "fence": 0.28,
+        "insideman": 0.27,
+        "lookout": 0.14,
+        "wheelman": 0
+      },
+      "invested": 0.78
+    },
+    {
+      "month": "2025-04",
+      "shares": {
+        "accountant": 0.315,
+        "fence": 0.2833,
+        "insideman": 0.2617,
+        "lookout": 0.14,
+        "wheelman": 0
+      },
+      "invested": 0.78
+    },
+    {
+      "month": "2025-05",
+      "shares": {
+        "accountant": 0.32,
+        "fence": 0.2867,
+        "insideman": 0.2533,
+        "lookout": 0.14,
+        "wheelman": 0
+      },
+      "invested": 0.78
+    },
+    {
+      "month": "2025-06",
+      "shares": {
+        "accountant": 0.325,
+        "fence": 0.29,
+        "insideman": 0.245,
+        "lookout": 0.14,
+        "wheelman": 0
+      },
+      "invested": 0.78
+    },
+    {
+      "month": "2025-07",
+      "shares": {
+        "accountant": 0.33,
+        "fence": 0.2933,
+        "insideman": 0.2367,
+        "lookout": 0.14,
+        "wheelman": 0
+      },
+      "invested": 0.78
+    },
+    {
+      "month": "2025-08",
+      "shares": {
+        "accountant": 0.335,
+        "fence": 0.2967,
+        "insideman": 0.2283,
+        "lookout": 0.14,
+        "wheelman": 0
+      },
+      "invested": 0.78
+    },
+    {
+      "month": "2025-09",
+      "shares": {
+        "accountant": 0.34,
+        "fence": 0.3,
+        "insideman": 0.22,
+        "lookout": 0.14,
+        "wheelman": 0
+      },
+      "invested": 0.78
+    },
+    {
+      "month": "2025-10",
+      "shares": {
+        "accountant": 0.3433,
+        "fence": 0.3017,
+        "insideman": 0.2133,
+        "lookout": 0.1417,
+        "wheelman": 0
+      },
+      "invested": 0.78
+    },
+    {
+      "month": "2025-11",
+      "shares": {
+        "accountant": 0.3467,
+        "fence": 0.3033,
+        "insideman": 0.2067,
+        "lookout": 0.1433,
+        "wheelman": 0
+      },
+      "invested": 0.78
+    },
+    {
+      "month": "2025-12",
+      "shares": {
+        "accountant": 0.35,
+        "fence": 0.305,
+        "insideman": 0.2,
+        "lookout": 0.145,
+        "wheelman": 0
+      },
+      "invested": 0.78
+    },
+    {
+      "month": "2026-01",
+      "shares": {
+        "accountant": 0.3533,
+        "fence": 0.3067,
+        "insideman": 0.1933,
+        "lookout": 0.1467,
+        "wheelman": 0
+      },
+      "invested": 0.78
+    },
+    {
+      "month": "2026-02",
+      "shares": {
+        "accountant": 0.3567,
+        "fence": 0.3083,
+        "insideman": 0.1867,
+        "lookout": 0.1483,
+        "wheelman": 0
+      },
+      "invested": 0.78
+    },
+    {
+      "month": "2026-03",
+      "shares": {
+        "accountant": 0.36,
+        "fence": 0.31,
+        "insideman": 0.18,
+        "lookout": 0.15,
+        "wheelman": 0
+      },
+      "invested": 0.78
+    },
+    {
+      "month": "2026-04",
+      "shares": {
+        "accountant": 0.364,
+        "fence": 0.31,
+        "insideman": 0.174,
+        "lookout": 0.152,
+        "wheelman": 0
+      },
+      "invested": 0.78
+    },
+    {
+      "month": "2026-05",
+      "shares": {
+        "accountant": 0.368,
+        "fence": 0.31,
+        "insideman": 0.168,
+        "lookout": 0.154,
+        "wheelman": 0
+      },
+      "invested": 0.78
+    },
+    {
+      "month": "2026-06",
+      "shares": {
+        "accountant": 0.372,
+        "fence": 0.31,
+        "insideman": 0.162,
+        "lookout": 0.156,
+        "wheelman": 0
+      },
+      "invested": 0.78
+    },
+    {
+      "month": "2026-07",
+      "shares": {
+        "accountant": 0.376,
+        "fence": 0.31,
+        "insideman": 0.156,
+        "lookout": 0.158,
+        "wheelman": 0
+      },
+      "invested": 0.78
+    },
+    {
+      "month": "2026-08",
+      "shares": {
+        "accountant": 0.38,
+        "fence": 0.31,
+        "insideman": 0.15,
+        "lookout": 0.16,
+        "wheelman": 0
+      },
+      "invested": 0.78
+    }
+  ]
+}

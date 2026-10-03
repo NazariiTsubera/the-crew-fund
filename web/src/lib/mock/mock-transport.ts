@@ -1,0 +1,192 @@
+// Dev-only stand-in for the API (NEXT_PUBLIC_API_MOCK=1). It serves the JSON fixtures next to
+// this file through the same Transport as real HTTP, so every response still goes through the
+// Zod schemas in api.ts. Numbers here are placeholders; never import this outside mock mode.
+
+import { ApiError, type Agent, type LogEntry, type Transport } from "@/lib/api";
+import type { SseEvent } from "@/lib/sse";
+
+import accountant from "./agents/accountant.json";
+import fence from "./agents/fence.json";
+import insideman from "./agents/insideman.json";
+import lookout from "./agents/lookout.json";
+import wheelman from "./agents/wheelman.json";
+import capital from "./capital.json";
+import logJson from "./log.json";
+import vault from "./vault.json";
+
+type Json = Record<string, unknown>;
+type ChatRow = { ts: string; role: "user" | "agent"; text: string; evidence?: string[]; source?: "fallback" };
+
+// JSON imports type literals loosely (shape: string); the fixtures are checked against the
+// API's models and the Zod schemas, so they can be typed as the contract.
+const SEEDS = [accountant, fence, insideman, lookout, wheelman] as unknown as Agent[];
+const TEMPLATE = fence as unknown as Agent;
+const LOG = logJson as unknown as LogEntry[];
+const SEED_IDS = new Set(SEEDS.map((a) => a.id));
+
+// The API's agents beyond the five seeds take these looks in turn (api/app/services/agents.py).
+const NEW_LOOKS: [Agent["shape"], Agent["color"]][] = [
+  ["box", "sky"],
+  ["half", "orange"],
+  ["plus", "lime"],
+];
+
+const SUMMARY_KEYS = [
+  "id", "name", "persona", "strategy_line", "pitch", "shape", "color", "status", "verdict",
+  "capital_share", "capital_trend", "stop_month", "kpis", "spark",
+] as const;
+
+// What GET /agents/{id} joins in and the stored document (the `done` event's payload) lacks.
+const JOINED = new Set(["spark", "curve", "benchmark", "holdings_month", "holdings"]);
+
+function summary(agent: Agent): Json {
+  return Object.fromEntries(SUMMARY_KEYS.map((k) => [k, agent[k]]));
+}
+
+function stamp(): string {
+  return new Date().toISOString().slice(0, 16).replace("T", " ");
+}
+
+function pct(x: number): string {
+  return `${x < 0 ? "−" : "+"}${Math.abs(x * 100).toFixed(1)}%`;
+}
+
+function sleep(ms: number, signal?: AbortSignal): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if (signal?.aborted) return reject(signal.reason);
+    const timer = setTimeout(resolve, ms);
+    signal?.addEventListener(
+      "abort",
+      () => {
+        clearTimeout(timer);
+        reject(signal.reason);
+      },
+      { once: true },
+    );
+  });
+}
+
+export type MockOptions = {
+  /** Milliseconds to wait before each creation stage; the design paces them 1–2 s apart. */
+  stageDelay?: () => number;
+};
+
+export function mockTransport({ stageDelay = () => 1000 + Math.random() * 1000 }: MockOptions = {}): Transport {
+  const agents = new Map<string, Agent>(SEEDS.map((a) => [a.id, structuredClone(a)]));
+  const chats = new Map<string, ChatRow[]>();
+
+  function findAgent(id: string): Agent {
+    const agent = agents.get(id);
+    if (!agent) throw new ApiError(404, `404 no agent ${id}`);
+    return agent;
+  }
+
+  function reply(agent: Agent, message: string | undefined): ChatRow {
+    const k = agent.kpis;
+    const evidence = [
+      `Sharpe ${k.sharpe.toFixed(2)} since ${agent.curve[0]?.date.slice(0, 7)}`,
+      `Max drawdown ${pct(k.max_drawdown)} in ${k.max_drawdown_month}`,
+      `Red Team verdict ${agent.redteam.verdict.toUpperCase()}`,
+    ];
+    const text = message
+      ? `Mock mode: I can only quote my file. Total return ${pct(k.total_return)}, Sharpe ${k.sharpe.toFixed(2)}.`
+      : `${agent.name}. ${agent.pitch}.`;
+    return { ts: stamp(), role: "agent", text, evidence, source: "fallback" };
+  }
+
+  function recruit(prompt: string): Agent {
+    const fresh = [...agents.keys()].filter((id) => !SEED_IDS.has(id)).length;
+    const [shape, color] = NEW_LOOKS[fresh % NEW_LOOKS.length];
+    return {
+      ...structuredClone(TEMPLATE),
+      id: `recruit-${fresh + 1}`,
+      name: fresh ? `The Recruit ${fresh + 1}` : "The Recruit",
+      persona: "Eager, untested, keen to prove the backtest was no fluke.",
+      strategy_line: prompt.length > 80 ? `${prompt.slice(0, 79)}…` : prompt,
+      pitch: prompt,
+      shape,
+      color,
+      status: "trading",
+      verdict: "probation",
+      capital_share: 0,
+      capital_trend: "flat",
+      redteam: { ...structuredClone(TEMPLATE.redteam), verdict: "probation" },
+      prompt,
+      created_at: stamp(),
+    };
+  }
+
+  async function* create(body: Json, signal?: AbortSignal): AsyncGenerator<SseEvent> {
+    const prompt = typeof body.prompt === "string" ? body.prompt.trim() : "";
+    await sleep(stageDelay(), signal);
+    yield { event: "compiling", data: {} };
+    if (!prompt) {
+      yield { event: "error", data: { message: "describe a strategy first" } };
+      return;
+    }
+    const agent = recruit(prompt);
+    await sleep(stageDelay(), signal);
+    yield { event: "backtesting", data: { name: agent.name, recipe: agent.recipe } };
+    await sleep(stageDelay(), signal);
+    yield { event: "redteam", data: { kpis: agent.kpis } };
+    await sleep(stageDelay(), signal);
+    agents.set(agent.id, agent);
+    const stored = Object.fromEntries(Object.entries(agent).filter(([k]) => !JOINED.has(k)));
+    yield { event: "done", data: { agent: structuredClone(stored) } };
+  }
+
+  function route(method: "GET" | "POST", path: string, body: Json = {}): unknown {
+    const url = new URL(path, "http://mock");
+    const q = url.searchParams;
+    const parts = url.pathname.split("/").filter(Boolean).map(decodeURIComponent);
+
+    if (method === "GET" && url.pathname === "/vault") {
+      return { ...vault, agents: [...agents.values()].map(summary) };
+    }
+    if (method === "GET" && url.pathname === "/agents") return [...agents.values()].map(summary);
+    if (method === "GET" && url.pathname === "/log") {
+      const type = q.get("type");
+      const limit = Number(q.get("limit") ?? 100);
+      return LOG.filter((e) => !type || e.type === type).slice(0, limit);
+    }
+    if (method === "GET" && url.pathname === "/capital") {
+      const from = q.get("from");
+      return { months: capital.months.filter((m) => !from || m.month >= from) };
+    }
+    if (parts[0] === "agents" && parts.length >= 2) {
+      const agent = findAgent(parts[1]);
+      if (method === "GET" && parts.length === 2) return agent;
+      if (method === "GET" && parts[2] === "log") {
+        const month = q.get("month");
+        const type = q.get("type");
+        return LOG.filter(
+          (e) => e.agent_id === agent.id && (!month || e.ts.startsWith(month)) && (!type || e.type === type),
+        );
+      }
+      if (parts[2] === "chat") {
+        const history = chats.get(agent.id) ?? [];
+        if (method === "GET") return history;
+        const message = typeof body.message === "string" ? body.message : undefined;
+        const answer = reply(agent, message);
+        if (message) history.push({ ts: answer.ts, role: "user", text: message });
+        history.push(answer);
+        chats.set(agent.id, history);
+        return answer;
+      }
+    }
+    throw new ApiError(404, `404 Not Found: ${method} ${url.pathname}`);
+  }
+
+  return {
+    async get(path) {
+      return structuredClone(route("GET", path));
+    },
+    async post(path, body) {
+      return structuredClone(route("POST", path, (body ?? {}) as Json));
+    },
+    stream(path, body, signal) {
+      if (path !== "/agents") throw new ApiError(404, `404 Not Found: POST ${path}`);
+      return create((body ?? {}) as Json, signal);
+    },
+  };
+}
