@@ -11,6 +11,12 @@ services:
     volumes:
       - ./cache:/app/cache
 
+  web:
+    image: ghcr.io/nazariitsubera/the-crew-fund/web:${WEB_TAG:-latest}
+    restart: unless-stopped
+    expose:
+      - "3000"
+
   caddy:
     image: caddy:2
     restart: unless-stopped
@@ -23,6 +29,7 @@ services:
       - caddy_config:/config
     depends_on:
       - api
+      - web
 
 volumes:
   caddy_data:
