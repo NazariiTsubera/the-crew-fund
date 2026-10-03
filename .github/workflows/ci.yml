@@ -13,6 +13,22 @@ jobs:
   api:
     name: api
     runs-on: ubuntu-latest
+    # Tiger Data runs TimescaleDB; the store tests run against the same engine.
+    services:
+      timescale:
+        image: timescale/timescaledb:latest-pg16
+        env:
+          POSTGRES_PASSWORD: crew
+          POSTGRES_DB: crew_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      TEST_DATABASE_URL: postgresql://postgres:crew@localhost:5432/crew_test
     defaults:
       run:
         working-directory: api

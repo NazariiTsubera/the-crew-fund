@@ -7,6 +7,8 @@ WORKDIR /app
 COPY pyproject.toml uv.lock ./
 RUN uv sync --frozen --no-dev --no-install-project
 COPY app ./app
+COPY crew ./crew
+COPY scripts ./scripts
 
 FROM python:3.12-slim
 RUN useradd --create-home --uid 10001 crew
