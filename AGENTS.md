@@ -8,7 +8,9 @@ An AI hedge fund for the Investment Society track at RowdyHacks XII. You describ
 chat; an agent compiles it into a recipe, backtests 2017 → holdout cutoff, survives a red team,
 and trades alongside the other agents. The Mastermind splits capital by track record.
 
-- `api/` — Python 3.12, uv, FastAPI, polars. The fund engine and every endpoint.
+- `api/` — Python 3.12, uv, FastAPI, polars. The fund engine and every endpoint. Layered
+  `routes/` → `services/` → `repository.py`, with schemas in `models.py`; only the repository
+  reads the dataset ([ADR 0001](docs/decisions/0001-layered-api.md)).
 - `web/` — Next.js (App Router), TypeScript, Tailwind, Vitest. The War Room UI.
 - `web/design/` — the Claude Design export we implement. Reference only, never shipped.
 - `docs/` — decisions (ADRs), per-ticket plans, `TRACKS.md`.

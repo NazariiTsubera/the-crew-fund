@@ -1,14 +1,15 @@
 """THE CREW API: the judged portfolio endpoints and the crew endpoints.
 
-The judged endpoints (/health, /portfolio/holdings, /backtest, /screen, /asof) are scored live
-by the organizers' checker; they must never depend on Gemini or any other outside service.
+Layers, top to bottom (docs/decisions/0001-layered-api.md):
+  routes/       HTTP only: parse, call a service, map errors to status codes
+  services/     business logic
+  repository.py the only reader of the organizers' dataset
+  models.py     request and response schemas
 """
 
 from fastapi import FastAPI
 
+from app.routes import judged
+
 app = FastAPI(title="THE CREW", version="0.1.0")
-
-
-@app.get("/health")
-def health() -> dict:
-    return {"ok": True}
+app.include_router(judged.router)
