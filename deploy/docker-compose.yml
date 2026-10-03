@@ -1,0 +1,25 @@
+# Runs on the VPS from /opt/crew. Images come from GHCR; secrets come from /opt/crew/.env.
+services:
+  api:
+    image: ghcr.io/nazariitsubera/the-crew-fund/api:${API_TAG:-latest}
+    env_file: .env
+    restart: unless-stopped
+    expose:
+      - "8000"
+
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - api
+
+volumes:
+  caddy_data:
+  caddy_config:

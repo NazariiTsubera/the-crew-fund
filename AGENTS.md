@@ -22,7 +22,9 @@ for **how**.
 - Find or create the issue before non-trivial work. Move it to In Progress when you start,
   Done only when its "Done when" line is verified by the command it names.
 - Do not start a blocked issue before its blockers are Done.
-- Branches `row-<n>-<slug>`; commit subjects start with `ROW-<n>: ` and an imperative summary.
+- Work on `main` and push directly; no pull requests. Run the regression gate before every push.
+  Never force-push. Commit subjects start with `ROW-<n>: ` and an imperative summary.
+- Every push to `main` that passes CI deploys automatically (`.github/workflows/deploy.yml`).
 - Scope creep becomes a new Backlog issue, never a silent expansion of the current one.
 
 ## Rules that protect the score

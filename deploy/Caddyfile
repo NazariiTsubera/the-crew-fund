@@ -1,0 +1,9 @@
+# Caddy obtains and renews HTTPS certificates for both hosts automatically.
+api.crewfund.vodka {
+	encode gzip
+	reverse_proxy api:8000
+}
+
+crewfund.vodka {
+	respond "THE CREW · War Room coming soon" 200
+}
