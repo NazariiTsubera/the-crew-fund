@@ -1,0 +1,53 @@
+name: Seed the crew
+
+# Run by hand after the dataset changes or the deploy box is new: pulls the panel cache onto the
+# box and runs the seed agents and the Mastermind into the store, with the box's own .env
+# (SV_DATA_ROOT, SV_DATA_TOKEN, DATABASE_URL). Idempotent.
+on:
+  workflow_dispatch:
+    inputs:
+      rebuild_cache:
+        description: Pull the panel cache again before seeding
+        type: boolean
+        default: true
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  seed:
+    runs-on: ubuntu-latest
+    env:
+      TARGET: ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}
+    steps:
+      - name: Load the deploy key
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          printf '%s\n' "${{ secrets.DEPLOY_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+
+      - name: Build the panel cache
+        if: inputs.rebuild_cache
+        run: |
+          # As root so the bind-mounted cache directory is writable, then hand it to the app user.
+          ssh "$TARGET" "cd /opt/crew && mkdir -p cache && docker compose run --rm --user root api \
+            sh -c 'python -m scripts.cache_panel && chown -R 10001:10001 /app/cache'"
+
+      - name: Seed the agents and rebalance
+        run: |
+          ssh "$TARGET" "cd /opt/crew && docker compose run --rm --user root api \
+            sh -c 'python -m scripts.seed_agents && chown -R 10001:10001 /app/cache'"
+
+      - name: Reload the API and check the fund
+        run: |
+          ssh "$TARGET" "cd /opt/crew && docker compose restart api"
+          for i in $(seq 1 30); do
+            if curl -fsS https://api.crewfund.vodka/vault -o /dev/null; then
+              curl -fsS https://api.crewfund.vodka/portfolio/holdings; exit 0
+            fi
+            sleep 5
+          done
+          echo "the fund is not served after seeding" >&2
+          exit 1
