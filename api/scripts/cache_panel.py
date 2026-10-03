@@ -22,6 +22,7 @@ import polars as pl
 from statevector import Dataset
 from statevector.pit import holdout_cutoff
 
+from app.mirror import mirrored_scan
 from crew.features import CLOCK_FIELDS, CONTROL_FLAGS, FEATURES, PLANTED_TICKER
 from crew.panel import cache_dir
 
@@ -29,6 +30,10 @@ DECISIONS_FROM = date(2017, 1, 1)
 CLOSES_FROM = date(2016, 1, 1)
 # A month-end vector older than this is stale, not a decision-date reading.
 MAX_VECTOR_AGE = timedelta(days=10)
+
+
+def progress(message: str) -> None:
+    print(f"[{datetime.now(UTC):%H:%M:%S}] {message}", file=sys.stderr, flush=True)
 
 
 def last_trading_day(ds: Dataset) -> date:
@@ -48,8 +53,12 @@ def build(ds: Dataset, out: Path, max_tickers: int | None = None) -> dict:
     if max_tickers:
         universe = universe[:max_tickers]
 
+    # Day-files come through the parallel mirror the API shares (cache/mirror): the SDK alone
+    # reads them one at a time over HTTP, which is most of a full pull's wall time.
+    mirror = out / "mirror"
+    progress(f"cutoff {cutoff}; {len(universe)} tickers; daily closes from {CLOSES_FROM}")
     closes = (
-        ds._scan("stocks_daily", start=str(CLOSES_FROM), end=str(cutoff - timedelta(days=1)))
+        mirrored_scan(ds, "stocks_daily", str(CLOSES_FROM), str(cutoff - timedelta(days=1)), mirror)
         .filter(
             pl.col("ticker").is_in(universe)
             & (pl.col("date") >= CLOSES_FROM)
@@ -66,11 +75,21 @@ def build(ds: Dataset, out: Path, max_tickers: int | None = None) -> dict:
         .sort("month")
     )
 
-    sv = ds._scan(
-        "state_vector",
-        start=str(DECISIONS_FROM - MAX_VECTOR_AGE),
-        end=str(cutoff - timedelta(days=1)),
-    )
+    # Only the days just before each decision date are read: the rest of the state vector is
+    # never used, and on a daily-partitioned panel this skips most of its files.
+    progress(f"{decision_dates.height} decision dates; state vector at each month-end")
+    if ds.base is None:  # a local root: one scan is cheapest
+        sv = ds._scan("state_vector", str(DECISIONS_FROM - MAX_VECTOR_AGE), str(cutoff))
+    else:
+        sv = pl.concat(
+            [
+                mirrored_scan(ds, "state_vector", str(d - MAX_VECTOR_AGE), str(d), mirror).filter(
+                    pl.col("date").cast(pl.Date).is_between(d - MAX_VECTOR_AGE, d)
+                )
+                for d in decision_dates["decision_date"].to_list()
+            ],
+            how="diagonal_relaxed",
+        )
     wanted = [*FEATURES, *CLOCK_FIELDS, *CONTROL_FLAGS]
     present = [c for c in wanted if c in sv.collect_schema().names()]
     # The last reading per ticker at or before each month's decision date.
@@ -92,6 +111,7 @@ def build(ds: Dataset, out: Path, max_tickers: int | None = None) -> dict:
         .sort(["date", "ticker"])
     )
 
+    progress(f"{vectors.height} vector rows; S&P 500 and sectors")
     benchmark = (
         ds._scan("index_daily")
         .filter(
