@@ -14,3 +14,7 @@ class BacktestRequest(BaseModel):
     end: date
     rebalance: str = "none"
     adjust_dividends: bool = False  # total return for stock legs, as the scorer computes it
+
+
+class CreateAgentRequest(BaseModel):
+    prompt: str = Field(min_length=1, max_length=2000)

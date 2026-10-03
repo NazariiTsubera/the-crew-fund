@@ -9,7 +9,8 @@ Layers, top to bottom (docs/decisions/0001-layered-api.md):
 
 from fastapi import FastAPI
 
-from app.routes import judged
+from app.routes import crew, judged
 
 app = FastAPI(title="THE CREW", version="0.1.0")
 app.include_router(judged.router)
+app.include_router(crew.router)
