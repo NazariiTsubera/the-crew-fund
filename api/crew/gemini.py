@@ -22,12 +22,34 @@ load_dotenv(API_DIR / ".env")
 load_dotenv()  # Environment variables always take precedence.
 
 DEFAULT_MODEL = "gemini-3.8-flash"
-
-
+# The free tier allows 20 requests a day per model, each model counted apart; when one model's
+# day is used up the client moves down this list. GEMINI_MODELS (comma-separated) overrides it.
+FALLBACK_MODELS = [
+    "gemini-3.7-flash",
+    "gemini-3.6-flash",
+    "gemini-3.5-flash",
+    "gemini-3-flash-preview",
+    "gemini-3.1-flash-lite",
+]
 RETRY_CODES = {429, 500, 502, 503, 504}
 RETRY_DELAY = 1.5  # seconds; long enough for a per-minute quota bucket to start refilling
+DAILY_QUOTA = "PerDay"
 
 log = logging.getLogger(__name__)
+# Models whose daily quota ran out in this process. A client is built per request, so this
+# outlives any one of them; a restart forgets it, which costs one wasted call per model.
+_EXHAUSTED: set[str] = set()
+
+
+def default_models() -> list[str]:
+    if os.environ.get("GEMINI_MODELS"):
+        return [m.strip() for m in os.environ["GEMINI_MODELS"].split(",") if m.strip()]
+    first = os.environ.get("GEMINI_MODEL") or DEFAULT_MODEL
+    return [first, *(m for m in FALLBACK_MODELS if m != first)]
+
+
+def _out_for_the_day(e: Exception) -> bool:
+    return getattr(e, "code", None) == 429 and DAILY_QUOTA in str(getattr(e, "details", ""))
 
 
 class LLMError(RuntimeError):
@@ -66,9 +88,10 @@ class GeminiClient:
     def __init__(
         self,
         api_key: str | None = None,
-        model: str | None = None,
+        models: list[str] | None = None,
         client=None,
         sleep: Callable[[float], None] = time.sleep,
+        exhausted: set[str] | None = None,
     ):
         if client is None:
             from google import genai
@@ -79,7 +102,12 @@ class GeminiClient:
             client = genai.Client(api_key=key)
         self._client = client
         self._sleep = sleep
-        self.model = model or os.environ.get("GEMINI_MODEL") or DEFAULT_MODEL
+        self._exhausted = _EXHAUSTED if exhausted is None else exhausted
+        self.models = models or default_models()
+
+    @property
+    def model(self) -> str:
+        return next((m for m in self.models if m not in self._exhausted), self.models[-1])
 
     def generate_json(self, system: str, prompt: str, schema: dict) -> dict:
         from google.genai import types
@@ -90,25 +118,33 @@ class GeminiClient:
             response_json_schema=schema,
             temperature=0.4,
         )
-        for attempt in (1, 2):
-            try:
-                response = self._client.models.generate_content(
-                    model=self.model, contents=prompt, config=config
-                )
-                return json.loads(response.text)
-            except Exception as e:  # network, quota, safety block, malformed JSON
-                why, retry = _classify(e)
-                log.warning(
-                    "gemini %s attempt %d failed: %s · %s",
-                    self.model,
-                    attempt,
-                    why,
-                    redact(str(e))[:300],
-                )
-                if not retry or attempt == 2:
-                    raise LLMError(str(e), why) from e
-                self._sleep(RETRY_DELAY)
-        raise AssertionError("unreachable")
+        last: LLMError | None = None
+        for model in [m for m in self.models if m not in self._exhausted]:
+            for attempt in (1, 2):
+                try:
+                    response = self._client.models.generate_content(
+                        model=model, contents=prompt, config=config
+                    )
+                    return json.loads(response.text)
+                except Exception as e:  # network, quota, safety block, malformed JSON
+                    why, retry = _classify(e)
+                    log.warning(
+                        "gemini %s attempt %d failed: %s · %s",
+                        model,
+                        attempt,
+                        why,
+                        redact(str(e))[:300],
+                    )
+                    last = LLMError(str(e), why)
+                    last.__cause__ = e
+                    if _out_for_the_day(e):
+                        self._exhausted.add(model)
+                        break  # no point retrying today; try the next model
+                    if not retry:
+                        raise last from e
+                    if attempt == 1:
+                        self._sleep(RETRY_DELAY)
+        raise last or LLMError("every Gemini model is out of quota today", "rate limited (429)")
 
 
 def default_llm() -> LLM:

@@ -6,7 +6,7 @@ from types import SimpleNamespace
 import pytest
 from google.genai import errors
 
-from crew.gemini import GeminiClient, LLMError, reason
+from crew.gemini import GeminiClient, LLMError, default_models, reason
 
 
 def quota():
@@ -37,7 +37,9 @@ class FakeModels:
 def client(*outcomes):
     models = FakeModels(*outcomes)
     sleeps = []
-    c = GeminiClient(api_key="k", client=SimpleNamespace(models=models), sleep=sleeps.append)
+    c = GeminiClient(
+        models=["m"], client=SimpleNamespace(models=models), sleep=sleeps.append, exhausted=set()
+    )
     return c, models, sleeps
 
 
@@ -80,3 +82,62 @@ def test_malformed_json_is_its_own_reason():
 
 def test_reason_of_a_plain_error_is_its_message():
     assert reason(LLMError("no Gemini client")) == "no Gemini client"
+
+
+def daily_quota():
+    return errors.ClientError(
+        429,
+        {
+            "error": {
+                "message": "quota",
+                "status": "RESOURCE_EXHAUSTED",
+                "details": [
+                    {
+                        "@type": "type.googleapis.com/google.rpc.QuotaFailure",
+                        "violations": [
+                            {"quotaId": "GenerateRequestsPerDayPerProjectPerModel-FreeTier"}
+                        ],
+                    }
+                ],
+            }
+        },
+    )
+
+
+class ModelAware(FakeModels):
+    def generate_content(self, model, **_):
+        self.calls += 1
+        self.models = [*getattr(self, "models", []), model]
+        out = self.outcomes.pop(0)
+        if isinstance(out, Exception):
+            raise out
+        return SimpleNamespace(text=out)
+
+
+def test_moves_to_the_next_model_when_one_is_out_of_daily_quota():
+    models = ModelAware(daily_quota(), '{"ok": 1}', '{"ok": 2}')
+    c = GeminiClient(
+        models=["a", "b"], client=SimpleNamespace(models=models), sleep=print, exhausted=set()
+    )
+    assert c.generate_json("s", "p", {}) == {"ok": 1}
+    assert c.generate_json("s", "p", {}) == {"ok": 2}
+    # The exhausted model is skipped from then on, without a wasted call.
+    assert models.models == ["a", "b", "b"]
+
+
+def test_every_model_out_of_quota_is_a_rate_limit():
+    models = ModelAware(daily_quota(), daily_quota())
+    c = GeminiClient(
+        models=["a", "b"], client=SimpleNamespace(models=models), sleep=print, exhausted=set()
+    )
+    with pytest.raises(LLMError) as e:
+        c.generate_json("s", "p", {})
+    assert e.value.reason == "rate limited (429)"
+    assert models.calls == 2
+
+
+def test_the_default_chain_starts_from_gemini_model(monkeypatch):
+    monkeypatch.delenv("GEMINI_MODELS", raising=False)
+    monkeypatch.setenv("GEMINI_MODEL", "gemini-3.6-flash")
+    chain = default_models()
+    assert chain[0] == "gemini-3.6-flash" and chain.count("gemini-3.6-flash") == 1
