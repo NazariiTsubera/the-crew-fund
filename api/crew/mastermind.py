@@ -6,12 +6,12 @@ fitted by water-filling. Until an agent has three settled months, the split is e
 means the month's holding period had closed by the decision date, so the Mastermind never
 reads a return it could not have known.
 
-An agent is fired, capital 0 from then on with the month recorded, when the trailing 12-month
+An agent is fired, capital 0 from then on with the month recorded, when the trailing 24-month
 Sharpe of its picks' returns in excess of an equal-weight book of its own eligible names stays
-below -1.0 for three months in a row. The picks' paper returns, because firing judges the
-signal, not months the agent chose to sit in cash; excess over its own pool, because against
-the S&P 500 a book of equal-weight mid caps is judged on size, and every long-only book has a
-negative Sharpe in a bear market; 12 months, because one bad quarter should trim an agent.
+below -1.5 for six months in a row. The picks' paper returns, because firing judges the signal,
+not months the agent chose to sit in cash; excess over its own pool, because against the S&P
+500 a book of equal-weight mid caps is judged on size, and every long-only book has a negative
+Sharpe in a bear market; 24 months, because one bad year should trim an agent, not fire it.
 
 The fund's book is the invested agents' books weighted by capital. A sitting-out agent's share
 flows to the others, because the organizers' checker demands weights summing to 1.0; "invested"
@@ -33,7 +33,10 @@ FLOOR, CAP = 0.10, 0.50
 POSITION_CAP = 0.05
 TRAILING_MONTHS = 6
 MIN_HISTORY = 3
-FIRE_WINDOW, FIRE_SHARPE, FIRE_MONTHS = 12, -1.0, 3
+# A 12-month Sharpe of a concentrated book against its pool has a standard error near 1, so a
+# 12-month window at -1.0 fired zero-skill agents on noise; 24 months at -1.5 held for 6 months
+# trips on a lag that is real (tests/test_mastermind.py).
+FIRE_WINDOW, FIRE_SHARPE, FIRE_MONTHS = 24, -1.5, 6
 MEMO_STEP = 0.03  # log a capital change of at least 3 points
 CLOSE = "16:00"
 
@@ -164,7 +167,8 @@ def allocate(agents: list[dict], universe: set[str], benchmark: list[dict] | Non
                         "ts": f"{month}-01 {CLOSE}",
                         "type": "mastermind",
                         "agent_id": a["id"],
-                        "text": f"Fired {a['name']} · picks' 12-month Sharpe vs its eligible names "
+                        "text": f"Fired {a['name']} · picks' {FIRE_WINDOW}-month Sharpe "
+                        "vs its eligible names "
                         f"{fmt(long_run, 1)} for {FIRE_MONTHS} months, capital → 0%",
                     }
                 )

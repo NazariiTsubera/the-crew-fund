@@ -66,11 +66,12 @@ its own, because a leaky backtest makes the other three numbers meaningless.
 - Capital across agents that are not killed or fired, by the positive part of each one's
   trailing 6-month Sharpe, with a 10% floor and a 50% cap, using only months settled by the
   decision date; equal until three such months exist.
-- Fired when the trailing 12-month Sharpe of its picks' returns in excess of an equal-weight
-  book of its own eligible names stays below −1.0 for three months. Excess over its own pool,
+- Fired when the trailing 24-month Sharpe of its picks' returns in excess of an equal-weight
+  book of its own eligible names stays below −1.5 for six months. Excess over its own pool,
   so neither a bear market nor a small-cap crash fires anyone; only picks that lag the names
   they were chosen from. A 12-month Sharpe of a concentrated book has a standard error near 1,
-  so over nine years even a zero-skill agent will likely cross −1.0 once, and firing is final.
+  so the earlier rule (12 months, −1.0, three months) fired zero-skill agents on noise and,
+  since firing is final, eventually fired everyone.
 - The fund book: invested agents' books weighted by capital, universe only, every position
   capped at 5%, re-scaled to sum to 1 (the organizers' checker requires it). A sitting-out
   agent's capital flows to the others; "invested" is shown separately.

@@ -155,6 +155,21 @@ def test_a_crash_in_every_name_alone_does_not_fire_anyone():
     assert "winner" not in plan.fired
 
 
+@pytest.mark.parametrize("seed", range(6))
+def test_noise_alone_does_not_get_an_agent_fired(seed):
+    # A zero-skill agent's picks-vs-pool Sharpe wanders around 0 with a standard error near 1;
+    # a firing rule that trips on that fires everyone eventually.
+    panel = make_panel(persistence=0.9, n_tickers=60, seed=seed)
+    agents = [
+        {"id": i, "name": i, "verdict": "pass", "run": run_recipe(r, panel).to_dict()}
+        for i, r in [("noise", recipe("atm_iv", top_n=10)), ("winner", recipe())]
+    ]
+
+    plan = allocate(agents, set(panel.vectors["ticker"].unique().to_list()), spx(panel))
+
+    assert "noise" not in plan.fired
+
+
 def test_bounded_split_water_fills():
     shares = bounded_split({"a": 10.0, "b": 0.0, "c": 0.0}, lo=0.1, hi=0.5)
 
