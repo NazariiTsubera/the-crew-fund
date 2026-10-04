@@ -249,7 +249,10 @@ def build_strategy_chat(
     history: list[StrategyChatMessage],
     current: dict | None,
     llm: LLM,
+    context: str | None = None,
 ) -> StrategyChatResponse:
+    """`context`: who the strategy belongs to, when an existing agent's recipe is being edited
+    (the What-if panel), so the AI keeps to that agent's idea rather than starting fresh."""
     current_strategy = current or DEFAULT_STRATEGY
 
     # Validate the strategy coming from the browser before Gemini sees it.
@@ -260,7 +263,10 @@ def build_strategy_chat(
 
     transcript = "\n".join(f"{m.role.upper()}: {m.text}" for m in history[-12:])
 
+    about = f"CONTEXT:\n{context}\n" if context else ""
+
     prompt = f"""
+{about}
 CURRENT STRATEGY:
 {current_recipe.model_dump_json(indent=2)}
 

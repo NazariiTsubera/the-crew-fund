@@ -182,6 +182,14 @@ export function mockTransport({ stageDelay = () => 1000 + Math.random() * 1000 }
           (e) => e.agent_id === agent.id && (!month || e.ts.startsWith(month)) && (!type || e.type === type),
         );
       }
+      if (method === "POST" && parts[2] === "whatif" && parts[3] === "compile") {
+        // No AI in mock mode: the draft comes back as sent, like a research question would.
+        return {
+          reply: "Mock mode: I can't read instructions without the AI, so I kept your draft as it was.",
+          recipe: body.recipe,
+          changed: false,
+        };
+      }
       if (method === "POST" && parts[2] === "whatif") {
         // Mock mode cannot backtest; it echoes the agent's own record for the edited recipe.
         return { recipe: body.recipe, kpis: agent.kpis, curve: agent.curve, yearly_returns: {}, redteam: agent.redteam };

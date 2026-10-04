@@ -1,12 +1,15 @@
 "use client";
 
-import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
+import { useEffect, useImperativeHandle, useRef, useState, type FormEvent, type KeyboardEvent, type Ref } from "react";
 
 import { RecipeCard } from "@/components/agent/recipe-card";
 import { Glyph, agentColorVar } from "@/components/glyph";
 import { api, type Agent, type ChatMessage, type RecipeOut } from "@/lib/api";
 
 export type ChatLine = ChatMessage | { role: "system"; ts: string; text: string };
+
+/** Lets the page put a question to the agent from outside the chat (the What-if panel's ASK WHY). */
+export type ChatHandle = { ask: (text: string) => void };
 
 function errorText(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
@@ -105,6 +108,7 @@ export function ChatColumn({
   className = "",
   initialLines,
   whatif,
+  ref,
 }: {
   agent: Agent;
   className?: string;
@@ -112,6 +116,7 @@ export function ChatColumn({
   initialLines?: ChatLine[];
   /** A what-if recipe the judge ran; questions go with it so the agent can compare. */
   whatif?: RecipeOut;
+  ref?: Ref<ChatHandle>;
 }) {
   const [lines, setLines] = useState<ChatLine[]>(initialLines ?? []);
   const [loading, setLoading] = useState(!initialLines);
@@ -168,6 +173,8 @@ export function ChatColumn({
       setBusy(false);
     }
   }
+
+  useImperativeHandle(ref, () => ({ ask: (text) => void send(text) }));
 
   function onSubmit(e: FormEvent) {
     e.preventDefault();

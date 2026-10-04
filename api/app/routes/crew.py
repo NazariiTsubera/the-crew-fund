@@ -22,10 +22,12 @@ from app.models import (
     LogEntry,
     SpeechRequest,
     StrategyChatRequest,
+    WhatIfCompile,
+    WhatIfCompileRequest,
     WhatIfRequest,
 )
 from app.services import agents, vault
-from crew.gemini import LLM, default_llm
+from crew.gemini import LLM, LLMError, default_llm
 from crew.recipe import Recipe, explain
 from crew.speech import SpeechError, synthesize
 from crew.strategy_chat import StrategyChatResponse, build_strategy_chat
@@ -106,6 +108,24 @@ def whatif(agent_id: str, req: WhatIfRequest) -> dict:
         return agents.whatif(agent_id, _recipe(req.recipe.model_dump()))
     except agents.AgentNotFound as exc:
         raise HTTPException(404, f"no agent {exc}") from exc
+
+
+@router.post("/agents/{agent_id}/whatif/compile", response_model=WhatIfCompile)
+def whatif_compile(
+    agent_id: str,
+    req: WhatIfCompileRequest,
+    llm: Annotated[Callable[[], LLM], Depends(get_llm)],
+) -> dict:
+    """{reply, recipe, changed}: the AI edits the what-if draft in words. Runs nothing."""
+    draft = _recipe(req.recipe.model_dump())
+    try:
+        return agents.whatif_compile(agent_id, req.message, draft, llm)
+    except agents.AgentNotFound as exc:
+        raise HTTPException(404, f"no agent {exc}") from exc
+    except LLMError as exc:
+        raise HTTPException(503, f"the AI is unavailable ({exc})") from exc
+    except ValueError as exc:
+        raise HTTPException(400, str(exc)) from exc
 
 
 @router.get("/agents/{agent_id}/chat")

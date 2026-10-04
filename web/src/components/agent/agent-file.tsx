@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 
-import { ChatColumn } from "@/components/agent/chat-column";
+import { ChatColumn, type ChatHandle } from "@/components/agent/chat-column";
 import { PerformanceColumn } from "@/components/agent/performance-column";
 import type { Variant } from "@/components/agent/what-if-panel";
 import { ApiError, api, type Agent } from "@/lib/api";
@@ -15,6 +15,8 @@ type State =
   | { status: "offline"; message: string };
 
 type Tab = "chat" | "perf";
+
+const WHY_QUESTION = "Why does my what-if do better or worse than you, and should I trust it?";
 
 function Notice({ kicker, title, children }: { kicker: string; title: string; children?: ReactNode }) {
   return (
@@ -75,11 +77,27 @@ export function AgentFile({ id }: { id: string }) {
 function AgentScreen({ agent }: { agent: Agent }) {
   // The what-if lives here so the chart draws it and the chat can ask the agent about it.
   const [variant, setVariant] = useState<Variant | null>(null);
+  const chat = useRef<ChatHandle>(null);
+  // Bumped by ASK WHY so a phone-width layout flips to the chat tab, where the answer lands.
+  const [chatFocus, setChatFocus] = useState(0);
+
+  function askWhy() {
+    chat.current?.ask(WHY_QUESTION);
+    setChatFocus((n) => n + 1);
+  }
+
   return (
     <FileLayout
-      chat={(className) => <ChatColumn agent={agent} className={className} whatif={variant?.recipe} />}
+      focusChat={chatFocus}
+      chat={(className) => <ChatColumn ref={chat} agent={agent} className={className} whatif={variant?.recipe} />}
       perf={(className) => (
-        <PerformanceColumn agent={agent} className={className} variant={variant} onVariant={setVariant} />
+        <PerformanceColumn
+          agent={agent}
+          className={className}
+          variant={variant}
+          onVariant={setVariant}
+          onAskWhy={askWhy}
+        />
       )}
     />
   );
@@ -93,12 +111,20 @@ export function FileLayout({
   chat,
   perf,
   label = "Agent file",
+  focusChat = 0,
 }: {
   chat: (className: string) => ReactNode;
   perf: (className: string) => ReactNode;
   label?: string;
+  /** Each new value shows the chat tab (only matters when the columns are tabs). */
+  focusChat?: number;
 }) {
   const [tab, setTab] = useState<Tab>("chat");
+  const [seenFocus, setSeenFocus] = useState(focusChat);
+  if (focusChat !== seenFocus) {
+    setSeenFocus(focusChat);
+    setTab("chat");
+  }
   const tabs: [Tab, string][] = [
     ["chat", "CHAT"],
     ["perf", "PERFORMANCE"],

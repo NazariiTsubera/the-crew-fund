@@ -11,6 +11,7 @@ from __future__ import annotations
 import threading
 
 from crew.backtest import fmt
+from crew.features import MARKET_WIDE
 from crew.panel import Panel
 from crew.pipeline import evaluate
 from crew.recipe import Recipe
@@ -40,6 +41,29 @@ def run_whatif(recipe: Recipe, panel: Panel) -> dict:
             _cache.pop(next(iter(_cache)))
         _cache[key] = out
     return out
+
+
+def whatif_context(agent: dict) -> str:
+    """Who the AI is recompiling a what-if for: the agent's own words and live recipe. Never its
+    record, because the AI must not tune a recipe toward a return it has seen."""
+    lines = [
+        f"You are editing a what-if variant of {agent['name']}, an existing agent on THE CREW.",
+        "Keep to the agent's idea unless the user asks to move away from it.",
+    ]
+    if agent.get("strategy_line"):
+        lines.append(f"Strategy: {agent['strategy_line']}")
+    if agent.get("prompt"):
+        lines.append(f"The words it was recruited from: {agent['prompt']}")
+    live = agent.get("recipe")
+    if live:
+        ranks = ", ".join(f"{f['name']} {f['direction']}" for f in live["features"])
+        lines.append(f"Its live recipe ranks on: {ranks}; holds the top {live['top_n']}.")
+    lines.append(
+        f"{', '.join(MARKET_WIDE)} have one value per date for every stock: they cannot rank "
+        "stocks on their own; say so if the user leans on them."
+    )
+    lines.append("Do not offer to compile: the user runs the what-if themselves.")
+    return "\n".join(lines)
 
 
 def _pct(x: float) -> str:

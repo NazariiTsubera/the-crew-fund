@@ -58,6 +58,11 @@ class WhatIfRequest(BaseModel):
     recipe: StrategyRequest
 
 
+class WhatIfCompileRequest(BaseModel):
+    message: str = Field(min_length=1, max_length=2000)
+    recipe: StrategyRequest  # the panel's current draft, which the AI edits
+
+
 class SpeechRequest(BaseModel):
     text: str = Field(min_length=1, max_length=2000)
 
@@ -114,6 +119,12 @@ class RecipeOut(BaseModel):
     top_n: int
     rebalance: str
     sit_out_if_trailing_sharpe_below: float | None
+
+
+class WhatIfCompile(BaseModel):
+    reply: str
+    recipe: RecipeOut
+    changed: bool  # False when the message was a question and the draft stands as sent
 
 
 class Holding(BaseModel):

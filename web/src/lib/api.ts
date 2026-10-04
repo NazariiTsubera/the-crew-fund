@@ -181,6 +181,15 @@ export const WhatIfSchema = z.object({
   redteam: RedTeamSchema,
 });
 export type WhatIf = z.infer<typeof WhatIfSchema>;
+
+// POST /agents/{id}/whatif/compile: the AI edits a what-if draft in words; nothing runs.
+export const WhatIfCompileSchema = z.object({
+  reply: z.string(),
+  recipe: RecipeOutSchema,
+  // false: the message was a question and the draft came back as sent.
+  changed: z.boolean(),
+});
+export type WhatIfCompile = z.infer<typeof WhatIfCompileSchema>;
 export type RecipeFeature = z.infer<typeof RecipeFeatureSchema>;
 export type RecipeOut = z.infer<typeof RecipeOutSchema>;
 export type Holding = z.infer<typeof HoldingSchema>;
@@ -297,6 +306,10 @@ export function createClient(transport: Transport) {
       ),
     whatif: async (id: string, recipe: RecipeOut, signal?: AbortSignal) =>
       WhatIfSchema.parse(await transport.post(`/agents/${enc(id)}/whatif`, { recipe }, signal)),
+    whatifCompile: async (id: string, message: string, recipe: RecipeOut, signal?: AbortSignal) =>
+      WhatIfCompileSchema.parse(
+        await transport.post(`/agents/${enc(id)}/whatif/compile`, { message, recipe }, signal),
+      ),
     chatHistory: async (id: string, signal?: AbortSignal) =>
       z.array(ChatMessageSchema).parse(await transport.get(`/agents/${enc(id)}/chat`, signal)),
     /** POST /agents: yields each creation stage as the server reports it. */

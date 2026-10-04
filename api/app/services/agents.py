@@ -17,7 +17,8 @@ from crew.gemini import LLM, LLMError
 from crew.pipeline import evaluate, publish, rebalance
 from crew.recipe import Recipe
 from crew.seeds import SEEDS
-from crew.whatif import run_whatif, whatif_facts
+from crew.strategy_chat import build_strategy_chat
+from crew.whatif import run_whatif, whatif_context, whatif_facts
 
 # The design's shapes and colours for agents beyond the five seeds, in turn.
 NEW_LOOKS = [("box", "sky"), ("half", "orange"), ("plus", "lime")]
@@ -165,6 +166,21 @@ def whatif(agent_id: str, recipe: Recipe) -> dict:
     if crew_repository.store().get_agent(agent_id) is None:
         raise AgentNotFound(agent_id)
     return run_whatif(recipe, crew_repository.panel())
+
+
+def whatif_compile(
+    agent_id: str, message: str, draft: Recipe, llm_factory: Callable[[], LLM]
+) -> dict:
+    """{reply, recipe, changed}: the recruiter's recipe editing, on a judge's what-if draft. It
+    only edits the recipe; the judge runs it. Raises LLMError without a key, ValueError when the
+    AI's recipe does not validate."""
+    agent = crew_repository.store().get_agent(agent_id)
+    if agent is None:
+        raise AgentNotFound(agent_id)
+    out = build_strategy_chat(
+        message, [], draft.model_dump(), llm_factory(), context=whatif_context(agent)
+    )
+    return {"reply": out.reply, "recipe": out.strategy, "changed": out.changed}
 
 
 def chat(

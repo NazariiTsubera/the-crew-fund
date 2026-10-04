@@ -3,12 +3,14 @@ the Pydantic response models, and every key it carries survives the round trip, 
 API does not serve (or a renamed one) fails CI."""
 
 import json
+import re
 from pathlib import Path
 
 import pytest
 from pydantic import TypeAdapter
 
 from app import models
+from crew.features import FEATURES, MARKET_WIDE
 
 MOCK = Path(__file__).parent.parent.parent / "web" / "src" / "lib" / "mock"
 
@@ -59,3 +61,20 @@ def test_an_extra_field_would_fail():
 
     with pytest.raises(AssertionError):
         check(TypeAdapter(models.Agent), agent)
+
+
+def _ts_glossary() -> tuple[dict[str, str], list[str]]:
+    """The web's copy of the feature glossary, read from features.ts."""
+    src = (MOCK.parent / "features.ts").read_text()
+    body = src.split("export const FEATURES", 1)[1].split("};", 1)[0]
+    meanings = dict(re.findall(r'^\s+(\w+):\s*"([^"]*)",?$', body, re.M))
+    wide = src.split("export const MARKET_WIDE", 1)[1].split("= [", 1)[1].split("]", 1)[0]
+    return meanings, re.findall(r'"(\w+)"', wide)
+
+
+def test_the_web_feature_glossary_is_the_compilers():
+    meanings, wide = _ts_glossary()
+
+    assert meanings == FEATURES
+    assert wide == MARKET_WIDE
+    assert set(MARKET_WIDE) <= set(FEATURES)

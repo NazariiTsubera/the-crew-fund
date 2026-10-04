@@ -58,12 +58,15 @@ export function PerformanceColumn({
   className = "",
   variant = null,
   onVariant,
+  onAskWhy,
 }: {
   agent: Agent;
   className?: string;
   /** A what-if the judge is running; the agent file owns it so the chat can see it too. */
   variant?: Variant | null;
   onVariant?: (v: Variant | null) => void;
+  /** Puts the preset "why" question about the what-if to the agent in the chat column. */
+  onAskWhy?: () => void;
 }) {
   const [selected, setSelected] = useState<string | null>(null);
   const log = useAgentLog(agent.id);
@@ -134,7 +137,7 @@ export function PerformanceColumn({
           onSelect={setSelected}
           variant={variant?.result.curve}
         />
-        {onVariant && <WhatIfPanel agent={agent} variant={variant} onVariant={onVariant} />}
+        {onVariant && <WhatIfPanel agent={agent} variant={variant} onVariant={onVariant} onAskWhy={onAskWhy} />}
         <RedTeamCard redteam={agent.redteam} />
         <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,280px),1fr))] gap-5">
           <BookTable

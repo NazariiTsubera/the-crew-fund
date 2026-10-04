@@ -141,6 +141,15 @@ describe("the client over the mock transport", () => {
     for await (const e of api.createAgent("   ")) events.push(e);
     expect(events.map((e) => e.event)).toEqual(["compiling", "error"]);
   });
+
+  it("recompiles a what-if draft by keeping it, since mock mode has no AI", async () => {
+    const recipe = (await api.agent("fence")).recipe;
+    const out = await api.whatifCompile("fence", "drop the volatility signal", recipe);
+    expect(out.changed).toBe(false);
+    expect(out.recipe).toEqual(recipe);
+    expect(out.reply).toMatch(/mock/i);
+    await expect(api.whatifCompile("nobody", "x", recipe)).rejects.toMatchObject({ status: 404 });
+  });
 });
 
 describe("httpTransport", () => {
@@ -203,6 +212,17 @@ describe("httpTransport", () => {
     expect(JSON.parse(String(calls[0].init?.body))).toEqual({ message: "Better?", whatif: recipe });
     expect(calls[1].url).toBe("http://api.test/agents/fence/whatif");
     expect(run.redteam.verdict).toBe("pass");
+
+    const reply = { reply: "Leaned in.", recipe, changed: true };
+    const compile = fakeFetch(() => Response.json(reply));
+    const out = await createClient(httpTransport("http://api.test", compile.impl)).whatifCompile(
+      "fence",
+      "lean into value",
+      recipe,
+    );
+    expect(compile.calls[0].url).toBe("http://api.test/agents/fence/whatif/compile");
+    expect(JSON.parse(String(compile.calls[0].init?.body))).toEqual({ message: "lean into value", recipe });
+    expect(out).toEqual(reply);
   });
 
   it("streams POST /agents as parsed creation events", async () => {

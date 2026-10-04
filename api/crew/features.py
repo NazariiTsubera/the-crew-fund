@@ -35,6 +35,10 @@ FEATURES: dict[str, str] = {
     "mktcap_duration_interact": "company size interacting with rate duration",
 }
 
+# One value per date, shared by every ticker: they can gate or time a strategy, but a ranking on
+# them alone ties every stock. The web's feature picker warns about these.
+MARKET_WIDE = ["treasury_funding_interact", "inflation_expectation", "funding_stress"]
+
 CLOCK_FIELDS = ["days_to_next_report", "days_to_opex"]
 
 CONTROL_FLAGS = [

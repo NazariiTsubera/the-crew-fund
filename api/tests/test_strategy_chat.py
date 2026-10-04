@@ -97,3 +97,11 @@ def test_the_prompt_researches_first_and_asks_before_compiling():
 
     assert "research" in system.lower()
     assert "compile" in system and "explicitly" in system
+
+
+def test_context_about_the_agent_reaches_the_prompt():
+    llm = FakeLLM({**reply(DEFAULT_STRATEGY), "changed": False})
+
+    build_strategy_chat("lean into value", [], None, llm, context="AGENT: The Ledger")
+
+    assert "AGENT: The Ledger" in llm.calls[0][1]
