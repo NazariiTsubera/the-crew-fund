@@ -1,17 +1,16 @@
 "use client";
 
-import { useEffect, useImperativeHandle, useRef, useState, type FormEvent, type KeyboardEvent, type Ref } from "react";
+import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
 
 import { RecipeCard } from "@/components/agent/recipe-card";
 import { Glyph, agentColorVar } from "@/components/glyph";
 import { MicButton } from "@/components/mic-button";
 import { SpeakButton } from "@/components/speak-button";
 import { api, type Agent, type ChatMessage, type RecipeOut } from "@/lib/api";
+import { formatNum, formatPct } from "@/lib/format";
+import { isEdited } from "@/lib/whatif";
 
 export type ChatLine = ChatMessage | { role: "system"; ts: string; text: string };
-
-/** Lets the page put a question to the agent from outside the chat (the What-if panel's ASK WHY). */
-export type ChatHandle = { ask: (text: string) => void };
 
 function errorText(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
@@ -22,11 +21,8 @@ export function localStamp(): string {
   return new Date().toISOString().slice(0, 16).replace("T", " ");
 }
 
-const WHATIF_QUESTIONS = [
-  "Is my what-if better than you?",
-  "What changed for the what-if in 2022?",
-  "Should I trust the what-if?",
-];
+// Offered while the recipe card holds an edit that is not compiled yet.
+const DRAFT_QUESTIONS = ["What would this change do?", "Is this a good idea?", "Recompile it"];
 
 function suggestionsFor(agent: Agent, lines: ChatLine[]): string[] {
   // The agent's latest answer suggests what to ask next; before that, a standard set.
@@ -110,22 +106,33 @@ export function ChatColumn({
   agent,
   className = "",
   initialLines,
-  whatif,
-  ref,
+  onRecompiled,
+  version = 0,
 }: {
   agent: Agent;
   className?: string;
   /** A transcript the caller already holds (the recruit flow's); skips reading the history. */
   initialLines?: ChatLine[];
-  /** A what-if recipe the judge ran; questions go with it so the agent can compare. */
-  whatif?: RecipeOut;
-  ref?: Ref<ChatHandle>;
+  /** Called once a recompile finishes, so the page reloads the agent. */
+  onRecompiled?: () => void;
+  /** Bumped by the page after a recompile: reload the history (it gains a "Recompiled" line). */
+  version?: number;
 }) {
   const [lines, setLines] = useState<ChatLine[]>(initialLines ?? []);
   const [loading, setLoading] = useState(!initialLines);
   const preloaded = initialLines !== undefined;
   const [busy, setBusy] = useState(false);
   const [input, setInput] = useState("");
+  // The recipe as edited in the card or proposed by the agent; RECOMPILE makes it live.
+  const [draft, setDraft] = useState<RecipeOut>(agent.recipe);
+  const [cardOpen, setCardOpen] = useState(false);
+  // A recompiled agent arrives with a new recipe: the draft starts over from it.
+  const [seenRecipe, setSeenRecipe] = useState(agent.recipe);
+  if (agent.recipe !== seenRecipe) {
+    setSeenRecipe(agent.recipe);
+    setDraft(agent.recipe);
+  }
+  const edited = isEdited(agent.recipe, draft);
   const scroller = useRef<HTMLDivElement>(null);
   const dim = agent.status === "killed";
 
@@ -151,7 +158,7 @@ export function ChatColumn({
       }
     })();
     return () => controller.abort();
-  }, [agent.id, preloaded]);
+  }, [agent.id, preloaded, version]);
 
   useEffect(() => {
     const el = scroller.current;
@@ -165,8 +172,20 @@ export function ChatColumn({
     setBusy(true);
     setLines((ls) => [...ls, { role: "user", ts: localStamp(), text: message }]);
     try {
-      const reply = await api.chat(agent.id, message, undefined, whatif);
+      const reply = await api.chat(agent.id, message, undefined, undefined, edited ? draft : undefined);
       setLines((ls) => [...ls, reply]);
+      if (reply.proposal) {
+        // The agent's proposed change lands in the card for the judge to see before compiling.
+        setDraft(reply.proposal);
+        setCardOpen(true);
+        if (reply.recompile) {
+          await recompile(reply.proposal);
+          return;
+        }
+      } else if (reply.recompile && edited) {
+        await recompile(draft);
+        return;
+      }
     } catch (error) {
       setLines((ls) => [
         ...ls,
@@ -177,7 +196,34 @@ export function ChatColumn({
     }
   }
 
-  useImperativeHandle(ref, () => ({ ask: (text) => void send(text) }));
+  function system(text: string) {
+    setLines((ls) => [...ls, { role: "system", ts: localStamp(), text }]);
+  }
+
+  /** The full pipeline again: backtest, Red Team, publish, Mastermind. Progress lands in the chat. */
+  async function recompile(recipe: RecipeOut) {
+    setBusy(true);
+    system("RECOMPILING · BACKTESTING THE NEW RECIPE 2017–2026…");
+    let done = false;
+    try {
+      for await (const event of api.recompile(agent.id, recipe)) {
+        if (event.event === "redteam") {
+          const k = event.data.kpis;
+          system(`BACKTESTED · SHARPE ${formatNum(k.sharpe)} · TOTAL RETURN ${formatPct(k.total_return)} · RED TEAM ATTACKING…`);
+        } else if (event.event === "done") {
+          done = true;
+          system(`RECOMPILED · RED TEAM VERDICT ${event.data.agent.redteam.verdict.toUpperCase()}`);
+        } else if (event.event === "error") {
+          system(`RECOMPILE FAILED · ${event.data.message}`);
+        }
+      }
+    } catch (error) {
+      system(`RECOMPILE FAILED · ${errorText(error)}`);
+    } finally {
+      setBusy(false);
+    }
+    if (done) onRecompiled?.();
+  }
 
   function onSubmit(e: FormEvent) {
     e.preventDefault();
@@ -200,7 +246,16 @@ export function ChatColumn({
         <span className="flex-none text-right font-mono text-[10px] leading-tight text-faint">AI · cites its log</span>
       </div>
 
-      <RecipeCard recipe={agent.recipe} tone={tone} />
+      <RecipeCard
+        recipe={agent.recipe}
+        draft={draft}
+        onDraft={setDraft}
+        onRecompile={() => void recompile(draft)}
+        open={cardOpen}
+        onOpen={setCardOpen}
+        busy={busy}
+        tone={tone}
+      />
 
       <div
         ref={scroller}
@@ -229,14 +284,14 @@ export function ChatColumn({
         )}
       </div>
 
-      {whatif && (
+      {edited && (
         <div className="mx-5 mb-2 border border-dashed border-accent px-3 py-2 font-mono text-[10.5px] leading-snug text-soft">
-          WHAT-IF ACTIVE · {agent.name} will compare it with its live recipe.
+          RECIPE EDITED, NOT COMPILED · ask {agent.name} about it, or say &ldquo;recompile it&rdquo;.
         </div>
       )}
       {!loading && !busy && (
         <div className="flex flex-none gap-1.5 overflow-x-auto px-5 pb-2.5">
-          {(whatif ? WHATIF_QUESTIONS : suggestionsFor(agent, lines)).map((label) => (
+          {(edited ? DRAFT_QUESTIONS : suggestionsFor(agent, lines)).map((label) => (
             <button
               key={label}
               type="button"

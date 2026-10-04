@@ -52,6 +52,8 @@ class ChatRequest(BaseModel):
     message: str | None = Field(default=None, min_length=1, max_length=2000)
     # A what-if recipe the judge is testing; the server re-runs it rather than trust numbers.
     whatif: StrategyRequest | None = None
+    # The recipe as edited in the recipe card, not yet recompiled; the agent edits from it.
+    draft: StrategyRequest | None = None
 
 
 class WhatIfRequest(BaseModel):

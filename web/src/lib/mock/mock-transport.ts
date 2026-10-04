@@ -153,6 +153,21 @@ export function mockTransport({ stageDelay = () => 1000 + Math.random() * 1000 }
     yield { event: "done", data: { agent: structuredClone(stored) } };
   }
 
+  // Mock mode cannot backtest: a recompile keeps the agent's numbers and stores the new recipe,
+  // so the flow (stages, reload, the card showing the new recipe) can still be walked through.
+  async function* recompile(id: string, body: Json, signal?: AbortSignal): AsyncGenerator<SseEvent> {
+    const agent = findAgent(id);
+    const recipe = body.recipe as Agent["recipe"];
+    await sleep(stageDelay(), signal);
+    yield { event: "backtesting", data: { name: agent.name, recipe } };
+    await sleep(stageDelay(), signal);
+    yield { event: "redteam", data: { kpis: agent.kpis } };
+    const next = { ...agent, recipe };
+    agents.set(id, next);
+    const stored = Object.fromEntries(Object.entries(next).filter(([k]) => !JOINED.has(k)));
+    yield { event: "done", data: { agent: structuredClone(stored) } };
+  }
+
   function route(method: "GET" | "POST", path: string, body: Json = {}): unknown {
     const url = new URL(path, "http://mock");
     const q = url.searchParams;
@@ -219,6 +234,8 @@ export function mockTransport({ stageDelay = () => 1000 + Math.random() * 1000 }
       throw new ApiError(503, "speech playback is unavailable in mock mode");
     },
     stream(path, body, signal) {
+      const re = path.match(/^\/agents\/([^/]+)\/recompile$/);
+      if (re) return recompile(decodeURIComponent(re[1]), (body ?? {}) as Json, signal);
       if (path !== "/agents" && path !== "/agents/from-strategy") throw new ApiError(404, `404 Not Found: POST ${path}`);
       return create((body ?? {}) as Json, signal);
     },

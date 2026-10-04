@@ -150,6 +150,10 @@ export const ChatMessageSchema = z.object({
   provider: z.string().optional(),
   // Questions the agent suggests next, shown as chips under the chat.
   follow_ups: z.array(z.string()).optional(),
+  // A recipe change the agent proposes (validated by the API) and whether the judge agreed to
+  // recompile it now.
+  proposal: RecipeOutSchema.optional(),
+  recompile: z.boolean().optional(),
 });
 
 export const AgentReplySchema = ChatMessageSchema.extend({
@@ -296,14 +300,25 @@ export function createClient(transport: Transport) {
     capital: async (opts: { from?: string } = {}, signal?: AbortSignal) =>
       CapitalSchema.parse(await transport.get(`/capital${query(opts)}`, signal)),
     /** `whatif`: an unsaved variant the judge is testing; the server re-runs it for the facts. */
-    chat: async (id: string, message?: string, signal?: AbortSignal, whatif?: RecipeOut) =>
+    /** `draft`: the recipe as edited in the recipe card, not yet recompiled. */
+    chat: async (id: string, message?: string, signal?: AbortSignal, whatif?: RecipeOut, draft?: RecipeOut) =>
       AgentReplySchema.parse(
         await transport.post(
           `/agents/${enc(id)}/chat`,
-          { ...(message === undefined ? {} : { message }), ...(whatif ? { whatif } : {}) },
+          {
+            ...(message === undefined ? {} : { message }),
+            ...(whatif ? { whatif } : {}),
+            ...(draft ? { draft } : {}),
+          },
           signal,
         ),
       ),
+    /** POST /agents/{id}/recompile: the full pipeline again under the same identity. */
+    async *recompile(id: string, recipe: RecipeOut, signal?: AbortSignal): AsyncGenerator<CreateEvent> {
+      for await (const raw of transport.stream(`/agents/${enc(id)}/recompile`, { recipe }, signal)) {
+        yield CreateEventSchema.parse(raw);
+      }
+    },
     whatif: async (id: string, recipe: RecipeOut, signal?: AbortSignal) =>
       WhatIfSchema.parse(await transport.post(`/agents/${enc(id)}/whatif`, { recipe }, signal)),
     whatifCompile: async (id: string, message: string, recipe: RecipeOut, signal?: AbortSignal) =>

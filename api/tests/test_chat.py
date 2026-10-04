@@ -296,3 +296,58 @@ def test_fact_ids_never_show_in_the_answer_text(store):
     out = answer(store, AGENT, "2022?", llm)
 
     assert out["text"] == "I sat out. Fine."
+
+
+PROPOSAL = {
+    "features": [{"name": "kyle_lambda", "weight": 2, "direction": "high"}],
+    "filters": [],
+    "lookback_months": 12,
+    "top_n": 20,
+    "rebalance": "monthly",
+    "sit_out_if_trailing_sharpe_below": None,
+}
+
+
+def test_a_requested_change_comes_back_as_a_validated_proposal(store):
+    import json
+
+    llm = FakeLLM(
+        {
+            "text": "Done. Recompile?",
+            "cited": [],
+            "follow_ups": [],
+            "proposal_json": json.dumps(PROPOSAL),
+            "recompile": False,
+        }
+    )
+
+    out = answer(store, {**AGENT, "recipe": RECIPE}, "Hold 20, kyle_lambda only", llm)
+
+    assert out["proposal"]["top_n"] == 20
+    assert out["proposal"]["features"][0]["weight"] == 1.0  # normalized
+    assert out["recompile"] is False
+    system, prompt, _ = llm.calls[0]
+    assert "proposal_json" in system and "kyle_lambda" in system  # the glossary is offered
+    assert '"top_n": 10' in prompt  # the current recipe, exactly
+
+
+def test_an_invalid_proposal_is_dropped(store):
+    bad = '{"features": [{"name": "alpha", "weight": 1, "direction": "high"}]}'
+    llm = FakeLLM(
+        {"text": "x", "cited": [], "follow_ups": [], "proposal_json": bad, "recompile": True}
+    )
+
+    out = answer(store, {**AGENT, "recipe": RECIPE}, "add alpha", llm)
+
+    assert "proposal" not in out and "recompile" not in out
+
+
+def test_the_draft_on_screen_is_what_the_agent_edits(store):
+    llm = FakeLLM(
+        {"text": "x", "cited": [], "follow_ups": [], "proposal_json": "", "recompile": False}
+    )
+
+    answer(store, {**AGENT, "recipe": RECIPE}, "Is this better?", llm, draft=PROPOSAL)
+
+    prompt = llm.calls[0][1]
+    assert '"top_n": 20' in prompt and "not compiled" in prompt

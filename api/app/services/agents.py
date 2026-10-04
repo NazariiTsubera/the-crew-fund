@@ -14,7 +14,7 @@ from app import crew_repository
 from crew import chat as crew_chat
 from crew.compiler import CompileError, compile_strategy
 from crew.gemini import LLM, LLMError
-from crew.pipeline import evaluate, publish, rebalance
+from crew.pipeline import evaluate, now_ts, publish, rebalance
 from crew.recipe import Recipe
 from crew.seeds import SEEDS
 from crew.strategy_chat import build_strategy_chat
@@ -157,6 +157,69 @@ def create_from_recipe(
     )
 
 
+IDENTITY = (
+    "id",
+    "name",
+    "persona",
+    "strategy_line",
+    "pitch",
+    "shape",
+    "color",
+    "prompt",
+    "created_at",
+)
+
+
+def recompile(agent_id: str, recipe: Recipe) -> Iterator[tuple[str, dict]]:
+    """Put a live agent's new recipe through the whole pipeline again: backtest, red team,
+    publish under the same identity, Mastermind re-split. The conversation is kept, with a line
+    saying what changed, so the agent can be asked why the new version does better or worse."""
+    store = crew_repository.store()
+    agent = store.get_agent(agent_id)
+    if agent is None:
+        raise AgentNotFound(agent_id)
+    yield "backtesting", {"name": agent["name"], "recipe": recipe.model_dump()}
+    try:
+        panel = crew_repository.panel()
+    except FileNotFoundError:
+        yield "error", {"message": "the panel cache is missing; run scripts/cache_panel.py"}
+        return
+    with _lock:
+        run, report = evaluate(recipe, panel)
+        yield "redteam", {"kpis": run.kpis}
+        chats = store.chats(agent_id)  # publish replaces everything stored under the id
+        before = agent.get("kpis") or {}
+        publish(store, {k: agent[k] for k in IDENTITY if k in agent}, recipe, run, report)
+        for c in chats:
+            store.add_chat(agent_id, c)
+        store.add_chat(
+            agent_id,
+            {
+                "ts": now_ts(),
+                "role": "agent",
+                "text": _recompiled_line(before, run.kpis, report["verdict"]),
+                "evidence": [],
+                "source": "fallback",
+            },
+        )
+        rebalance(store, panel)
+        agent = store.get_agent(agent_id)
+    yield "done", {"agent": agent}
+
+
+def _recompiled_line(before: dict, after: dict, verdict: str) -> str:
+    def f(k, pct=True):
+        v = after.get(k)
+        b = before.get(k)
+        fmt = (lambda x: f"{x:+.1%}") if pct else (lambda x: f"{x:.2f}")
+        return fmt(v) + (f" (was {fmt(b)})" if b is not None else "")
+
+    return (
+        f"Recompiled. Total return {f('total_return')}, Sharpe {f('sharpe', False)}, "
+        f"max drawdown {f('max_drawdown')}. Red Team verdict {verdict.upper()}."
+    )
+
+
 class AgentNotFound(LookupError):
     pass
 
@@ -188,6 +251,7 @@ def chat(
     message: str | None,
     llm_factory: Callable[[], LLM],
     variant: Recipe | None = None,
+    draft: Recipe | None = None,
 ) -> dict:
     store = crew_repository.store()
     agent = store.get_agent(agent_id)
@@ -199,7 +263,9 @@ def chat(
         llm = None  # no key: the agent still answers, from its facts alone
     # Re-run the variant here (cached) rather than trust numbers sent by the browser.
     facts = whatif_facts(agent, whatif(agent_id, variant)) if variant else None
-    return crew_chat.answer(store, agent, message, llm, whatif=facts)
+    return crew_chat.answer(
+        store, agent, message, llm, whatif=facts, draft=draft.model_dump() if draft else None
+    )
 
 
 def chat_history(agent_id: str) -> list[dict]:

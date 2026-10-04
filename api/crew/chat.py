@@ -9,12 +9,16 @@ rate-limited or has no key, a deterministic answer is built from the same facts.
 
 from __future__ import annotations
 
+import json
 import logging
 import re
+
+from pydantic import ValidationError
 
 from crew.features import FEATURES
 from crew.gemini import LLM, LLMError, reason
 from crew.pipeline import now_ts
+from crew.recipe import Recipe
 from crew.store import Store
 
 log = logging.getLogger(__name__)
@@ -28,8 +32,12 @@ SCHEMA = {
         "text": {"type": "string"},
         "cited": {"type": "array", "items": {"type": "string"}},
         "follow_ups": {"type": "array", "items": {"type": "string"}},
+        # A recipe change as a JSON string ("" for none): a string survives both providers'
+        # schema dialects, and Python validates it before anything sees it.
+        "proposal_json": {"type": "string"},
+        "recompile": {"type": "boolean"},
     },
-    "required": ["text", "cited", "follow_ups"],
+    "required": ["text", "cited", "follow_ups", "proposal_json", "recompile"],
 }
 # What a judge might ask next, offered as chips when Gemini cannot suggest any.
 DEFAULT_FOLLOW_UPS = [
@@ -232,6 +240,17 @@ def _paragraphs(text: str) -> str:
     return "\n\n".join(p for p in paras if p)
 
 
+def _proposal(raw) -> dict | None:
+    """A validated, normalized recipe from the model's JSON, or None (empty or invalid)."""
+    if not raw or not str(raw).strip():
+        return None
+    try:
+        return Recipe.model_validate(json.loads(raw)).model_dump()
+    except (ValueError, ValidationError):
+        log.warning("dropped an invalid recipe proposal")
+        return None
+
+
 def _follow_ups(raw) -> list[str]:
     out = [" ".join(str(q).split())[:80] for q in raw or []]
     return [q for q in out if q][:MAX_FOLLOW_UPS]
@@ -243,8 +262,10 @@ def answer(
     question: str | None,
     llm: LLM | None,
     whatif: list[str] | None = None,
+    draft: dict | None = None,
 ) -> dict:
-    """Answer `question` (None: the agent introduces itself) and store the exchange."""
+    """Answer `question` (None: the agent introduces itself) and store the exchange. `draft`:
+    the recipe as the judge has edited it on screen, not yet compiled."""
     facts = facts_for(store, agent, question, whatif)
     by_id = {f["id"]: f["text"] for f in facts}
     system = (
@@ -271,15 +292,39 @@ def answer(
             "did better or worse and when, and what its Red Team result says about trusting it. "
             "A hand-tuned curve that fails the shuffle or lookahead test is likely overfit; say so."
         )
-    prompt = f"Question: {question or INTRO}\n\nFacts:\n" + "\n".join(
-        f"{f['id']}: {f['text']}" for f in facts
+    system += (
+        "\nThe judge can change your recipe through you. If they ask to change it (weights, "
+        "signals, directions, top N, lookback, the sit-out rule), put the complete new recipe in "
+        "`proposal_json` as JSON with keys features [{name, weight, direction}], filters, "
+        'lookback_months (1-60), top_n (1-50), rebalance "monthly" and '
+        "sit_out_if_trailing_sharpe_below (number or null), starting from the recipe on screen "
+        "and changing only what they asked; say what you changed and ask whether to recompile. "
+        "Otherwise leave `proposal_json` empty. Set `recompile` true only when the judge "
+        "explicitly agrees to recompile now. Market-wide signals (funding_stress, "
+        "inflation_expectation, treasury_funding_interact) cannot rank stocks; warn if asked. "
+        "Signals:\n" + "\n".join(f"- {n}: {m}" for n, m in FEATURES.items())
+    )
+    current = draft or agent.get("recipe")
+    on_screen = (
+        "Recipe on screen (edited by the judge, not compiled yet)"
+        if draft and draft != agent.get("recipe")
+        else "Recipe on screen (compiled, live)"
+    )
+    prompt = (
+        f"Question: {question or INTRO}\n\n"
+        + (f"{on_screen}:\n{json.dumps(current, indent=2)}\n\n" if current else "")
+        + "Facts:\n"
+        + "\n".join(f"{f['id']}: {f['text']}" for f in facts)
     )
     source, why = "gemini", None
+    proposal, recompile = None, False
     try:
         if llm is None:
             raise LLMError("no Gemini client", "no Gemini key")
         reply = llm.generate_json(system, prompt, SCHEMA)
         text = _paragraphs(str(reply.get("text") or ""))
+        proposal = _proposal(reply.get("proposal_json"))
+        recompile = bool(reply.get("recompile")) and proposal is not None
         follow_ups = _follow_ups(reply.get("follow_ups"))
         evidence = [by_id[i] for i in reply.get("cited") or [] if i in by_id]
         if not text:
@@ -299,6 +344,9 @@ def answer(
         message["provider"] = llm.provider
     if follow_ups:
         message["follow_ups"] = follow_ups
+    if source == "gemini" and proposal is not None:
+        message["proposal"] = proposal
+        message["recompile"] = recompile
     if why:
         message["fallback_reason"] = why
     store.add_chat(agent["id"], message)

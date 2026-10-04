@@ -91,6 +91,15 @@ describe("the schemas", () => {
 describe("the client over the mock transport", () => {
   const api = createClient(mockTransport({ stageDelay: () => 0 }));
 
+  it("recompiles an agent and keeps the new recipe", async () => {
+    const agent = await api.agent("fence");
+    const recipe = { ...agent.recipe, top_n: 9 };
+    const events: string[] = [];
+    for await (const e of api.recompile("fence", recipe)) events.push(e.event);
+    expect(events).toEqual(["backtesting", "redteam", "done"]);
+    expect((await api.agent("fence")).recipe.top_n).toBe(9);
+  });
+
   it("reads the vault and the crew", async () => {
     const vault = await api.vault();
     expect(vault.agents).toHaveLength(5);
@@ -223,6 +232,47 @@ describe("httpTransport", () => {
     expect(compile.calls[0].url).toBe("http://api.test/agents/fence/whatif/compile");
     expect(JSON.parse(String(compile.calls[0].init?.body))).toEqual({ message: "lean into value", recipe });
     expect(out).toEqual(reply);
+  });
+
+  it("sends the draft with a chat question and reads a proposal back", async () => {
+    const draft = {
+      features: [{ name: "kyle_lambda", weight: 1, direction: "low" as const }],
+      filters: [],
+      lookback_months: 12,
+      top_n: 20,
+      rebalance: "monthly" as const,
+      sit_out_if_trailing_sharpe_below: null,
+    };
+    const { impl, calls } = fakeFetch(() =>
+      Response.json({ ts: "t", role: "agent", text: "x", evidence: [], source: "gemini", proposal: draft, recompile: true }),
+    );
+
+    const reply = await createClient(httpTransport("http://api.test", impl)).chat("fence", "Hold 20", undefined, undefined, draft);
+
+    expect(JSON.parse(String(calls[0].init?.body))).toEqual({ message: "Hold 20", draft });
+    expect(reply.proposal?.top_n).toBe(20);
+    expect(reply.recompile).toBe(true);
+  });
+
+  it("streams a recompile as creation events", async () => {
+    const body = 'event: backtesting\ndata: {"name": "The Fence", "recipe": null}\n\nevent: error\ndata: {"message": "x"}\n\n';
+    const { impl, calls } = fakeFetch(() => new Response(body, { headers: { "Content-Type": "text/event-stream" } }));
+    const recipe = {
+      features: [{ name: "kyle_lambda", weight: 1, direction: "low" as const }],
+      filters: [],
+      lookback_months: 12,
+      top_n: 20,
+      rebalance: "monthly" as const,
+      sit_out_if_trailing_sharpe_below: null,
+    };
+    const events: CreateEvent[] = [];
+    try {
+      for await (const e of createClient(httpTransport("http://api.test", impl)).recompile("fence", recipe)) events.push(e);
+    } catch {
+      // a backtesting event without a recipe fails the schema; only the request shape matters here
+    }
+    expect(calls[0].url).toBe("http://api.test/agents/fence/recompile");
+    expect(JSON.parse(String(calls[0].init?.body))).toEqual({ recipe });
   });
 
   it("streams POST /agents as parsed creation events", async () => {

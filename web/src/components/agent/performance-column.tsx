@@ -8,7 +8,6 @@ import { KpiTiles } from "@/components/agent/kpi-tiles";
 import { LogFeed } from "@/components/agent/log-feed";
 import { RedTeamCard } from "@/components/agent/red-team-card";
 import { statusDotStyle } from "@/components/agent/tags";
-import { WhatIfPanel, type Variant } from "@/components/agent/what-if-panel";
 import { isFired, statusLabel } from "@/lib/agent-status";
 import { VerdictBadge } from "@/components/agent/verdict-badge";
 import { Glyph, agentColorVar } from "@/components/glyph";
@@ -23,7 +22,7 @@ function toneOf(x: number): string {
   return x > 0.00005 ? "var(--up)" : x < -0.00005 ? "var(--down)" : "var(--muted)";
 }
 
-function useAgentLog(id: string): LogState {
+function useAgentLog(id: string, version: number): LogState {
   const [state, setState] = useState<LogState>({ status: "loading" });
   useEffect(() => {
     const controller = new AbortController();
@@ -35,7 +34,7 @@ function useAgentLog(id: string): LogState {
       },
     );
     return () => controller.abort();
-  }, [id]);
+  }, [id, version]);
   return state;
 }
 
@@ -56,20 +55,15 @@ function useHoldoutCutoff(): string | null {
 export function PerformanceColumn({
   agent,
   className = "",
-  variant = null,
-  onVariant,
-  onAskWhy,
+  version = 0,
 }: {
   agent: Agent;
   className?: string;
-  /** A what-if the judge is running; the agent file owns it so the chat can see it too. */
-  variant?: Variant | null;
-  onVariant?: (v: Variant | null) => void;
-  /** Puts the preset "why" question about the what-if to the agent in the chat column. */
-  onAskWhy?: () => void;
+  /** Bumped after a recompile so the log reloads. */
+  version?: number;
 }) {
   const [selected, setSelected] = useState<string | null>(null);
-  const log = useAgentLog(agent.id);
+  const log = useAgentLog(agent.id, version);
   const holdoutCutoff = useHoldoutCutoff();
   const killed = agent.status === "killed";
   const tone = killed ? "var(--faint)" : agentColorVar(agent.color);
@@ -135,9 +129,7 @@ export function PerformanceColumn({
           holdoutCutoff={holdoutCutoff}
           selected={selected}
           onSelect={setSelected}
-          variant={variant?.result.curve}
         />
-        {onVariant && <WhatIfPanel agent={agent} variant={variant} onVariant={onVariant} onAskWhy={onAskWhy} />}
         <RedTeamCard redteam={agent.redteam} />
         <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,280px),1fr))] gap-5">
           <BookTable

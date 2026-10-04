@@ -11,6 +11,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import Response, StreamingResponse
 from pydantic import ValidationError
 
+from app import crew_repository
 from app.models import (
     Agent,
     AgentSummary,
@@ -87,8 +88,9 @@ def chat(
 ) -> dict:
     """{text, evidence, source, ts}: the agent's answer and the stored facts it cites."""
     variant = _recipe(req.whatif.model_dump()) if req.whatif else None
+    draft = _recipe(req.draft.model_dump()) if req.draft else None
     try:
-        return agents.chat(agent_id, req.message, llm, variant)
+        return agents.chat(agent_id, req.message, llm, variant, draft)
     except agents.AgentNotFound as exc:
         raise HTTPException(404, f"no agent {exc}") from exc
 
@@ -98,6 +100,20 @@ def _recipe(raw: dict) -> Recipe:
         return Recipe.model_validate(raw)
     except ValidationError as exc:
         raise HTTPException(422, f"invalid recipe: {explain(exc)}") from exc
+
+
+@router.post("/agents/{agent_id}/recompile")
+def recompile(agent_id: str, req: WhatIfRequest):
+    """Server-sent events: backtesting, redteam, then done {agent} or error. The agent keeps its
+    identity and chat; its recipe, record, verdict and capital are recomputed."""
+    recipe = _recipe(req.recipe.model_dump())
+    if crew_repository.store().get_agent(agent_id) is None:
+        raise HTTPException(404, f"no agent {agent_id}")
+    return StreamingResponse(
+        _sse(agents.recompile(agent_id, recipe)),
+        media_type="text/event-stream",
+        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+    )
 
 
 @router.post("/agents/{agent_id}/whatif")
