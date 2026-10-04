@@ -125,8 +125,10 @@ export function FileLayout({
   ];
 
   return (
-    <div className="flex min-w-0 flex-col min-[1100px]:h-screen">
-      <div role="tablist" aria-label={label} className="flex border-b border-line min-[1100px]:hidden">
+    // Below 1100px the screen is exactly the viewport under the top bar (60px + 1px border) so only
+    // the chat log or performance column scrolls: header, tabs and the input bar stay put.
+    <div className="flex h-[calc(100dvh-61px)] min-w-0 flex-col overflow-hidden wide:h-dvh min-[1100px]:h-screen">
+      <div role="tablist" aria-label={label} className="flex flex-none border-b border-line min-[1100px]:hidden">
         {tabs.map(([key, text]) => (
           <button
             key={key}
@@ -140,11 +142,11 @@ export function FileLayout({
           </button>
         ))}
       </div>
-      <div className="grid min-h-0 min-w-0 flex-1 grid-cols-[minmax(0,1fr)] min-[1100px]:grid-cols-[minmax(340px,4fr)_minmax(0,6fr)]">
+      <div className="grid min-h-0 min-w-0 flex-1 grid-cols-[minmax(0,1fr)] grid-rows-[minmax(0,1fr)] min-[1100px]:grid-cols-[minmax(340px,4fr)_minmax(0,6fr)]">
         {chat(
-          `${tab === "chat" ? "flex" : "hidden"} h-[calc(100dvh-140px)] wide:h-[calc(100dvh-43px)] min-[1100px]:flex min-[1100px]:h-full min-[1100px]:border-r min-[1100px]:border-line`,
+          `${tab === "chat" ? "flex" : "hidden"} h-full min-[1100px]:flex min-[1100px]:border-r min-[1100px]:border-line`,
         )}
-        {perf(`${tab === "perf" ? "flex" : "hidden"} min-[1100px]:flex min-[1100px]:h-full min-[1100px]:overflow-y-auto`)}
+        {perf(`${tab === "perf" ? "flex" : "hidden"} h-full overflow-y-auto overscroll-contain min-[1100px]:flex`)}
       </div>
     </div>
   );

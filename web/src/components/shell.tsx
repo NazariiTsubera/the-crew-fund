@@ -60,7 +60,7 @@ export function Shell({ children }: { children: ReactNode }) {
   };
 
   return (
-    <div className="flex min-h-screen bg-bg text-ink">
+    <div className="flex min-h-dvh bg-bg text-ink">
       <ThemeRestorer />
       <Sidebar model={model} />
       <div className="flex min-w-0 flex-1 flex-col">

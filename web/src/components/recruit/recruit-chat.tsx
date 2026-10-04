@@ -222,7 +222,7 @@ export function RecruitChat({
     role="log"
     aria-live="polite"
     aria-busy={busy}
-    className="flex min-h-0 flex-1 flex-col gap-[18px] overflow-y-auto p-5"
+    className="flex min-h-0 flex-1 flex-col gap-[18px] overflow-y-auto overscroll-contain p-5"
     >
     {showBrief && (
       <div className="flex flex-col gap-4 py-2">
@@ -335,7 +335,7 @@ export function RecruitChat({
             maxLength={2000}
             aria-label="Tell the recruiter about your investment strategy"
             placeholder="Tell the recruiter what you want this agent to invest in…"
-            className="max-h-[140px] min-h-12 min-w-0 resize-none rounded-[2px] border border-line-strong bg-panel px-3 py-[11px] text-sm leading-snug text-ink outline-none placeholder:text-faint focus:border-accent disabled:opacity-60"
+            className="max-h-[140px] min-h-12 min-w-0 resize-none rounded-[2px] border border-line-strong bg-panel px-3 py-[11px] text-sm leading-snug max-wide:text-base text-ink outline-none placeholder:text-faint focus:border-accent disabled:opacity-60"
             />
 
             <div className="flex justify-end gap-2">

@@ -60,7 +60,7 @@ export function RecipeCard({ recipe, draft, onDraft, onRecompile, open, onOpen, 
         <span aria-hidden>{open ? "−" : "+"}</span>
       </button>
       {open && (
-        <div className="flex max-h-[46vh] flex-col gap-3 overflow-y-auto px-5 pt-0.5 pb-4 font-mono text-xs leading-snug">
+        <div className="flex max-h-[46dvh] flex-col gap-3 overflow-y-auto overscroll-contain px-5 pt-0.5 pb-4 font-mono text-xs leading-snug">
           <div className="flex flex-col gap-1.5">
             {draft.features.map((f, i) => (
               <div

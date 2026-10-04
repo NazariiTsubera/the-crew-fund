@@ -263,7 +263,7 @@ export function ChatColumn({
         role="log"
         aria-live="polite"
         aria-busy={loading || busy}
-        className="flex min-h-0 flex-1 flex-col gap-[18px] overflow-y-auto p-5"
+        className="flex min-h-0 flex-1 flex-col gap-[18px] overflow-y-auto overscroll-contain p-5"
       >
         {loading && <SystemLine text="OPENING THE FILE…" />}
         {lines.map((line, i) =>
@@ -315,7 +315,7 @@ export function ChatColumn({
           maxLength={1000}
           aria-label={`Ask ${agent.name} anything`}
           placeholder={`Ask ${agent.name} anything. "How are you doing?"`}
-          className="max-h-[140px] min-h-12 min-w-0 flex-1 resize-none rounded-[2px] border border-line-strong bg-panel px-3 py-[11px] text-sm leading-snug text-ink outline-none placeholder:text-faint focus:border-accent disabled:opacity-60"
+          className="max-h-[140px] min-h-12 min-w-0 flex-1 resize-none rounded-[2px] border border-line-strong bg-panel px-3 py-[11px] text-sm leading-snug max-wide:text-base text-ink outline-none placeholder:text-faint focus:border-accent disabled:opacity-60"
         />
         <MicButton value={input} onChange={setInput} disabled={busy} />
         <button

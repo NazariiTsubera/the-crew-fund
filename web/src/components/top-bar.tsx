@@ -36,7 +36,7 @@ export function TopBar({ model }: { model: ShellModel }) {
 
   return (
     <div className="sticky top-0 z-20 border-b border-line bg-side wide:hidden">
-      <div className="flex items-center justify-between gap-3 px-3.5 py-3">
+      <div className="flex h-[60px] items-center justify-between gap-3 px-3.5">
         <div className="flex min-w-0 items-center gap-3">
           <button
             type="button"
@@ -78,7 +78,7 @@ export function TopBar({ model }: { model: ShellModel }) {
         <nav
           id="mobile-menu"
           aria-label="Sections"
-          className="flex max-h-[calc(100dvh-62px)] flex-col gap-1 overflow-y-auto border-t border-line px-3.5 pt-2 pb-4"
+          className="flex max-h-[calc(100dvh-61px)] flex-col gap-1 overflow-y-auto overscroll-contain border-t border-line px-3.5 pt-2 pb-4"
         >
           {nav.map((n) => {
             const on = isCurrent(pathname, n.href);
