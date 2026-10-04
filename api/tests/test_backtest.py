@@ -208,3 +208,14 @@ def test_missing_feature_values_never_break_a_run(panel):
     texts = [e["text"] for e in run.log] + [h["reason"] for h in run.holdings]
     assert run.monthly
     assert not any("nan" in t or "None" in t for t in texts)
+
+
+def test_each_month_records_the_equal_weight_return_of_every_eligible_name(panel):
+    # With top_n covering the whole universe the picks are the eligible names.
+    everyone = run_recipe(recipe(top_n=40), panel)
+    assert all(m["baseline_ret"] == pytest.approx(m["paper_ret"]) for m in everyone.monthly)
+    # A narrower book keeps the same baseline: it depends on the pool, not the picks.
+    narrow = run_recipe(recipe(top_n=5), panel)
+    assert [m["baseline_ret"] for m in narrow.monthly] == pytest.approx(
+        [m["baseline_ret"] for m in everyone.monthly]
+    )

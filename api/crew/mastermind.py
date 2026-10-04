@@ -7,10 +7,11 @@ means the month's holding period had closed by the decision date, so the Masterm
 reads a return it could not have known.
 
 An agent is fired, capital 0 from then on with the month recorded, when the trailing 12-month
-Sharpe of its picks' returns in excess of the S&P 500 stays below -1.0 for three months in a
-row. The picks' paper returns, because firing judges the signal, not months the agent chose to
-sit in cash; excess returns, because every long-only book has a negative Sharpe in a bear
-market; 12 months, because one bad quarter should trim an agent, not fire it.
+Sharpe of its picks' returns in excess of an equal-weight book of its own eligible names stays
+below -1.0 for three months in a row. The picks' paper returns, because firing judges the
+signal, not months the agent chose to sit in cash; excess over its own pool, because against
+the S&P 500 a book of equal-weight mid caps is judged on size, and every long-only book has a
+negative Sharpe in a bear market; 12 months, because one bad quarter should trim an agent.
 
 The fund's book is the invested agents' books weighted by capital. A sitting-out agent's share
 flows to the others, because the organizers' checker demands weights summing to 1.0; "invested"
@@ -98,6 +99,13 @@ def cap_positions(weights: dict[str, float], cap: float = POSITION_CAP) -> dict[
             w[k] = v + excess * v / rest_total
 
 
+def _excess(row: dict, spx: float) -> float:
+    """The picks' return over the equal-weight return of every name the agent could have
+    picked. Runs stored before that baseline existed fall back to the S&P 500."""
+    base = row.get("baseline_ret")
+    return (row["paper_ret"] or 0.0) - (spx if base is None else base)
+
+
 def _sharpe(rets: list[float]) -> float:
     sd = float(np.std(rets, ddof=1))
     return float(np.mean(rets)) / sd * np.sqrt(12) if sd else 0.0
@@ -146,7 +154,7 @@ def allocate(agents: list[dict], universe: set[str], benchmark: list[dict] | Non
             if a["id"] in fired or a["verdict"] == "killed" or len(rets) < FIRE_WINDOW:
                 continue
             window = [m for m in settled if m in monthly[a["id"]]][-FIRE_WINDOW:]
-            excess = [(monthly[a["id"]][m]["paper_ret"] or 0.0) - spx.get(m, 0.0) for m in window]
+            excess = [_excess(monthly[a["id"]][m], spx.get(m, 0.0)) for m in window]
             long_run = _sharpe(excess)
             strikes[a["id"]] = strikes[a["id"]] + 1 if long_run < FIRE_SHARPE else 0
             if strikes[a["id"]] >= FIRE_MONTHS:
@@ -156,7 +164,7 @@ def allocate(agents: list[dict], universe: set[str], benchmark: list[dict] | Non
                         "ts": f"{month}-01 {CLOSE}",
                         "type": "mastermind",
                         "agent_id": a["id"],
-                        "text": f"Fired {a['name']} · picks' 12-month Sharpe vs S&P 500 "
+                        "text": f"Fired {a['name']} · picks' 12-month Sharpe vs its eligible names "
                         f"{fmt(long_run, 1)} for {FIRE_MONTHS} months, capital → 0%",
                     }
                 )

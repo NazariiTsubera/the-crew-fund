@@ -137,6 +137,24 @@ def test_a_bear_market_alone_does_not_fire_anyone():
     assert "winner" not in plan.fired
 
 
+def test_a_crash_in_every_name_alone_does_not_fire_anyone():
+    # Every name falls 1.5x the index all year: picks lag the S&P 500 but not their own pool.
+    panel = make_panel(
+        persistence=0.9,
+        n_tickers=60,
+        market_shocks={f"2020-{m:02d}": -0.06 for m in range(1, 13)},
+        name_beta=1.5,
+    )
+    agents = [
+        {"id": i, "name": i, "verdict": "pass", "run": run_recipe(r, panel).to_dict()}
+        for i, r in [("winner", recipe()), ("other", recipe("skew_25d", top_n=25))]
+    ]
+
+    plan = allocate(agents, set(panel.vectors["ticker"].unique().to_list()), spx(panel))
+
+    assert "winner" not in plan.fired
+
+
 def test_bounded_split_water_fills():
     shares = bounded_split({"a": 10.0, "b": 0.0, "c": 0.0}, lo=0.1, hi=0.5)
 

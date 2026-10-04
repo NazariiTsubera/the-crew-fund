@@ -38,6 +38,7 @@ def make_panel(
     persistence: float = 0.0,
     tilted_shocks: dict[str, tuple[float, float]] | None = None,
     leak_feature: str | None = None,
+    name_beta: float = 1.0,
 ) -> Panel:
     """`market_shocks` maps "YYYY-MM" to a return applied to every name (and the S&P 500)
     spread evenly over that month's trading days.
@@ -46,7 +47,9 @@ def make_panel(
     `tilted_shocks` maps "YYYY-MM" to (return, tilt): the S&P 500 takes the return, and each
     name takes return * (1 + tilt * the signal driving that month), so high-signal names fall
     harder. `leak_feature` overwrites that feature with each name's realized return over the
-    holding period that follows the decision: future information a backtest must not trust."""
+    holding period that follows the decision: future information a backtest must not trust.
+    `name_beta` scales the market shocks for the names but not the S&P 500, the way small and
+    mid caps fell harder than the index in 2020."""
     rng = np.random.default_rng(seed)
     days = [d for d in bizdays(start, end) if d < cutoff]
     months = sorted({(d.year, d.month) for d in days})
@@ -64,7 +67,7 @@ def make_panel(
         y, mo = map(int, m.split("-"))
         if (y, mo) in months:
             shocks[months.index((y, mo))] = r
-    name_shocks = np.repeat(shocks[:, None], n_tickers, axis=1)
+    name_shocks = np.repeat(shocks[:, None] * name_beta, n_tickers, axis=1)
     for m, (r, tilt) in (tilted_shocks or {}).items():
         y, mo = map(int, m.split("-"))
         if (y, mo) in months:

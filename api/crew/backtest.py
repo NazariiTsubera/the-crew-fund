@@ -37,7 +37,9 @@ class Run:
     recipe: dict
     kpis: dict
     curve: list[dict]  # daily {date, value}, starting at 1.0 on the first decision date
-    monthly: list[dict]  # {month, ret, invested, paper_ret, value_start, value_end}
+    # {month, ret, invested, paper_ret, baseline_ret, value_start, value_end}; baseline_ret is
+    # the equal-weight gross return of every eligible name, the pool the picks came from.
+    monthly: list[dict]
     holdings: list[dict]  # {month, ticker, weight, reason}
     log: list[dict]  # {ts, type, code, text}
     yearly_returns: dict[str, float]
@@ -186,6 +188,19 @@ def rank_month(m: Market, recipe: Recipe, i: int, lag_months: int = 0) -> pl.Dat
     return score(rows, recipe).sort(["_score", "ticker"], descending=[True, False])
 
 
+def _pool_cols(m: Market, ranked: pl.DataFrame | None) -> list[int]:
+    return [m.col[t] for t in ranked["ticker"].to_list()] if ranked is not None else []
+
+
+def _pool_return(m: Market, ranked: pl.DataFrame | None, i: int) -> float | None:
+    cols = _pool_cols(m, ranked)
+    if not cols:
+        return None
+    with np.errstate(invalid="ignore"):
+        r = float(np.nanmean(m.period_returns[i, cols]))
+    return r if np.isfinite(r) else None
+
+
 def run_recipe(
     recipe: Recipe,
     panel: Panel,
@@ -224,6 +239,7 @@ def run_recipe(
         if picks:
             cols = [m.col[t] for t in picks]
             paper.append((exit_, float(np.mean(m.period_returns[i, cols]))))
+        baseline = _pool_return(m, ranked, i)
 
         invested = bool(picks) and not sitting
         new_book = {t: 1.0 / len(picks) for t in picks} if invested else {}
@@ -308,6 +324,7 @@ def run_recipe(
                 "ret": value / start_value - 1.0,
                 "invested": invested,
                 "paper_ret": paper[-1][1] if picks else None,
+                "baseline_ret": baseline,
                 # Before this month's costs and at its end: the boundary day of the curve
                 # carries the post-cost value, so sleeves are rebuilt from these.
                 "value_start": start_value,
