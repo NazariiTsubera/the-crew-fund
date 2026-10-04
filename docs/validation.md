@@ -49,8 +49,14 @@ the average one-way monthly turnover, trailing 12-month Sharpe from monthly retu
 | --- | --- |
 | Lookahead | Scoring each month on the previous month's vector keeps more than 80% of the Sharpe |
 | Shuffle | The monthly picks beat 100 random draws from the same eligible names, p < 0.05 |
-| 2020 replay | Drawdown Feb–Apr 2020 no worse than the S&P 500's |
-| 2022 replay | Drawdown Dec 2021–Dec 2022 no worse than the S&P 500's |
+| 2020 replay | Drawdown Feb–Apr 2020 no worse than 90% of 100 random books of the same size from the same eligible names |
+| 2022 replay | The same, Dec 2021–Dec 2022 |
+
+The replays used to compare against the S&P 500. A 5–15 name equal-weight book of mid caps
+lost every crash to a cap-weighted index on size and concentration alone, so the replays now
+judge only the picks: same pool, same size, no signal. In a crash every name falls together,
+so the bar is the worst decile of random books, not their median. The S&P 500 stays in the
+detail line for context.
 
 Verdict: no failures pass, one probation, two or more killed. A failed lookahead test kills on
 its own, because a leaky backtest makes the other three numbers meaningless.
@@ -60,8 +66,11 @@ its own, because a leaky backtest makes the other three numbers meaningless.
 - Capital across agents that are not killed or fired, by the positive part of each one's
   trailing 6-month Sharpe, with a 10% floor and a 50% cap, using only months settled by the
   decision date; equal until three such months exist.
-- Fired when the trailing 12-month Sharpe of its picks' returns in excess of the S&P 500 stays
-  below −1.0 for three months. Excess returns, so a bear market alone fires no one.
+- Fired when the trailing 12-month Sharpe of its picks' returns in excess of an equal-weight
+  book of its own eligible names stays below −1.0 for three months. Excess over its own pool,
+  so neither a bear market nor a small-cap crash fires anyone; only picks that lag the names
+  they were chosen from. A 12-month Sharpe of a concentrated book has a standard error near 1,
+  so over nine years even a zero-skill agent will likely cross −1.0 once, and firing is final.
 - The fund book: invested agents' books weighted by capital, universe only, every position
   capped at 5%, re-scaled to sum to 1 (the organizers' checker requires it). A sitting-out
   agent's capital flows to the others; "invested" is shown separately.
@@ -79,3 +88,10 @@ its own, because a leaky backtest makes the other three numbers meaningless.
   ranking.
 - **Multiple testing.** A judge can create many agents; the shuffle test's p-value is per
   agent, not corrected across agents.
+  `scripts/scan_features.py` runs every stock-level feature both ways (48 trials) through the
+  same pipeline. On the 2026-10-04 panel six passed the shuffle test at p < 0.05, where about
+  2.4 would by luck; with 1,000 shuffles only the two illiquidity measures (`kyle_lambda` and
+  `amihud_illiq`, high) stayed below 0.01, and neither clears a Bonferroni bar of 0.001.
+- **Survivorship and illiquidity.** The strongest scan result, buying the most illiquid names,
+  is where survivorship bites hardest: a $0.70 stock is in today's universe because it
+  survived. We read that result as the bias, not as an edge.

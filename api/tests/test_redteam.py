@@ -71,7 +71,8 @@ def test_details_read_like_the_design_card():
     assert " → " in tests["Lookahead test"]["detail"]
     assert "over 50 runs, p=" in tests["Shuffle test"]["detail"]
     assert tests["2020 replay"]["detail"].startswith("Drawdown ")
-    assert " vs SPX −" in tests["2020 replay"]["detail"]
+    assert " vs random picks −" in tests["2020 replay"]["detail"]
+    assert "SPX −" in tests["2020 replay"]["detail"]
     assert tests["2020 replay"]["detail"].endswith(", Feb–Apr 2020")
     assert tests["2022 replay"]["detail"].endswith(", Dec 2021–Dec 2022")
 
@@ -110,3 +111,13 @@ def test_a_decaying_signal_fails_lookahead_without_being_killed_for_it():
 
     assert not by_name(report)["Lookahead test"]["passed"]
     assert report["verdict"] != "killed" or sum(not t["passed"] for t in report["tests"]) >= 2
+
+
+def test_a_crash_that_hits_every_name_harder_than_the_index_is_not_held_against_the_agent():
+    # Every name falls 1.5x the S&P 500: the book falls harder than the index, but no harder
+    # than the names it could have bought. That is size, not skill.
+    panel = make_panel(persistence=0.95, market_shocks={"2020-03": -0.30}, name_beta=1.5)
+
+    report = attack(recipe(), panel)
+
+    assert by_name(report)["2020 replay"]["passed"], by_name(report)["2020 replay"]
