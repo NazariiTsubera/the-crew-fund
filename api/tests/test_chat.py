@@ -396,7 +396,7 @@ def test_agreeing_to_recompile_the_draft_on_screen_keeps_the_flag(store):
 
     out = answer(store, {**AGENT, "recipe": RECIPE}, "Yes, recompile it", llm, draft=PROPOSAL)
 
-    assert out["recompile"] is True and "proposal" not in out
+    assert out["recompile"] is True and out["proposal"]["top_n"] == 20
 
 
 def test_there_is_nothing_to_recompile_without_a_change(store):
@@ -424,3 +424,22 @@ def test_the_prompt_forbids_unrequested_signals_and_false_claims(store):
 
     assert "never add a signal" in system
     assert "only when you set `recompile`" in system
+
+
+def test_agreement_compiles_what_is_on_screen_even_if_the_model_echoes_the_old_recipe(store):
+    import json
+
+    llm = FakeLLM(
+        {
+            "text": "Recompiling.",
+            "cited": [],
+            "follow_ups": [],
+            "proposal_json": json.dumps(RECIPE),
+            "recompile": True,
+        }
+    )
+
+    out = answer(store, {**AGENT, "recipe": RECIPE}, "Yes, recompile it", llm, draft=PROPOSAL)
+
+    assert out["recompile"] is True
+    assert out["proposal"]["top_n"] == 20  # the draft, not the echoed live recipe

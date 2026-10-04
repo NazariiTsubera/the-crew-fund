@@ -364,6 +364,10 @@ def answer(
         # there is nothing to recompile, so the flag is dropped.
         pending = draft is not None and draft != agent.get("recipe")
         recompile = bool(reply.get("recompile")) and (proposal is not None or pending)
+        if recompile and pending:
+            # Agreeing compiles exactly what the judge sees; the model tends to echo the live
+            # recipe here, which would silently undo the edit.
+            proposal = _proposal(json.dumps(draft))
         follow_ups = _follow_ups(reply.get("follow_ups"))
         evidence = [by_id[i] for i in reply.get("cited") or [] if i in by_id]
         if not text:
