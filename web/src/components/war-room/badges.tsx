@@ -1,5 +1,6 @@
 import type { CSSProperties } from "react";
 
+import { statusLabel } from "@/lib/agent-status";
 import type { AgentSummary, Verdict } from "@/lib/api";
 
 const BADGE: CSSProperties = {
@@ -42,12 +43,6 @@ export function VerdictBadge({ verdict }: { verdict: Verdict }) {
   );
 }
 
-export const STATUS_TEXT: Record<AgentSummary["status"], string> = {
-  trading: "Trading",
-  sitting_out: "Sitting out",
-  killed: "Killed",
-};
-
 function dotStyle(status: AgentSummary["status"]): CSSProperties {
   if (status === "trading") {
     return {
@@ -59,11 +54,12 @@ function dotStyle(status: AgentSummary["status"]): CSSProperties {
 }
 
 /** Status dot plus its word: filled for trading, hollow for sitting out or killed. */
-export function AgentStatus({ status }: { status: AgentSummary["status"] }) {
+export function AgentStatus({ agent }: { agent: Pick<AgentSummary, "status" | "verdict" | "stop_month"> }) {
+  const { status } = agent;
   return (
     <span className="flex items-center gap-1.5 font-mono text-[11px] leading-none whitespace-nowrap text-muted">
       <span aria-hidden className="inline-block size-[7px] flex-none rounded-full" style={dotStyle(status)} />
-      {STATUS_TEXT[status]}
+      {statusLabel(agent)}
     </span>
   );
 }

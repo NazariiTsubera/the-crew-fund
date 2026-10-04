@@ -6,6 +6,7 @@ import { agentColorVar, Glyph } from "@/components/glyph";
 import { useReducedMotion } from "@/components/use-reduced-motion";
 import { KICKER } from "@/components/war-room/page-frame";
 import type { Load } from "@/components/war-room/use-fund-data";
+import { isFired } from "@/lib/agent-status";
 import type { AgentSummary, Capital } from "@/lib/api";
 import { clampIndex, formatChange, replayStart, shareRows, type ShareRow } from "@/lib/capital";
 import { formatMonth, formatShare } from "@/lib/format";
@@ -124,7 +125,8 @@ export function CapitalPanel({ agents, capital, latestMemo }: Props) {
         <ul className="m-0 flex list-none flex-col p-0">
           {rows.map((r) => {
             const a = byId.get(r.id);
-            const fired = r.share < 0.001 && (a?.status === "killed" || !a);
+            const out = r.share < 0.001 && (a?.status === "killed" || !a);
+            const fired = out && a !== undefined && isFired(a);
             return (
               <li
                 key={r.id}
@@ -138,9 +140,9 @@ export function CapitalPanel({ agents, capital, latestMemo }: Props) {
                 </span>
                 <span
                   className="text-right font-mono text-[11px] leading-none font-medium whitespace-nowrap"
-                  style={{ color: changeTone(r, fired) }}
+                  style={{ color: changeTone(r, out) }}
                 >
-                  {fired ? "FIRED" : formatChange(r.change)}
+                  {out ? (fired ? "FIRED" : "KILLED") : formatChange(r.change)}
                 </span>
               </li>
             );

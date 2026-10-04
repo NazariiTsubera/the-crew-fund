@@ -103,4 +103,3 @@ export function statusDotStyle(status: "trading" | "sitting_out" | "killed"): CS
   };
 }
 
-export const STATUS_TEXT = { trading: "Trading", sitting_out: "Sitting out", killed: "Killed" } as const;

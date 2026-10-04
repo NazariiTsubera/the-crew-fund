@@ -7,7 +7,8 @@ import { EquityChart } from "@/components/agent/equity-chart";
 import { KpiTiles } from "@/components/agent/kpi-tiles";
 import { LogFeed } from "@/components/agent/log-feed";
 import { RedTeamCard } from "@/components/agent/red-team-card";
-import { STATUS_TEXT, statusDotStyle } from "@/components/agent/tags";
+import { statusDotStyle } from "@/components/agent/tags";
+import { isFired, statusLabel } from "@/lib/agent-status";
 import { VerdictBadge } from "@/components/agent/verdict-badge";
 import { Glyph, agentColorVar } from "@/components/glyph";
 import { entriesInMonth, lastTwelveMonths } from "@/lib/agent-log";
@@ -94,10 +95,12 @@ export function PerformanceColumn({ agent, className = "" }: { agent: Agent; cla
         <div className="flex basis-full flex-wrap items-center gap-x-4 gap-y-1.5 font-mono text-[11px] leading-none text-muted sm:basis-auto sm:flex-col sm:items-end">
           <span className="flex items-center gap-[7px] text-ink">
             <span style={statusDotStyle(agent.status)} />
-            {STATUS_TEXT[agent.status]}
+            {statusLabel(agent)}
           </span>
           {killed && agent.stop_month && (
-            <span className="text-down">STOPPED {formatMonth(agent.stop_month).toUpperCase()}</span>
+            <span className="text-down">
+              {isFired(agent) ? "FIRED BY THE MASTERMIND" : "STOPPED"} {formatMonth(agent.stop_month).toUpperCase()}
+            </span>
           )}
           {latest && (
             <span title="The latest month's return from the stored curve; the store has no intraday P&L.">

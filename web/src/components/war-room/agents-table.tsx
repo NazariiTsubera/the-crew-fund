@@ -1,7 +1,8 @@
 import Link from "next/link";
 
 import { agentColorVar, Glyph } from "@/components/glyph";
-import { AgentStatus, STATUS_TEXT, VerdictBadge } from "@/components/war-room/badges";
+import { AgentStatus, VerdictBadge } from "@/components/war-room/badges";
+import { statusLabel } from "@/lib/agent-status";
 import { KICKER } from "@/components/war-room/page-frame";
 import { Sparkline } from "@/components/war-room/sparkline";
 import type { AgentSummary } from "@/lib/api";
@@ -69,7 +70,7 @@ export function AgentsTable({ agents, slots }: { agents: AgentSummary[]; slots: 
                 <li key={a.id} className="border-t border-line-soft first:border-t-0 @2xl:first:border-t">
                   <Link
                     href={`/agents/${encodeURIComponent(a.id)}`}
-                    aria-label={`${a.name}, ${STATUS_TEXT[a.status]}, Red Team ${a.verdict}, capital ${formatShare(a.capital_share, 1)}`}
+                    aria-label={`${a.name}, ${statusLabel(a)}, Red Team ${a.verdict}, capital ${formatShare(a.capital_share, 1)}`}
                     className="block text-ink no-underline outline-none hover:bg-hover focus-visible:bg-hover focus-visible:shadow-[inset_2px_0_0_var(--accent)]"
                     style={{ opacity: killed ? 0.5 : 1 }}
                   >
@@ -79,7 +80,7 @@ export function AgentsTable({ agents, slots }: { agents: AgentSummary[]; slots: 
                       <span className="flex min-w-0 flex-col gap-1">
                         <span className="flex items-center gap-2.5">
                           <span className="truncate text-sm leading-[1.2] font-semibold">{a.name}</span>
-                          <AgentStatus status={a.status} />
+                          <AgentStatus agent={a} />
                         </span>
                         <span className="text-xs leading-[1.35] text-muted">{a.strategy_line}</span>
                       </span>
@@ -98,7 +99,7 @@ export function AgentsTable({ agents, slots }: { agents: AgentSummary[]; slots: 
                       <span className="flex min-w-0 flex-col gap-1.5">
                         <span className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
                           <span className="text-sm leading-[1.2] font-semibold">{a.name}</span>
-                          <AgentStatus status={a.status} />
+                          <AgentStatus agent={a} />
                         </span>
                         <span className="text-xs leading-[1.35] text-muted">{a.strategy_line}</span>
                       </span>
