@@ -150,3 +150,18 @@ export function sparkPath(values: number[], box: { width: number; height: number
     })
     .join(" ");
 }
+
+/**
+ * An agent's month-end equity scaled to its share of the fund: 1 + share × its return, i.e. the
+ * part of the fund's growth it carried. Empty for an agent with no share (fired).
+ */
+export function contributionValues(spark: number[], share: number): number[] {
+  if (share <= 0 || !spark.length) return [];
+  const base = spark[0] || 1;
+  return spark.map((v) => 1 + share * (v / base - 1));
+}
+
+/** A path for `values` (month-end, from the fund's first month) on the fund chart's axes. */
+export function contributionPath(m: ChartModel, values: number[]): string {
+  return values.map((v, i) => `${i ? "L" : "M"}${r1(m.x(i))} ${r1(m.y(v))}`).join(" ");
+}

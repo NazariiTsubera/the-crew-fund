@@ -34,7 +34,7 @@ export function tagStyle(kind: TagKind): CSSProperties {
     case "SELL":
       return soft("var(--down)");
     case "FAIL":
-      return { ...soft("var(--down)"), textDecoration: "line-through" };
+      return soft("var(--down)");
     case "RISK":
       return { ...TAG_BASE, border: "1px dashed var(--c-amber)", color: "var(--c-amber)", padding: "2px 0" };
     case "MM":
@@ -85,8 +85,7 @@ export function badgeStyle(verdict: Verdict): CSSProperties {
         ...BADGE_BASE,
         color: "var(--down)",
         border: "1px solid color-mix(in oklch, var(--down) 50%, transparent)",
-        textDecoration: "line-through",
-      };
+          };
   }
 }
 

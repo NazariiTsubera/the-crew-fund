@@ -40,8 +40,40 @@ function Capital({ a }: { a: AgentSummary }) {
 }
 
 /** Every agent: who it is, how it is doing over the last year, its capital and its Red Team verdict. */
-export function AgentsTable({ agents, slots }: { agents: AgentSummary[]; slots: number }) {
+export function AgentsTable({
+  agents,
+  slots,
+  shown,
+  onShow,
+}: {
+  agents: AgentSummary[];
+  slots: number;
+  /** Agents whose line is drawn on the fund chart; the checkboxes are its legend. */
+  shown?: Set<string>;
+  onShow?: (ids: Set<string>) => void;
+}) {
   const crew = sortCrew(agents);
+  const all = shown !== undefined && crew.every((a) => shown.has(a.id));
+  const toggle = (id: string) => {
+    if (!shown || !onShow) return;
+    const next = new Set(shown);
+    if (next.has(id)) next.delete(id);
+    else next.add(id);
+    onShow(next);
+  };
+  const Check = ({ a }: { a: AgentSummary }) =>
+    shown && onShow ? (
+      <label className="grid w-10 flex-none cursor-pointer place-items-center self-stretch" title="Show on the fund chart">
+        <input
+          type="checkbox"
+          checked={shown.has(a.id)}
+          onChange={() => toggle(a.id)}
+          aria-label={`Show ${a.name} on the fund chart`}
+          className="size-3.5 cursor-pointer"
+          style={{ accentColor: agentColorVar(a.color) }}
+        />
+      </label>
+    ) : null;
   return (
     <section aria-label="Agents" className="@container flex min-w-0 flex-col gap-2.5">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
@@ -54,7 +86,20 @@ export function AgentsTable({ agents, slots }: { agents: AgentSummary[]; slots: 
         <div className="border border-line bg-panel p-6 font-mono text-xs text-muted">No agents yet.</div>
       ) : (
         <div className="border border-line">
-          <div className={`hidden gap-4 bg-panel px-4 py-2.5 @2xl:grid ${COLS} ${HEAD}`}>
+          <div className="flex bg-panel">
+          {shown && onShow && (
+            <label className="hidden w-10 flex-none cursor-pointer place-items-center @2xl:grid" title="Show all on the fund chart">
+              <input
+                type="checkbox"
+                checked={all}
+                onChange={() => onShow(all ? new Set() : new Set(crew.map((a) => a.id)))}
+                aria-label="Show every agent on the fund chart"
+                className="size-3.5 cursor-pointer"
+                style={{ accentColor: "var(--accent)" }}
+              />
+            </label>
+          )}
+          <div className={`hidden flex-1 gap-4 py-2.5 pr-4 @2xl:grid ${shown && onShow ? "pl-0" : "pl-4"} ${COLS} ${HEAD}`}>
             <span />
             <span>AGENT</span>
             <span>CURVE</span>
@@ -62,20 +107,22 @@ export function AgentsTable({ agents, slots }: { agents: AgentSummary[]; slots: 
             <span className="text-right">CAPITAL</span>
             <span>RED TEAM</span>
           </div>
+          </div>
           <ul className="m-0 list-none p-0">
             {crew.map((a, i) => {
               const killed = (a.status === "killed" || a.status === "fired");
               const tone = killed ? "var(--faint)" : agentColorVar(a.color);
               return (
-                <li key={a.id} className="border-t border-line-soft first:border-t-0 @2xl:first:border-t">
+                <li key={a.id} className="flex border-t border-line-soft first:border-t-0 @2xl:first:border-t">
+                  <Check a={a} />
                   <Link
                     href={`/agents/${encodeURIComponent(a.id)}`}
                     aria-label={`${a.name}, ${statusLabel(a)}, Red Team ${a.verdict}, capital ${formatShare(a.capital_share, 1)}`}
-                    className="block text-ink no-underline outline-none hover:bg-hover focus-visible:bg-hover focus-visible:shadow-[inset_2px_0_0_var(--accent)]"
+                    className="block min-w-0 flex-1 text-ink no-underline outline-none hover:bg-hover focus-visible:bg-hover focus-visible:shadow-[inset_2px_0_0_var(--accent)]"
                     style={{ opacity: killed ? 0.5 : 1 }}
                   >
                     {/* Wide: the design's six-column row. */}
-                    <div className={`hidden items-center gap-4 px-4 py-[13px] @2xl:grid ${COLS}`}>
+                    <div className={`hidden items-center gap-4 py-[13px] pr-4 @2xl:grid ${shown && onShow ? "pl-0" : "pl-4"} ${COLS}`}>
                       <Glyph shape={a.shape} color={a.color} size={13} dim={killed} />
                       <span className="flex min-w-0 flex-col gap-1">
                         <span className="flex items-center gap-2.5">

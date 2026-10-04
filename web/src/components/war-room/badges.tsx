@@ -27,7 +27,6 @@ const VERDICT_STYLE: Record<Verdict, CSSProperties> = {
   killed: {
     color: "var(--down)",
     border: "1px solid color-mix(in oklch, var(--down) 50%, transparent)",
-    textDecoration: "line-through",
   },
 };
 

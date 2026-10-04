@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { alignSeries, chartModel, equityTicks, indexAtFraction, sparkPath } from "@/lib/chart";
+import { alignSeries, chartModel, equityTicks, indexAtFraction, sparkPath, contributionPath, contributionValues } from "@/lib/chart";
 
 const curve = [
   { date: "2020-01-31", value: 1 },
@@ -148,5 +148,27 @@ describe("sparkPath", () => {
   it("draws a flat line for a single point and nothing for no data", () => {
     expect(sparkPath([1], { width: 120, height: 34, slots: 1 })).toBe("M0 17 L120 17");
     expect(sparkPath([], { width: 120, height: 34, slots: 1 })).toBe("");
+  });
+});
+
+describe("contributionPath", () => {
+  it("draws an agent's return scaled by its share on the fund chart's axes", () => {
+    const points = [
+      { month: "2020-01", fund: 1, spx: 1 },
+      { month: "2020-02", fund: 1.2, spx: 1.1 },
+      { month: "2020-03", fund: 1.4, spx: 1.2 },
+    ];
+    const m = chartModel(points, { log: false, holdoutCutoff: "2030-01-01", ddMonth: null, width: 100, height: 100 });
+
+    // The agent doubled; with a quarter of the fund it added 25%.
+    const values = contributionValues([1, 1.5, 2], 0.25);
+    expect(values).toEqual([1, 1.125, 1.25]);
+    const path = contributionPath(m, values);
+    expect(path.startsWith(`M0.0 ${m.y(1).toFixed(1)}`)).toBe(true);
+    expect(path.split("L")).toHaveLength(3);
+  });
+
+  it("is empty for an agent with no share", () => {
+    expect(contributionValues([1, 2], 0)).toEqual([]);
   });
 });

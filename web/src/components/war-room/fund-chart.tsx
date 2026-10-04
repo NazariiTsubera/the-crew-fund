@@ -3,8 +3,9 @@
 import { useMemo, useState, type KeyboardEvent, type PointerEvent } from "react";
 
 import { KICKER } from "@/components/war-room/page-frame";
-import type { Fund } from "@/lib/api";
-import { alignSeries, chartModel, indexAtFraction } from "@/lib/chart";
+import { agentColorVar } from "@/components/glyph";
+import type { AgentColor, Fund } from "@/lib/api";
+import { alignSeries, chartModel, contributionPath, indexAtFraction } from "@/lib/chart";
 import { formatMonth, formatPct } from "@/lib/format";
 import { DRAW_MS } from "@/lib/motion";
 
@@ -33,7 +34,10 @@ function ScaleToggle({ log, onChange }: { log: boolean; onChange: (log: boolean)
 }
 
 /** The fund's equity curve against the S&P 500 since inception, with the holdout and worst drawdown marked. */
-export function FundChart({ vault }: { vault: Fund }) {
+/** An agent's contribution line: 1 + its share × its return, in its colour. */
+export type AgentLine = { id: string; color: AgentColor; values: number[] };
+
+export function FundChart({ vault, lines = [] }: { vault: Fund; lines?: AgentLine[] }) {
   const [log, setLog] = useState(true);
   const [hover, setHover] = useState<number | null>(null);
   const points = useMemo(() => alignSeries(vault.curve, vault.benchmark), [vault.curve, vault.benchmark]);
@@ -155,6 +159,17 @@ export function FundChart({ vault }: { vault: Fund }) {
               strokeDasharray="5 4"
               vectorEffect="non-scaling-stroke"
             />
+            {lines.map((l) => (
+              <path
+                key={l.id}
+                d={contributionPath(m, l.values)}
+                fill="none"
+                stroke={agentColorVar(l.color)}
+                strokeWidth={1.25}
+                strokeOpacity={0.85}
+                vectorEffect="non-scaling-stroke"
+              />
+            ))}
             <path d={m.fundPath} fill="none" stroke="var(--fund)" strokeWidth={2} vectorEffect="non-scaling-stroke" />
           </svg>
 
