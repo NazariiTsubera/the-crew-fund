@@ -97,3 +97,17 @@ def test_a_missing_gemini_key_is_an_error_event(client, monkeypatch):
 
 def test_an_empty_prompt_is_rejected(client):
     assert client.post("/agents", json={"prompt": ""}).status_code == 422
+
+
+def test_a_new_agent_takes_a_colour_nobody_in_the_crew_has():
+    from app.services.agents import next_look
+
+    crew = [
+        {"id": "a", "color": "sky"},
+        {"id": "b", "color": "orange"},
+        {"id": "c", "color": "violet"},
+    ]
+    shape, color = next_look(crew)
+
+    assert color not in {"sky", "orange", "violet", "amber"}
+    assert shape

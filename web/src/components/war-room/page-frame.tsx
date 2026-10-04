@@ -22,7 +22,7 @@ export function PageHeader({ kicker, title, aside }: { kicker: string; title: st
 /** The padded column every section of a page sits in. */
 export function PageBody({ children }: { children: ReactNode }) {
   return (
-    <div className="flex w-full max-w-[1360px] min-w-0 flex-col gap-7 px-4 pt-6 pb-12 sm:px-7">{children}</div>
+    <div className="flex w-full min-w-0 flex-col gap-7 px-4 pt-6 pb-12 sm:px-7">{children}</div>
   );
 }
 

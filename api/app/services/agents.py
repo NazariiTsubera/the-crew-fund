@@ -23,6 +23,19 @@ from crew.whatif import run_whatif, whatif_context, whatif_facts
 # The design's shapes and colours for agents beyond the five seeds, in turn.
 NEW_LOOKS = [("box", "sky"), ("half", "orange"), ("plus", "lime")]
 SEED_IDS = {s["id"] for s in SEEDS}
+# The palette in the order new agents take it; amber is the fund's own line, never an agent's.
+PALETTE = ["sky", "orange", "lime", "rose", "green", "teal", "violet", "slate"]
+
+
+def next_look(agents: list[dict]) -> tuple[str, str]:
+    """A shape in turn and the first palette colour no one in the crew has, so every line on
+    the War Room chart is told apart (colours repeat only past eight agents)."""
+    used = {a.get("color") for a in agents}
+    fresh = [c for c in PALETTE if c not in used]
+    color = fresh[0] if fresh else PALETTE[len(agents) % len(PALETTE)]
+    shape = NEW_LOOKS[sum(a["id"] not in SEED_IDS for a in agents) % len(NEW_LOOKS)][0]
+    return shape, color
+
 
 # One creation at a time: publish + rebalance rewrite the fund.
 _lock = threading.Lock()
@@ -60,7 +73,7 @@ def create(prompt: str, llm_factory: Callable[[], LLM]) -> Iterator[tuple[str, d
 
         agents = store.list_agents()
         taken = {a["id"] for a in agents}
-        shape, color = NEW_LOOKS[sum(a["id"] not in SEED_IDS for a in agents) % len(NEW_LOOKS)]
+        shape, color = next_look(agents)
         meta = {
             "id": _agent_id(compiled.name, prompt, taken),
             "name": compiled.name,
@@ -124,7 +137,7 @@ def create_from_recipe(
         agents = store.list_agents()
         taken = {a["id"] for a in agents}
 
-        shape, color = NEW_LOOKS[sum(a["id"] not in SEED_IDS for a in agents) % len(NEW_LOOKS)]
+        shape, color = next_look(agents)
 
         meta = {
             "id": _agent_id(name, prompt, taken),

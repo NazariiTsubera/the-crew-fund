@@ -105,7 +105,7 @@ function Tape({ log, crew }: { log: LogEntry[]; crew: AgentSummary[] }) {
         }
       />
       <PageBody>
-        <section aria-label="Replay tape" className="@container flex max-w-[1100px] min-w-0 flex-col gap-2.5">
+        <section aria-label="Replay tape" className="@container flex min-w-0 flex-col gap-2.5">
           <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5">
             <div className={`${KICKER} flex items-center gap-2`}>
               <span
