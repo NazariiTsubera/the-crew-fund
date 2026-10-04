@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 
 import { agentColorVar, Glyph } from "@/components/glyph";
+import { useReducedMotion } from "@/components/use-reduced-motion";
 import { KICKER } from "@/components/war-room/page-frame";
 import type { Load } from "@/components/war-room/use-fund-data";
 import type { AgentSummary, Capital } from "@/lib/api";
@@ -31,6 +32,18 @@ export function CapitalPanel({ agents, capital, latestMemo }: Props) {
   // null follows the latest month, so a refetch that adds a month keeps the panel current.
   const [picked, setPicked] = useState<number | null>(null);
   const [replayRequested, setReplaying] = useState(false);
+  const reduced = useReducedMotion();
+  // The history arrives after the panel mounts; the first time it does, play the replay once so
+  // the split is seen moving through real months. Set during render, React's pattern for state
+  // that follows props, so the first painted frame is already the replay's start.
+  const [autoplayed, setAutoplayed] = useState(false);
+  if (!autoplayed && count > 1) {
+    setAutoplayed(true);
+    if (!reduced) {
+      setPicked(replayStart(count, REPLAY_MONTHS));
+      setReplaying(true);
+    }
+  }
   const index = picked === null ? count - 1 : clampIndex(picked, count);
   // A replay ends by itself on reaching the latest month.
   const replaying = replayRequested && index < count - 1;

@@ -2,10 +2,10 @@
 
 import { useSyncExternalStore } from "react";
 
-const QUERY = "(prefers-reduced-motion: reduce)";
+import { prefersReducedMotion, REDUCED_MOTION_QUERY } from "@/lib/motion";
 
 function subscribe(onChange: () => void): () => void {
-  const mq = window.matchMedia(QUERY);
+  const mq = window.matchMedia(REDUCED_MOTION_QUERY);
   mq.addEventListener("change", onChange);
   return () => mq.removeEventListener("change", onChange);
 }
@@ -14,7 +14,7 @@ function subscribe(onChange: () => void): () => void {
 export function useReducedMotion(): boolean {
   return useSyncExternalStore(
     subscribe,
-    () => window.matchMedia(QUERY).matches,
+    () => prefersReducedMotion(window),
     () => false,
   );
 }

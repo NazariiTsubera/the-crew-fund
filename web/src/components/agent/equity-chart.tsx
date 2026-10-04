@@ -108,7 +108,7 @@ export function EquityChart({ curve, benchmark, tone, holdoutCutoff, selected, o
           <svg
             viewBox={`0 0 ${W} ${H}`}
             preserveAspectRatio="none"
-            className="absolute inset-0 size-full overflow-visible"
+            className="crew-draw absolute inset-0 size-full overflow-visible"
             aria-hidden
           >
             <path

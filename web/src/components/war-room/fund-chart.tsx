@@ -6,6 +6,7 @@ import { KICKER } from "@/components/war-room/page-frame";
 import type { Fund } from "@/lib/api";
 import { alignSeries, chartModel, indexAtFraction } from "@/lib/chart";
 import { formatMonth, formatPct } from "@/lib/format";
+import { DRAW_MS } from "@/lib/motion";
 
 const W = 1000;
 const H = 300;
@@ -143,7 +144,8 @@ export function FundChart({ vault }: { vault: Fund }) {
             aria-hidden
             viewBox={`0 0 ${W} ${H}`}
             preserveAspectRatio="none"
-            className="absolute inset-0 size-full overflow-visible"
+            // Drawn in once on mount; toggling the scale swaps the paths without replaying it.
+            className="crew-draw absolute inset-0 size-full overflow-visible"
           >
             <path
               d={m.spxPath}
@@ -157,7 +159,8 @@ export function FundChart({ vault }: { vault: Fund }) {
           </svg>
 
           {m.dd && (
-            <div aria-hidden>
+            // The drawdown callout waits for the line to reach it.
+            <div aria-hidden className="crew-rise" style={{ animationDelay: `${DRAW_MS}ms` }}>
               <div
                 className="absolute -mt-1 -ml-1 size-2 rounded-full border-[1.5px] border-fund bg-bg"
                 style={{ left: pctX(m.dd.x), top: pctY(m.dd.y) }}

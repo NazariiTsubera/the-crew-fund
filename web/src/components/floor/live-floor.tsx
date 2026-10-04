@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState, type ReactNode } from "react";
 
 import { TapeRow } from "@/components/floor/tape-row";
 import { useFloorData } from "@/components/floor/use-floor-data";
-import { useReducedMotion } from "@/components/floor/use-reduced-motion";
+import { useReducedMotion } from "@/components/use-reduced-motion";
 import { ErrorState, KICKER, LoadingState, PageBody, PageHeader } from "@/components/war-room/page-frame";
 import type { AgentSummary, LogEntry, LogType } from "@/lib/api";
 import {

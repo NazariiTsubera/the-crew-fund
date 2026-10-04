@@ -9,7 +9,9 @@ import { sortCrew } from "@/lib/crew";
 import { formatNum, formatShare } from "@/lib/format";
 
 const COLS = "grid-cols-[24px_minmax(200px,1fr)_120px_70px_100px_110px]";
-const HEAD = "font-mono text-[10px] leading-none font-medium tracking-[0.12em] text-dim";
+// Each row's sparkline starts a beat after the one above, so the crew reads in rank order.
+const SPARK_STAGGER_MS = 70;
+const HEAD ="font-mono text-[10px] leading-none font-medium tracking-[0.12em] text-dim";
 
 const TREND = {
   up: { arrow: "▲", tone: "var(--up)", word: "rising" },
@@ -60,7 +62,7 @@ export function AgentsTable({ agents, slots }: { agents: AgentSummary[]; slots: 
             <span>RED TEAM</span>
           </div>
           <ul className="m-0 list-none p-0">
-            {crew.map((a) => {
+            {crew.map((a, i) => {
               const killed = a.status === "killed";
               const tone = killed ? "var(--faint)" : agentColorVar(a.color);
               return (
@@ -81,7 +83,7 @@ export function AgentsTable({ agents, slots }: { agents: AgentSummary[]; slots: 
                         </span>
                         <span className="text-xs leading-[1.35] text-muted">{a.strategy_line}</span>
                       </span>
-                      <Sparkline values={a.spark} slots={slots} tone={tone} />
+                      <Sparkline values={a.spark} slots={slots} tone={tone} delayMs={i * SPARK_STAGGER_MS} />
                       <span className="text-right font-mono text-sm leading-none font-medium">{sharpeOf(a)}</span>
                       <Capital a={a} />
                       <span>
@@ -103,7 +105,14 @@ export function AgentsTable({ agents, slots }: { agents: AgentSummary[]; slots: 
                       <Capital a={a} />
                       <span />
                       <span className="flex min-w-0 items-center gap-3">
-                        <Sparkline values={a.spark} slots={slots} tone={tone} width={96} height={26} />
+                        <Sparkline
+                          values={a.spark}
+                          slots={slots}
+                          tone={tone}
+                          width={96}
+                          height={26}
+                          delayMs={i * SPARK_STAGGER_MS}
+                        />
                         <span className="font-mono text-[11px] leading-none whitespace-nowrap text-muted">
                           SR <span className="text-ink">{sharpeOf(a)}</span>
                         </span>

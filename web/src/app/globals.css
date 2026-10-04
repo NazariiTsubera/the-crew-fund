@@ -137,3 +137,42 @@ body {
     opacity: 0.15;
   }
 }
+
+/* ROW-29: motion that only reveals what is already on screen. Charts wipe in left to right
+   (time's direction) and sequenced items fade up; with reduced motion they are simply there. */
+@keyframes crew-wipe {
+  from {
+    clip-path: inset(-20px 100% -20px -20px);
+  }
+  to {
+    clip-path: inset(-20px -20px -20px -20px);
+  }
+}
+
+@keyframes crew-rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* 900ms matches DRAW_MS in src/lib/motion.ts, which reveals sequenced after a chart wait for. */
+.crew-draw {
+  animation: crew-wipe 900ms cubic-bezier(0.33, 1, 0.68, 1) both;
+}
+
+/* `both` keeps an item hidden through its animation-delay, so a sequence reads in order. */
+.crew-rise {
+  animation: crew-rise 420ms ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .crew-draw,
+  .crew-rise {
+    animation: none;
+  }
+}

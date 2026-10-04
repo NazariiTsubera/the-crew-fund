@@ -2,7 +2,8 @@
 
 import { useEffect, useId, useRef, useState } from "react";
 
-import { Tag, badgeStyle } from "@/components/agent/tags";
+import { RedTeamTestRow } from "@/components/agent/red-team-card";
+import { badgeStyle } from "@/components/agent/tags";
 import type { RedTeam } from "@/lib/api";
 
 /** The Red Team verdict; clicking it opens the four tests with what each one found. */
@@ -58,13 +59,7 @@ export function VerdictBadge({ redteam }: { redteam: RedTeam }) {
             <div className="font-mono text-xs text-dim">No tests recorded.</div>
           )}
           {redteam.tests.map((t) => (
-            <div key={t.name} className="flex flex-col gap-1.5 border-t border-line-soft pt-2.5">
-              <div className="flex items-center justify-between gap-3">
-                <span className="text-[13px] leading-none font-semibold text-ink">{t.name}</span>
-                <Tag kind={t.passed ? "PASS" : "FAIL"} />
-              </div>
-              <span className="font-mono text-[11px] leading-snug text-muted">{t.detail}</span>
-            </div>
+            <RedTeamTestRow key={t.name} test={t} />
           ))}
         </div>
       )}

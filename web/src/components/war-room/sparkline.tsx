@@ -7,20 +7,23 @@ export function Sparkline({
   tone,
   width = 120,
   height = 34,
+  delayMs = 0,
 }: {
   values: number[];
   slots: number;
   tone: string;
   width?: number;
   height?: number;
+  /** Lets a table draw its rows in one after another. */
+  delayMs?: number;
 }) {
   return (
     <svg
       aria-hidden
       viewBox={`0 0 ${width} ${height}`}
       preserveAspectRatio="none"
-      className="block overflow-visible"
-      style={{ width, height }}
+      className="crew-draw block overflow-visible"
+      style={{ width, height, animationDelay: `${delayMs}ms` }}
     >
       <path
         d={sparkPath(values, { width, height, slots })}

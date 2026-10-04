@@ -6,6 +6,7 @@ import { BookTable } from "@/components/agent/book-table";
 import { EquityChart } from "@/components/agent/equity-chart";
 import { KpiTiles } from "@/components/agent/kpi-tiles";
 import { LogFeed } from "@/components/agent/log-feed";
+import { RedTeamCard } from "@/components/agent/red-team-card";
 import { STATUS_TEXT, statusDotStyle } from "@/components/agent/tags";
 import { VerdictBadge } from "@/components/agent/verdict-badge";
 import { Glyph, agentColorVar } from "@/components/glyph";
@@ -117,6 +118,7 @@ export function PerformanceColumn({ agent, className = "" }: { agent: Agent; cla
           selected={selected}
           onSelect={setSelected}
         />
+        <RedTeamCard redteam={agent.redteam} />
         <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,280px),1fr))] gap-5">
           <BookTable
             holdings={agent.holdings}

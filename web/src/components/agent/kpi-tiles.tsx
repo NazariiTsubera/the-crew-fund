@@ -1,3 +1,6 @@
+import type { ReactNode } from "react";
+
+import { CountUp } from "@/components/count-up";
 import type { Agent } from "@/lib/api";
 import { benchmarkReturnAt } from "@/lib/equity-chart";
 import { formatMonth, formatNum, formatPct, formatShare } from "@/lib/format";
@@ -5,6 +8,9 @@ import { formatMonth, formatNum, formatPct, formatShare } from "@/lib/format";
 const DASH = "—";
 
 const TREND = { up: "▲ rising", down: "▼ falling", flat: "— flat" } as const;
+
+const share1 = (v: number) => formatShare(v, 1);
+const perMonth = (v: number) => `${formatShare(v)}/mo`;
 
 function lastDate(agent: Agent): string | null {
   let last: string | null = null;
@@ -16,14 +22,22 @@ export function KpiTiles({ agent }: { agent: Agent }) {
   const k = agent.kpis;
   const end = lastDate(agent);
   const spx = end ? benchmarkReturnAt(agent.benchmark, end) : null;
-  const tiles: [string, string, string][] = [
-    ["TOTAL RETURN", formatPct(k.total_return), spx === null ? "" : `S&P ${formatPct(spx)}`],
-    ["ANN. RETURN", formatPct(k.ann_return), ""],
-    ["ANN. VOL", formatShare(k.ann_vol, 1), ""],
-    ["SHARPE", formatNum(k.sharpe), `12M ${k.trailing_12m_sharpe === null ? DASH : formatNum(k.trailing_12m_sharpe)}`],
-    ["MAX DRAWDOWN", formatPct(k.max_drawdown), k.max_drawdown_month ? formatMonth(k.max_drawdown_month).toUpperCase() : ""],
-    ["CAPITAL SHARE", formatShare(agent.capital_share, 1), TREND[agent.capital_trend]],
-    ["TURNOVER", k.turnover === null ? DASH : `${formatShare(k.turnover)}/mo`, ""],
+  const tiles: [string, ReactNode, string][] = [
+    ["TOTAL RETURN", <CountUp key="v" value={k.total_return} format={formatPct} />, spx === null ? "" : `S&P ${formatPct(spx)}`],
+    ["ANN. RETURN", <CountUp key="v" value={k.ann_return} format={formatPct} />, ""],
+    ["ANN. VOL", <CountUp key="v" value={k.ann_vol} format={share1} />, ""],
+    [
+      "SHARPE",
+      <CountUp key="v" value={k.sharpe} format={formatNum} />,
+      `12M ${k.trailing_12m_sharpe === null ? DASH : formatNum(k.trailing_12m_sharpe)}`,
+    ],
+    [
+      "MAX DRAWDOWN",
+      <CountUp key="v" value={k.max_drawdown} format={formatPct} />,
+      k.max_drawdown_month ? formatMonth(k.max_drawdown_month).toUpperCase() : "",
+    ],
+    ["CAPITAL SHARE", <CountUp key="v" value={agent.capital_share} format={share1} />, TREND[agent.capital_trend]],
+    ["TURNOVER", k.turnover === null ? DASH : <CountUp key="v" value={k.turnover} format={perMonth} />, ""],
   ];
 
   return (
