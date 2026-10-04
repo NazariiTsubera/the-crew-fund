@@ -20,12 +20,14 @@ from crew.gemini import LLM, LLMError, reason
 from crew.pipeline import now_ts
 from crew.recipe import Recipe
 from crew.store import Store
+from crew.strategy_chat import StrategyChatMessage, build_strategy_chat
 
 log = logging.getLogger(__name__)
 
 INTRO = "Introduce yourself: what you trade, your track record in one sentence, your verdict."
 MAX_LOG_FACTS = 20
 MAX_FOLLOW_UPS = 3
+HISTORY_TURNS = 8
 SCHEMA = {
     "type": "object",
     "properties": {
@@ -36,8 +38,11 @@ SCHEMA = {
         # schema dialects, and Python validates it before anything sees it.
         "proposal_json": {"type": "string"},
         "recompile": {"type": "boolean"},
+        # What the judge's message asks for; a change or recompile with no recipe written here
+        # is handed to the recruiter's recipe editor, which writes recipes reliably.
+        "intent": {"type": "string", "enum": ["question", "change", "recompile"]},
     },
-    "required": ["text", "cited", "follow_ups", "proposal_json", "recompile"],
+    "required": ["text", "cited", "follow_ups", "proposal_json", "recompile", "intent"],
 }
 # What a judge might ask next, offered as chips when Gemini cannot suggest any.
 DEFAULT_FOLLOW_UPS = [
@@ -274,6 +279,29 @@ def _paragraphs(text: str) -> str:
     return "\n\n".join(p for p in paras if p)
 
 
+def _edited_recipe(
+    message: str, earlier: list[dict], agent: dict, llm: LLM
+) -> tuple[dict, str] | None:
+    """The recruiter's recipe editor turns the request (and the conversation that led to it)
+    into (validated recipe, its explanation), or None when it changes nothing or fails."""
+    history = [
+        StrategyChatMessage(
+            role="user" if c["role"] == "user" else "assistant", text=c["text"][:1900]
+        )
+        for c in earlier
+        if c.get("text")
+    ]
+    context = (
+        f"You are editing the live recipe of {agent.get('name')}, an agent already trading. "
+        "Apply what the judge asks for now, or what they agreed to earlier in the conversation."
+    )
+    try:
+        edited = build_strategy_chat(message, history, agent.get("recipe"), llm, context)
+    except ValueError:
+        return None
+    return (edited.strategy, edited.reply) if edited.changed else None
+
+
 def _proposal(raw) -> dict | None:
     """A validated, normalized recipe from the model's JSON, or None (empty or invalid)."""
     if not raw or not str(raw).strip():
@@ -334,7 +362,13 @@ def answer(
         "sit_out_if_trailing_sharpe_below (number or null), starting from the recipe on screen "
         "and changing only what they asked (never add a signal they did not ask for); say what "
         "you changed and ask whether to recompile. "
+        'Set `intent`: "change" when the judge asks to change the recipe (vaguely or not), '
+        '"recompile" when they tell you to recompile or go ahead, else "question". '
         "Say you are recompiling only when you set `recompile` true. "
+        'A vague request ("make it less risky", "more aggressive", "more value") is a change '
+        "request: turn it into a concrete recipe in `proposal_json` and explain the choices. If "
+        "the judge agrees to a change you described earlier in the conversation, put that "
+        "complete recipe in `proposal_json` and set `recompile` true. "
         "Otherwise leave `proposal_json` empty. Set `recompile` true only when the judge "
         "explicitly agrees to recompile now. Market-wide signals (funding_stress, "
         "inflation_expectation, treasury_funding_interact) cannot rank stocks; warn if asked. "
@@ -346,8 +380,14 @@ def answer(
         if draft and draft != agent.get("recipe")
         else "Recipe on screen (compiled, live)"
     )
+    # The conversation so far, so "go ahead" can refer to what the agent proposed before.
+    earlier = store.chats(agent["id"])[-HISTORY_TURNS:]
+    convo = "\n".join(
+        f"{'JUDGE' if c['role'] == 'user' else 'YOU'}: {c['text'][:700]}" for c in earlier
+    )
     prompt = (
-        f"Question: {question or INTRO}\n\n"
+        (f"Conversation so far:\n{convo}\n\n" if convo else "")
+        + f"Question: {question or INTRO}\n\n"
         + (f"{on_screen}:\n{json.dumps(current, indent=2)}\n\n" if current else "")
         + "Facts:\n"
         + "\n".join(f"{f['id']}: {f['text']}" for f in facts)
@@ -363,7 +403,22 @@ def answer(
         # Agreement compiles the new proposal, or the edit already on screen; with neither
         # there is nothing to recompile, so the flag is dropped.
         pending = draft is not None and draft != agent.get("recipe")
-        recompile = bool(reply.get("recompile")) and (proposal is not None or pending)
+        intent = reply.get("intent")
+        if intent in ("change", "recompile") and proposal is None and not pending:
+            edited = _edited_recipe(question or "", earlier, agent, llm)
+            if edited is not None:
+                # The editor's own account of what it changed replaces a reply that could not
+                # see the change.
+                proposal, text = edited
+        asked = bool(reply.get("recompile")) or intent == "recompile"
+        recompile = asked and (proposal is not None or pending)
+        if asked and not recompile:
+            # The model said it would recompile but gave nothing to compile: say so rather than
+            # let a claim stand that no action backs.
+            text += (
+                "\n\n(Nothing was recompiled: there is no change to compile yet. Tell me what to "
+                "change, or edit the recipe above.)"
+            )
         if recompile and pending:
             # Agreeing compiles exactly what the judge sees; the model tends to echo the live
             # recipe here, which would silently undo the edit.

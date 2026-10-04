@@ -443,3 +443,105 @@ def test_agreement_compiles_what_is_on_screen_even_if_the_model_echoes_the_old_r
 
     assert out["recompile"] is True
     assert out["proposal"]["top_n"] == 20  # the draft, not the echoed live recipe
+
+
+def test_the_agent_remembers_the_conversation(store):
+    store.add_chat("lookout", {"ts": "t1", "role": "user", "text": "Make it less risky"})
+    store.add_chat(
+        "lookout",
+        {"ts": "t2", "role": "agent", "text": "I would cut top N to 8 and add a sit-out floor."},
+    )
+    llm = FakeLLM(
+        {"text": "x", "cited": [], "follow_ups": [], "proposal_json": "", "recompile": False}
+    )
+
+    answer(store, AGENT, "Go ahead and recompile it", llm)
+
+    prompt = llm.calls[0][1]
+    assert "Make it less risky" in prompt and "cut top N to 8" in prompt
+
+
+def test_vague_change_requests_must_become_a_proposal(store):
+    llm = FakeLLM(
+        {"text": "x", "cited": [], "follow_ups": [], "proposal_json": "", "recompile": False}
+    )
+    answer(store, AGENT, "hi", llm)
+    assert "less risky" in llm.calls[0][0]
+
+
+def test_a_claimed_recompile_with_nothing_to_compile_is_corrected(store):
+    llm = FakeLLM(
+        {
+            "text": "Recompiling now.",
+            "cited": [],
+            "follow_ups": [],
+            "proposal_json": "",
+            "recompile": True,
+        }
+    )
+
+    out = answer(store, {**AGENT, "recipe": RECIPE}, "Go ahead and recompile it", llm)
+
+    assert "recompile" not in out
+    assert "nothing was recompiled" in out["text"].lower()
+
+
+def strategy_reply(recipe, changed=True):
+    return {
+        "reply": "Lowered risk.",
+        "ready": True,
+        "changed": changed,
+        "ask_to_compile": True,
+        "compile": False,
+        "strategy": recipe,
+        "name": "x",
+        "persona": "x",
+        "strategy_line": "x",
+        "pitch": "x",
+    }
+
+
+def test_a_change_request_is_written_by_the_recipe_editor_when_the_chat_does_not(store):
+    safer = {**RECIPE, "top_n": 25, "sit_out_if_trailing_sharpe_below": 0.0}
+    llm = FakeLLM(
+        {
+            "text": "I would make it safer.",
+            "cited": [],
+            "follow_ups": [],
+            "proposal_json": "",
+            "recompile": False,
+            "intent": "change",
+        },
+        strategy_reply(safer),
+    )
+
+    out = answer(store, {**AGENT, "recipe": RECIPE}, "Make it a lot less risky", llm)
+
+    assert out["proposal"]["top_n"] == 25 and out["recompile"] is False
+    assert out["text"] == "Lowered risk."  # the editor's account of the change
+    assert len(llm.calls) == 2  # the editor got the current recipe and the request
+    assert '"top_n": 10' in llm.calls[1][1] and "less risky" in llm.calls[1][1]
+
+
+def test_go_ahead_recompiles_what_the_conversation_agreed(store):
+    store.add_chat("lookout", {"ts": "t1", "role": "user", "text": "Make it less risky"})
+    store.add_chat(
+        "lookout", {"ts": "t2", "role": "agent", "text": "I'd hold 25 names and sit out below 0."}
+    )
+    safer = {**RECIPE, "top_n": 25, "sit_out_if_trailing_sharpe_below": 0.0}
+    llm = FakeLLM(
+        {
+            "text": "Recompiling.",
+            "cited": [],
+            "follow_ups": [],
+            "proposal_json": "",
+            "recompile": True,
+            "intent": "recompile",
+        },
+        strategy_reply(safer),
+    )
+
+    out = answer(store, {**AGENT, "recipe": RECIPE}, "Go ahead and recompile it", llm)
+
+    assert out["recompile"] is True and out["proposal"]["top_n"] == 25
+    assert "hold 25 names" in llm.calls[1][1]  # the editor saw the conversation
