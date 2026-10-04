@@ -407,7 +407,8 @@ def test_there_is_nothing_to_recompile_without_a_change(store):
             "follow_ups": [],
             "proposal_json": "",
             "recompile": True,
-        }
+        },
+        strategy_reply(RECIPE, changed=False),
     )
 
     out = answer(store, {**AGENT, "recipe": RECIPE}, "Recompile", llm)
@@ -452,7 +453,8 @@ def test_the_agent_remembers_the_conversation(store):
         {"ts": "t2", "role": "agent", "text": "I would cut top N to 8 and add a sit-out floor."},
     )
     llm = FakeLLM(
-        {"text": "x", "cited": [], "follow_ups": [], "proposal_json": "", "recompile": False}
+        {"text": "x", "cited": [], "follow_ups": [], "proposal_json": "", "recompile": False},
+        strategy_reply(RECIPE, changed=False),
     )
 
     answer(store, AGENT, "Go ahead and recompile it", llm)
@@ -477,7 +479,8 @@ def test_a_claimed_recompile_with_nothing_to_compile_is_corrected(store):
             "follow_ups": [],
             "proposal_json": "",
             "recompile": True,
-        }
+        },
+        strategy_reply(RECIPE, changed=False),
     )
 
     out = answer(store, {**AGENT, "recipe": RECIPE}, "Go ahead and recompile it", llm)
@@ -545,3 +548,49 @@ def test_go_ahead_recompiles_what_the_conversation_agreed(store):
 
     assert out["recompile"] is True and out["proposal"]["top_n"] == 25
     assert "hold 25 names" in llm.calls[1][1]  # the editor saw the conversation
+
+
+@pytest.mark.parametrize(
+    "message",
+    [
+        "okay go ahead and change KL of surprise bids to 35% and recompile the model",
+        "go ahead",
+        "Do it.",
+        "apply it and compile",
+    ],
+)
+def test_saying_recompile_recompiles_even_if_the_model_wants_to_ask_again(store, message):
+    heavier = {**RECIPE, "top_n": 12}
+    llm = FakeLLM(
+        {
+            "text": "I still need your go-ahead.",
+            "cited": [],
+            "follow_ups": [],
+            "proposal_json": "",
+            "recompile": False,
+            "intent": "change",
+        },
+        strategy_reply(heavier),
+    )
+
+    out = answer(store, {**AGENT, "recipe": RECIPE}, message, llm)
+
+    assert out["recompile"] is True and out["proposal"]["top_n"] == 12
+
+
+def test_a_plain_change_request_still_waits(store):
+    llm = FakeLLM(
+        {
+            "text": "x",
+            "cited": [],
+            "follow_ups": [],
+            "proposal_json": "",
+            "recompile": False,
+            "intent": "change",
+        },
+        strategy_reply({**RECIPE, "top_n": 12}),
+    )
+
+    out = answer(store, {**AGENT, "recipe": RECIPE}, "Make it less risky", llm)
+
+    assert out["recompile"] is False

@@ -279,6 +279,13 @@ def _paragraphs(text: str) -> str:
     return "\n\n".join(p for p in paras if p)
 
 
+_RECOMPILE = re.compile(r"\b(re)?compile\b|\bgo ahead\b|\bdo it\b|\bapply it\b", re.IGNORECASE)
+
+
+def _says_recompile(question: str | None) -> bool:
+    return bool(question and _RECOMPILE.search(question))
+
+
 def _edited_recipe(
     message: str, earlier: list[dict], agent: dict, llm: LLM
 ) -> tuple[dict, str] | None:
@@ -361,7 +368,8 @@ def answer(
         'lookback_months (1-60), top_n (1-50), rebalance "monthly" and '
         "sit_out_if_trailing_sharpe_below (number or null), starting from the recipe on screen "
         "and changing only what they asked (never add a signal they did not ask for); say what "
-        "you changed and ask whether to recompile. "
+        "you changed. If the same message also says to recompile (or go ahead, do it), set "
+        "`recompile` true and do not ask again; otherwise ask whether to recompile. "
         'Set `intent`: "change" when the judge asks to change the recipe (vaguely or not), '
         '"recompile" when they tell you to recompile or go ahead, else "question". '
         "Say you are recompiling only when you set `recompile` true. "
@@ -404,6 +412,10 @@ def answer(
         # there is nothing to recompile, so the flag is dropped.
         pending = draft is not None and draft != agent.get("recipe")
         intent = reply.get("intent")
+        # Saying recompile (or go ahead) recompiles: Python decides, not the model, which
+        # tends to ask for a go-ahead it has already been given.
+        if _says_recompile(question):
+            intent = "recompile"
         if intent in ("change", "recompile") and proposal is None and not pending:
             edited = _edited_recipe(question or "", earlier, agent, llm)
             if edited is not None:
