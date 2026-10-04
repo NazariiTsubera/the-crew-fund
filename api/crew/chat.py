@@ -9,11 +9,14 @@ rate-limited or has no key, a deterministic answer is built from the same facts.
 
 from __future__ import annotations
 
+import logging
 import re
 
-from crew.gemini import LLM, LLMError
+from crew.gemini import LLM, LLMError, reason
 from crew.pipeline import now_ts
 from crew.store import Store
+
+log = logging.getLogger(__name__)
 
 INTRO = "Introduce yourself: what you trade, your track record in one sentence, your verdict."
 MAX_LOG_FACTS = 12
@@ -199,22 +202,25 @@ def answer(store: Store, agent: dict, question: str | None, llm: LLM | None) -> 
     prompt = f"Question: {question or INTRO}\n\nFacts:\n" + "\n".join(
         f"{f['id']}: {f['text']}" for f in facts
     )
-    source = "gemini"
+    source, why = "gemini", None
     try:
         if llm is None:
-            raise LLMError("no Gemini client")
+            raise LLMError("no Gemini client", "no Gemini key")
         reply = llm.generate_json(system, prompt, SCHEMA)
         text = " ".join(str(reply.get("text") or "").split())
         evidence = [by_id[i] for i in reply.get("cited") or [] if i in by_id]
         if not text:
             raise LLMError("empty answer")
-    except LLMError:
-        source = "fallback"
+    except LLMError as e:
+        source, why = "fallback", reason(e)
+        log.warning("chat %s fell back: %s", agent["id"], why)
         text, evidence = fallback(agent, question, facts)
 
     ts = now_ts()
     if question is not None:
         store.add_chat(agent["id"], {"ts": ts, "role": "user", "text": question})
     message = {"ts": ts, "role": "agent", "text": text, "evidence": evidence, "source": source}
+    if why:
+        message["fallback_reason"] = why
     store.add_chat(agent["id"], message)
     return message

@@ -193,3 +193,20 @@ def test_the_chat_endpoint_answers_offline_and_keeps_history(monkeypatch):
     assert "PROBATION" in intro["text"]
     assert len(client.get("/agents/lookout/chat").json()) == 3
     assert client.post("/agents/nobody/chat", json={"message": "hi"}).status_code == 404
+
+
+def test_a_fallback_says_why_gemini_was_not_used(store):
+    limited = FakeLLM(LLMError("boom", "rate limited (429)"))
+    out = answer(store, AGENT, "How are you doing?", limited)
+
+    assert out["source"] == "fallback"
+    assert out["fallback_reason"] == "rate limited (429)"
+
+
+def test_a_gemini_answer_has_no_fallback_reason(store):
+    facts = facts_for(store, AGENT, "How are you doing?")
+    out = answer(store, AGENT, "How are you doing?", FakeLLM({"text": "Fine.", "cited": []}))
+
+    assert out["source"] == "gemini"
+    assert "fallback_reason" not in out
+    assert facts

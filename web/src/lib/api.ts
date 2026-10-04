@@ -140,6 +140,8 @@ export const ChatMessageSchema = z.object({
   // Only the agent's replies carry these.
   evidence: z.array(z.string()).optional(),
   source: z.enum(["gemini", "fallback"]).optional(),
+  // Why a fallback answer is one (rate limited, no key…), from the API's Gemini client.
+  fallback_reason: z.string().optional(),
 });
 
 export const AgentReplySchema = ChatMessageSchema.extend({

@@ -57,7 +57,12 @@ export function AgentLine({
       <div className="flex min-w-0 flex-col gap-[7px]">
         <span className="font-mono text-[10px] leading-none font-medium tracking-[0.08em] text-muted">
           {agent.name.toUpperCase()} · {message.ts}
-          {message.source === "fallback" && <span className="text-faint"> · FROM ITS FILE</span>}
+          {message.source === "fallback" && (
+            <span className="text-faint" title={message.fallback_reason}>
+              {" "}
+              · FROM ITS FILE{message.fallback_reason && ` · GEMINI ${message.fallback_reason.toUpperCase()}`}
+            </span>
+          )}
         </span>
         <div className="text-sm leading-normal text-pretty whitespace-pre-wrap text-ink">{message.text}</div>
         {evidence.length > 0 && (

@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 
 import {
+  AgentReplySchema,
   AgentSchema,
   ApiError,
   CapitalSchema,
@@ -67,6 +68,18 @@ describe("the schemas", () => {
     });
     expect(k.turnover).toBeNull();
     expect(k.trailing_12m_sharpe).toBeNull();
+  });
+
+  it("keep why a chat answer fell back", () => {
+    const reply = AgentReplySchema.parse({
+      ts: "2026-10-04 10:00",
+      role: "agent",
+      text: "From my file.",
+      evidence: [],
+      source: "fallback",
+      fallback_reason: "rate limited (429)",
+    });
+    expect(reply.fallback_reason).toBe("rate limited (429)");
   });
 
   it("reject a status outside the contract", () => {
