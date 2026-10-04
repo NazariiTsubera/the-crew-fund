@@ -10,7 +10,7 @@ type Props = {
 
 export function LogFeed({ scope, state, onClear }: Props) {
   return (
-    <div className="flex min-w-0 flex-col gap-2">
+    <div className="flex min-h-0 min-w-0 flex-col gap-2">
       <div className="flex items-baseline justify-between gap-2 font-mono text-[11px] leading-none font-medium tracking-[0.12em] text-dim">
         <span>LOG · {scope}</span>
         {onClear && (
@@ -23,7 +23,9 @@ export function LogFeed({ scope, state, onClear }: Props) {
           </button>
         )}
       </div>
-      <div role="log" className="max-h-[420px] overflow-y-auto border border-line">
+      {/* A zero basis: beside the book the log takes the book's height and scrolls,
+          rather than setting the row's height itself; alone on a phone it keeps a minimum. */}
+      <div role="log" className="min-h-[260px] grow basis-0 overflow-y-auto border border-line">
         {state.status === "loading" && <div className="px-3 py-3.5 font-mono text-xs text-dim">Loading the log…</div>}
         {state.status === "error" && (
           <div className="px-3 py-3.5 font-mono text-xs leading-snug text-down">API offline · {state.message}</div>
@@ -35,7 +37,7 @@ export function LogFeed({ scope, state, onClear }: Props) {
           state.entries.map((e, i) => (
             <div
               key={`${e.ts}-${i}`}
-              className="grid grid-cols-[46px_minmax(0,1fr)] items-start gap-2.5 border-t border-line-soft px-3 py-2 font-mono text-xs leading-snug first:border-t-0"
+              className="grid grid-cols-[46px_minmax(0,1fr)] items-center gap-2.5 border-t border-line-soft px-3 py-2 font-mono text-xs leading-snug first:border-t-0"
             >
               <Tag kind={logTag(e)} />
               <span className="flex min-w-0 flex-col gap-1">
