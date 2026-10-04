@@ -84,16 +84,29 @@ def test_the_attack_reuses_a_run_it_is_given():
 
 
 @pytest.mark.parametrize(
-    "fails, expected",
+    "fails, leaked, expected",
     [
-        ([], "pass"),
-        (["Shuffle test"], "probation"),
-        (["2020 replay"], "probation"),
-        (["2020 replay", "2022 replay"], "killed"),
-        (["Lookahead test"], "killed"),
+        ([], False, "pass"),
+        (["Shuffle test"], False, "probation"),
+        (["2020 replay"], False, "probation"),
+        (["2020 replay", "2022 replay"], False, "killed"),
+        # A signal that fades when lagged (real, just fast) is one ordinary failure...
+        (["Lookahead test"], False, "probation"),
+        # ...one that collapses when lagged is leaking, and that alone kills it.
+        (["Lookahead test"], True, "killed"),
     ],
 )
-def test_verdict_counts_failures_and_lookahead_is_fatal(fails, expected):
+def test_verdict_counts_failures_and_a_collapse_is_fatal(fails, leaked, expected):
     tests = [{"name": n, "passed": n not in fails, "detail": ""} for n in TESTS]
 
-    assert verdict(tests) == expected
+    assert verdict(tests, leaked=leaked) == expected
+
+
+def test_a_decaying_signal_fails_lookahead_without_being_killed_for_it():
+    # Persistence 0.6: last month's reading keeps some, not most, of its edge.
+    panel = make_panel(persistence=0.6)
+
+    report = attack(recipe(), panel)
+
+    assert not by_name(report)["Lookahead test"]["passed"]
+    assert report["verdict"] != "killed" or sum(not t["passed"] for t in report["tests"]) >= 2

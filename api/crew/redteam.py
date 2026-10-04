@@ -7,8 +7,10 @@
 3. 2020 replay: drawdown Feb–Apr 2020 no worse than the S&P 500's.
 4. 2022 replay: drawdown Dec 2021–Dec 2022 no worse than the S&P 500's.
 
-Verdict: no failures is `pass`, one is `probation`, two or more is `killed`. A failed lookahead
-test kills on its own: a backtest that leaks makes the other three numbers meaningless.
+Verdict: no failures is `pass`, one is `probation`, two or more is `killed`. A lookahead test
+that collapses (the lagged signal keeps under a quarter of its Sharpe) kills on its own: that is
+what leakage looks like, and a backtest that leaks makes the other three numbers meaningless. A
+milder drop is a real but fast-decaying signal, and counts as one ordinary failure.
 """
 
 from __future__ import annotations
@@ -23,6 +25,7 @@ from crew.recipe import Recipe
 
 TESTS = ["Lookahead test", "Shuffle test", "2020 replay", "2022 replay"]
 LAG_KEEP = 0.8
+LAG_COLLAPSE = 0.25
 P_MAX = 0.05
 REPLAYS = {
     "2020 replay": (date(2020, 2, 1), date(2020, 4, 30), "Feb–Apr 2020"),
@@ -34,23 +37,25 @@ def pct0(x: float) -> str:
     return f"{'−' if x < 0 else '+'}{abs(x) * 100:.0f}%"
 
 
-def verdict(tests: list[dict]) -> str:
+def verdict(tests: list[dict], leaked: bool = False) -> str:
     failed = [t["name"] for t in tests if not t["passed"]]
-    if "Lookahead test" in failed or len(failed) >= 2:
+    if leaked or len(failed) >= 2:
         return "killed"
     return "probation" if failed else "pass"
 
 
-def _lookahead(recipe: Recipe, panel: Panel, run: Run) -> dict:
+def _lookahead(recipe: Recipe, panel: Panel, run: Run) -> tuple[dict, bool]:
+    """The test, and whether the lagged signal collapsed (a leak) rather than faded."""
     base = run.kpis["sharpe"]
     lagged = run_recipe(recipe, panel, lag_months=1).kpis["sharpe"]
     # A recipe with no edge has nothing to leak.
     passed = base <= 0 or lagged > LAG_KEEP * base
+    collapsed = base > 0 and lagged < LAG_COLLAPSE * base
     return {
         "name": "Lookahead test",
         "passed": bool(passed),
         "detail": f"Sharpe {fmt(base)} → {fmt(lagged)} with signals lagged one month",
-    }
+    }, collapsed
 
 
 def _sharpe(monthly: np.ndarray) -> float:
@@ -126,10 +131,11 @@ def attack(
 ) -> dict:
     """{verdict, tests: [{name, passed, detail}]} for the recipe on this panel."""
     run = run or run_recipe(recipe, panel)
+    lookahead, leaked = _lookahead(recipe, panel, run)
     tests = [
-        _lookahead(recipe, panel, run),
+        lookahead,
         _shuffle(recipe, panel, shuffles, seed),
         _replay("2020 replay", run, panel),
         _replay("2022 replay", run, panel),
     ]
-    return {"verdict": verdict(tests), "tests": tests}
+    return {"verdict": verdict(tests, leaked=leaked), "tests": tests}
