@@ -177,6 +177,10 @@ export function mockTransport({ stageDelay = () => 1000 + Math.random() * 1000 }
       return { ...vault, agents: [...agents.values()].map(summary) };
     }
     if (method === "GET" && url.pathname === "/agents") return [...agents.values()].map(summary);
+    if (method === "GET" && url.pathname === "/holdings/history") {
+      // The fixtures hold one book; mock mode shows it as the only month.
+      return { months: [{ month: vault.as_of, holdings: vault.holdings }] };
+    }
     if (method === "GET" && url.pathname === "/log") {
       const type = q.get("type");
       const limit = Number(q.get("limit") ?? 100);

@@ -21,6 +21,7 @@ from app.models import (
     CreateAgentFromStrategyRequest,
     CreateAgentRequest,
     Fund,
+    HoldingsHistory,
     LogEntry,
     SpeechRequest,
     StrategyChatRequest,
@@ -206,6 +207,13 @@ def agent_log(
     type: str | None = None,  # noqa: A002 - the contract's name
 ):
     return _found(vault.agent_log, agent_id, month, type)
+
+
+@router.get("/holdings/history", response_model=HoldingsHistory)
+def holdings_history():
+    """The fund's book month by month since 2017, for the Holdings chart. The judged
+    /portfolio/holdings stays the latest book only."""
+    return vault.holdings_history()
 
 
 @router.get("/log", response_model=list[LogEntry])

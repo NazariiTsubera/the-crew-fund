@@ -151,3 +151,13 @@ def test_fund_log_can_start_the_tape_at_a_chosen_month(client):
     # The oldest 50 from Feb 2020 onward, still newest first like every log response.
     assert min(r["ts"] for r in rows) < "2020-04"
     assert [r["ts"] for r in rows] == sorted((r["ts"] for r in rows), reverse=True)
+
+
+def test_holdings_history_has_every_month_of_the_fund_book(client):
+    months = timed(client, "/holdings/history")["months"]
+
+    assert len(months) > 24
+    assert [m["month"] for m in months] == sorted(m["month"] for m in months)
+    for m in months:
+        assert sum(h["weight"] for h in m["holdings"]) == pytest.approx(1.0)
+        assert all(h["agent_id"] for h in m["holdings"])

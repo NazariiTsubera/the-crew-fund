@@ -176,6 +176,12 @@ export type Verdict = z.infer<typeof VerdictSchema>;
 export type RedTeamTest = z.infer<typeof RedTeamTestSchema>;
 export type RedTeam = z.infer<typeof RedTeamSchema>;
 
+// GET /holdings/history: the fund's book for every month, oldest first (the Holdings chart).
+export const HoldingsHistorySchema = z.object({
+  months: z.array(z.object({ month: z.string(), holdings: z.array(HoldingSchema) })),
+});
+export type HoldingsHistory = z.infer<typeof HoldingsHistorySchema>;
+
 // POST /agents/{id}/whatif: an edited recipe through the same backtest and red team, unsaved.
 export const WhatIfSchema = z.object({
   recipe: RecipeOutSchema,
@@ -302,6 +308,8 @@ export function createClient(transport: Transport) {
         .array(LogEntrySchema)
         .parse(await transport.get(`/agents/${enc(id)}/log${query(opts)}`, signal)),
     /** `since` (YYYY-MM): the oldest `limit` entries from that month on, still newest first. */
+    holdingsHistory: async (signal?: AbortSignal) =>
+      HoldingsHistorySchema.parse(await transport.get("/holdings/history", signal)),
     log: async (opts: { limit?: number; type?: LogType; since?: string } = {}, signal?: AbortSignal) =>
       z.array(LogEntrySchema).parse(await transport.get(`/log${query(opts)}`, signal)),
     capital: async (opts: { from?: string } = {}, signal?: AbortSignal) =>

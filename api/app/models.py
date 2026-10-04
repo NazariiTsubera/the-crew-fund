@@ -141,6 +141,15 @@ class Holding(BaseModel):
     agent_id: str | None = None
 
 
+class HoldingsMonth(BaseModel):
+    month: str
+    holdings: list[Holding]
+
+
+class HoldingsHistory(BaseModel):
+    months: list[HoldingsMonth]
+
+
 class AgentSummary(BaseModel):
     id: str
     name: str

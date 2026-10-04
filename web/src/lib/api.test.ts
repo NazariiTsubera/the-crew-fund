@@ -100,6 +100,12 @@ describe("the client over the mock transport", () => {
     expect((await api.agent("fence")).recipe.top_n).toBe(9);
   });
 
+  it("reads the fund's book month by month", async () => {
+    const { months } = await api.holdingsHistory();
+    expect(months.length).toBeGreaterThan(0);
+    expect(months[0].holdings.reduce((t, h) => t + h.weight, 0)).toBeCloseTo(1);
+  });
+
   it("reads the vault and the crew", async () => {
     const vault = await api.vault();
     expect(vault.agents).toHaveLength(5);

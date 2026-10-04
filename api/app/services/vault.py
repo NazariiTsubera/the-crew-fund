@@ -76,6 +76,19 @@ def agent_log(agent_id: str, month: str | None, type_: str | None) -> list[dict]
     return store.log(agent_id=agent_id, month=month, types=[type_] if type_ else None)
 
 
+def holdings_history() -> dict:
+    """The fund's book for every month (the Holdings page's chart and table), oldest first."""
+    by_month: dict[str, list[dict]] = {}
+    for h in crew_repository.store().holdings("fund"):
+        by_month.setdefault(h["month"], []).append(h)
+    return {
+        "months": [
+            {"month": m, "holdings": sorted(rows, key=lambda h: -h["weight"])}
+            for m, rows in sorted(by_month.items())
+        ]
+    }
+
+
 def fund_log(limit: int, type_: str | None, since: str | None = None) -> list[dict]:
     types = [type_] if type_ else None
     if since is None:

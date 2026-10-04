@@ -3,7 +3,11 @@
 import { agentColorVar, Glyph } from "@/components/glyph";
 import { ErrorState, LoadingState, PageBody, PageHeader } from "@/components/war-room/page-frame";
 import { useFundData } from "@/components/war-room/use-fund-data";
-import type { AgentSummary, Holding } from "@/lib/api";
+import { useEffect, useState } from "react";
+
+import { HoldingsChart } from "@/components/war-room/holdings-chart";
+import { api, type AgentSummary, type Holding } from "@/lib/api";
+import type { BookMonth } from "@/lib/holdings-history";
 import { formatMonth } from "@/lib/format";
 import { bookSummary, sortHoldings } from "@/lib/holdings";
 
@@ -94,17 +98,48 @@ function Book({ holdings, agents }: { holdings: Holding[]; agents: AgentSummary[
   );
 }
 
-/** Holdings (FILE 03): the fund's latest book, each position with the agent holding it and why. */
+/** The fund's book for every month; null until it loads (or if it fails: the latest book stays). */
+function useHistory(): BookMonth[] | null {
+  const [months, setMonths] = useState<BookMonth[] | null>(null);
+  useEffect(() => {
+    const controller = new AbortController();
+    api.holdingsHistory(controller.signal).then(
+      (h) => setMonths(h.months),
+      () => {},
+    );
+    return () => controller.abort();
+  }, []);
+  return months;
+}
+
+/** Holdings (FILE 03): the fund's book over time by agent, and the positions of any month. */
 export function HoldingsView() {
   const { vault, retry } = useFundData({ withCapital: false });
-  const month = vault.status === "ready" ? ` · ${formatMonth(vault.data.as_of).toUpperCase()}` : "";
+  const history = useHistory();
+  const [hovered, setHovered] = useState<string | null>(null);
+  const [pinned, setPinned] = useState<string | null>(null);
+  const latest = vault.status === "ready" ? vault.data.as_of : null;
+  const shownMonth = hovered ?? pinned ?? latest;
+  const fromHistory = history?.find((m) => m.month === shownMonth)?.holdings;
+  const book = shownMonth !== latest && fromHistory ? fromHistory : vault.status === "ready" ? vault.data.holdings : [];
+  const month = shownMonth ? ` · ${formatMonth(shownMonth).toUpperCase()}` : "";
   return (
     <>
       <PageHeader kicker={`${KICKER}${month}`} title="Holdings" />
       <PageBody>
         {vault.status === "loading" && <LoadingState />}
         {vault.status === "error" && <ErrorState error={vault.error} onRetry={retry} />}
-        {vault.status === "ready" && <Book holdings={vault.data.holdings} agents={vault.data.agents} />}
+        {vault.status === "ready" && history && shownMonth && (
+          <HoldingsChart
+            months={history}
+            agents={vault.data.agents}
+            shown={shownMonth}
+            pinned={pinned}
+            onHover={setHovered}
+            onPin={setPinned}
+          />
+        )}
+        {vault.status === "ready" && <Book holdings={book} agents={vault.data.agents} />}
       </PageBody>
     </>
   );
