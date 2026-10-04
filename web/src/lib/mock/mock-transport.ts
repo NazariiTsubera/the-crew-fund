@@ -124,6 +124,8 @@ export function mockTransport({ stageDelay = () => 1000 + Math.random() * 1000 }
     return {
       reply: "Mock mode: I can't read strategies without Gemini, so I kept the current recipe. Ready when you are.",
       ready: true,
+      compile: false,
+      changed: false,
       strategy: body.strategy ?? TEMPLATE.recipe,
       name: "The Recruit",
       persona: "Eager, untested, keen to prove the backtest was no fluke.",

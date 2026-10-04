@@ -78,15 +78,16 @@ export function RecruitScreen() {
         ts: timestamp(),
       });
 
-      dispatch({
-        type: "strategy",
+      const identity = {
         recipe: response.strategy,
         name: response.name,
         persona: response.persona,
         strategyLine: response.strategy_line,
         pitch: response.pitch,
-        ready: response.ready,
-      });
+      };
+      dispatch({ type: "strategy", ...identity, ready: response.ready });
+      // The user agreed to compile in words; build the agent as if RECRUIT had been pressed.
+      if (response.compile) await recruit(identity);
     } catch (error) {
       dispatch({
         type: "assistant",
@@ -96,21 +97,17 @@ export function RecruitScreen() {
     }
   }
 
-  async function recruit() {
-    if (
-      isRecruiting(state) ||
-      !state.ready ||
-      !state.name ||
-      !state.persona ||
-      !state.strategyLine ||
-      !state.pitch
-    ) {
-      return;
-    }
+  type Draft = Pick<typeof state, "recipe" | "name" | "persona" | "strategyLine" | "pitch">;
 
-    const prompt =
-    state.strategyLine ||
-    "User-defined investment strategy";
+  // `agreed` carries the draft from the reply that agreed to compile: this render's `state`
+  // has not seen that reply yet.
+  async function recruit(agreed?: Draft) {
+    const draft: Draft = agreed ?? state;
+    if (isRecruiting(state) || (!agreed && !state.ready)) return;
+    const { recipe, name, persona, strategyLine, pitch } = draft;
+    if (!name || !persona || !strategyLine || !pitch) return;
+
+    const prompt = strategyLine || "User-defined investment strategy";
 
         dispatch({
           type: "start",
@@ -125,11 +122,11 @@ export function RecruitScreen() {
             const event of api.createAgentFromStrategy(
               {
                 prompt,
-                strategy: state.recipe,
-                name: state.name,
-                persona: state.persona,
-                strategy_line: state.strategyLine,
-                pitch: state.pitch,
+                strategy: recipe,
+                name,
+                persona,
+                strategy_line: strategyLine,
+                pitch,
               },
             )
           ) {

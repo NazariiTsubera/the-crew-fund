@@ -42,12 +42,16 @@ export const RecipeOutSchema = z.object({
 
 export const StrategyChatResponseSchema = z.object({
   reply: z.string(),
-                                                   strategy: RecipeOutSchema,
-                                                   name: z.string(),
-                                                   persona: z.string(),
-                                                   strategy_line: z.string(),
-                                                   pitch: z.string(),
-                                                   ready: z.boolean(),
+  strategy: RecipeOutSchema,
+  name: z.string(),
+  persona: z.string(),
+  strategy_line: z.string(),
+  pitch: z.string(),
+  // ready: complete enough to compile; compile: the user agreed to compile now;
+  // changed: this turn edited the recipe (false for a research question).
+  ready: z.boolean(),
+  compile: z.boolean().default(false),
+  changed: z.boolean().default(true),
 });
 export type StrategyChatResponse = z.infer<typeof StrategyChatResponseSchema>;
 

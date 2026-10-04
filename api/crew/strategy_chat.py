@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from typing import Literal
 
 from pydantic import BaseModel, Field, ValidationError
@@ -52,7 +53,11 @@ class StrategyChatRequest(BaseModel):
 
 class StrategyChatResponse(BaseModel):
     reply: str
+    # ready: the recipe is complete enough to compile; compile: the user agreed to compile now;
+    # changed: this turn edited the recipe (False for a question).
     ready: bool
+    compile: bool = False
+    changed: bool = True
     strategy: dict
     name: str
     persona: str
@@ -120,8 +125,20 @@ CONVERSATION RULES:
 6. If the user has not specified a value, keep the current value.
 7. Ask a clarification question only when the requested change cannot be
    reasonably inferred.
-8. Set ready=true only when the user has clearly provided enough information
-   to define the strategy or explicitly asks to finalize/confirm it.
+8. This is research first. When the user asks a question (what a feature means,
+   which signals suit an idea, what a parameter does, how the backtest or the
+   Red Team works), answer it fully and set changed=false: the recipe stays
+   exactly as it is. Set changed=true only when the latest message asks to
+   change the strategy, and then change only what it asks for.
+9. When the strategy looks complete and coherent, say so, summarize it in a
+   sentence, and ask whether to compile it now or keep exploring; set
+   ask_to_compile=true. Never compile on your own initiative.
+10. Set compile=true only when the user explicitly agrees to compile (for
+   example "yes", "compile it", "go ahead") in reply to your question or
+   unprompted. Otherwise compile=false.
+11. Be conversational and helpful: explain your reasoning in two or three
+   short paragraphs, suggest ideas worth exploring, and keep the user in
+   charge of the decisions.
 
 IDENTITY:
 Also return:
@@ -139,6 +156,9 @@ SCHEMA = {
     "properties": {
         "reply": {"type": "string"},
         "ready": {"type": "boolean"},
+        "changed": {"type": "boolean"},
+        "ask_to_compile": {"type": "boolean"},
+        "compile": {"type": "boolean"},
         "name": {"type": "string"},
         "persona": {"type": "string"},
         "strategy_line": {"type": "string"},
@@ -191,6 +211,9 @@ SCHEMA = {
     "required": [
         "reply",
         "ready",
+        "changed",
+        "ask_to_compile",
+        "compile",
         "strategy",
         "name",
         "persona",
@@ -261,16 +284,29 @@ Return the complete strategy, not just changed fields.
     except LLMError as exc:
         raise ValueError(f"Gemini could not update the strategy ({exc})") from exc
 
-    try:
-        recipe = Recipe.model_validate(data.get("strategy") or {})
-    except ValidationError as exc:
-        raise ValueError(f"Gemini produced an invalid strategy: {explain(exc)}") from exc
+    # A question must not move the recipe, even if Gemini echoes a drifted copy of it.
+    changed = bool(data.get("changed", True))
+    if changed:
+        try:
+            recipe = Recipe.model_validate(data.get("strategy") or {})
+        except ValidationError as exc:
+            raise ValueError(f"Gemini produced an invalid strategy: {explain(exc)}") from exc
+    else:
+        recipe = current_recipe
 
     identity = _clean_identity(data)
+    compile_now = bool(data.get("compile", False))
 
     return StrategyChatResponse(
-        reply=" ".join(str(data["reply"]).split()),
-        ready=bool(data["ready"]),
+        reply=_paragraphs(str(data["reply"])),
+        ready=bool(data.get("ready")) or bool(data.get("ask_to_compile")) or compile_now,
+        compile=compile_now,
+        changed=changed,
         strategy=recipe.model_dump(),
         **identity,
     )
+
+
+def _paragraphs(text: str) -> str:
+    paras = [" ".join(p.split()) for p in re.split(r"\n\s*\n", text)]
+    return "\n\n".join(p for p in paras if p)

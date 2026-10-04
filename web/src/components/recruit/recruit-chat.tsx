@@ -22,9 +22,9 @@ import {
 import { api } from "@/lib/api";
 
 export const EXAMPLES = [
-  "I want a value strategy focused on cheap companies with strong earnings surprises.",
-"I want momentum, but I want liquidity to matter more than anything else.",
-"I want a defensive strategy that reduces risk when funding stress becomes extreme.",
+  "Which signals here capture cheap companies with improving earnings?",
+  "I want momentum, but liquidity should matter more than anything else.",
+  "How does the Red Team decide whether a strategy survives?",
 ];
 
 function Waiting({ text }: { text: string }) {
@@ -278,9 +278,9 @@ export function RecruitChat({
       </h1>
 
       <p className="m-0 text-xs leading-normal text-muted">
-      Defaults are already loaded. You can change
-      any weight, filter, lookback, position count,
-      or risk rule through the conversation.
+      Research first: ask what a signal means or which
+      ones suit your idea, and nothing changes until you
+      ask for it. Gemini asks before it compiles.
       </p>
 
       <div className="flex flex-col gap-1.5">
@@ -359,8 +359,8 @@ export function RecruitChat({
           !busy &&
           state.phase !== "ready" && (
             <div className="border border-accent/40 bg-side p-3 font-mono text-xs text-soft">
-            Strategy confirmed. Review the parameters
-            above, then recruit the agent.
+            Ready to compile. Say &ldquo;compile it&rdquo; or press
+            RECRUIT AGENT, or keep exploring.
             </div>
           )}
 
