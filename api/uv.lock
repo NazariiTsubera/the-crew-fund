@@ -1,5 +1,5 @@
 version = 1
-revision = 3
+revision = 5
 requires-python = "==3.12.*"
 resolution-markers = [
     "sys_platform == 'win32'",
@@ -140,6 +140,7 @@ dependencies = [
     { name = "polars" },
     { name = "psycopg", extra = ["binary"] },
     { name = "pydantic" },
+    { name = "python-dotenv" },
     { name = "statevector" },
     { name = "uvicorn", extra = ["standard"] },
 ]
@@ -160,6 +161,7 @@ requires-dist = [
     { name = "polars", specifier = ">=1.0" },
     { name = "psycopg", extras = ["binary"], specifier = ">=3.2" },
     { name = "pydantic", specifier = ">=2.8" },
+    { name = "python-dotenv", specifier = ">=1.0" },
     { name = "statevector", git = "https://github.com/orkid-labs/utsa-investment-hackathon?subdirectory=sdk&rev=3c137e7" },
     { name = "uvicorn", extras = ["standard"], specifier = ">=0.30" },
 ]

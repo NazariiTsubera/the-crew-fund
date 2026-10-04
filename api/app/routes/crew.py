@@ -8,13 +8,36 @@ from collections.abc import Callable, Iterator
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from fastapi.responses import StreamingResponse
+from fastapi.responses import Response, StreamingResponse
 
-from app.models import Agent, AgentSummary, Capital, ChatRequest, CreateAgentRequest, Fund, LogEntry
+from app.models import (
+    Agent,
+    AgentSummary,
+    Capital,
+    ChatRequest,
+    CreateAgentFromStrategyRequest,
+    CreateAgentRequest,
+    Fund,
+    LogEntry,
+    SpeechRequest,
+    StrategyChatRequest,
+)
 from app.services import agents, vault
 from crew.gemini import LLM, default_llm
+from crew.recipe import Recipe
+from crew.speech import SpeechError, synthesize
+from crew.strategy_chat import StrategyChatResponse, build_strategy_chat
 
 router = APIRouter()
+
+
+@router.post("/agents/strategy-chat/speech")
+def strategy_chat_speech(req: SpeechRequest):
+    try:
+        audio = synthesize(req.text)
+    except SpeechError as exc:
+        raise HTTPException(503, str(exc)) from exc
+    return Response(audio, media_type="audio/mpeg", headers={"Cache-Control": "no-store"})
 
 
 def get_llm() -> Callable[[], LLM]:
@@ -25,6 +48,23 @@ def get_llm() -> Callable[[], LLM]:
 def _sse(events: Iterator[tuple[str, dict]]) -> Iterator[str]:
     for event, data in events:
         yield f"event: {event}\ndata: {json.dumps(data)}\n\n"
+
+
+@router.post("/agents/strategy-chat", response_model=StrategyChatResponse)
+def strategy_chat_endpoint(
+    req: StrategyChatRequest,
+    llm: Annotated[Callable[[], LLM], Depends(get_llm)],
+):
+    try:
+        result = build_strategy_chat(
+            message=req.message,
+            history=req.history,
+            current=req.strategy.model_dump() if req.strategy is not None else None,
+            llm=llm(),
+        )
+        return result
+    except ValueError as exc:
+        raise HTTPException(400, str(exc)) from exc
 
 
 @router.post("/agents")
@@ -44,16 +84,39 @@ def chat(
     """{text, evidence, source, ts}: the agent's answer and the stored facts it cites."""
     try:
         return agents.chat(agent_id, req.message, llm)
-    except agents.AgentNotFound as e:
-        raise HTTPException(404, f"no agent {e}") from e
+    except agents.AgentNotFound as exc:
+        raise HTTPException(404, f"no agent {exc}") from exc
 
 
 @router.get("/agents/{agent_id}/chat")
 def chat_history(agent_id: str) -> list[dict]:
     try:
         return agents.chat_history(agent_id)
-    except agents.AgentNotFound as e:
-        raise HTTPException(404, f"no agent {e}") from e
+    except agents.AgentNotFound as exc:
+        raise HTTPException(404, f"no agent {exc}") from exc
+
+
+@router.post("/agents/from-strategy")
+def create_agent_from_strategy(req: CreateAgentFromStrategyRequest):
+    try:
+        recipe = Recipe.model_validate(req.strategy.model_dump())
+    except Exception as exc:
+        raise HTTPException(400, f"invalid strategy: {exc}") from exc
+
+    return StreamingResponse(
+        _sse(
+            agents.create_from_recipe(
+                prompt=req.prompt,
+                recipe=recipe,
+                name=req.name,
+                persona=req.persona,
+                strategy_line=req.strategy_line,
+                pitch=req.pitch,
+            )
+        ),
+        media_type="text/event-stream",
+        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+    )
 
 
 def _found(fn, *args):

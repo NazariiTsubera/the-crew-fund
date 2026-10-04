@@ -40,6 +40,17 @@ export const RecipeOutSchema = z.object({
   sit_out_if_trailing_sharpe_below: z.number().nullable(),
 });
 
+export const StrategyChatResponseSchema = z.object({
+  reply: z.string(),
+                                                   strategy: RecipeOutSchema,
+                                                   name: z.string(),
+                                                   persona: z.string(),
+                                                   strategy_line: z.string(),
+                                                   pitch: z.string(),
+                                                   ready: z.boolean(),
+});
+export type StrategyChatResponse = z.infer<typeof StrategyChatResponseSchema>;
+
 export const HoldingSchema = z.object({
   ticker: z.string(),
   weight: z.number(),
@@ -172,6 +183,7 @@ export type CreateEvent = z.infer<typeof CreateEventSchema>;
 export interface Transport {
   get(path: string, signal?: AbortSignal): Promise<unknown>;
   post(path: string, body: unknown, signal?: AbortSignal): Promise<unknown>;
+  postAudio(path: string, body: unknown, signal?: AbortSignal): Promise<Blob>;
   stream(path: string, body: unknown, signal?: AbortSignal): AsyncIterable<SseEvent>;
 }
 
@@ -215,6 +227,11 @@ export function httpTransport(base: string, fetchImpl: typeof fetch = fetch): Tr
       const res = await post(path, body, signal);
       if (!res.ok) throw await failure(res);
       return res.json();
+    },
+    async postAudio(path, body, signal) {
+      const res = await post(path, body, signal);
+      if (!res.ok) throw await failure(res);
+      return res.blob();
     },
     async *stream(path, body, signal) {
       const res = await post(path, body, signal);
@@ -261,6 +278,46 @@ export function createClient(transport: Transport) {
         yield CreateEventSchema.parse(raw);
       }
     },
+    strategyChat: async (
+      message: string,
+      history: { role: "user" | "assistant"; text: string }[],
+      strategy: RecipeOut,
+      signal?: AbortSignal,
+    ): Promise<StrategyChatResponse> =>
+    StrategyChatResponseSchema.parse(
+      await transport.post(
+        "/agents/strategy-chat",
+        {
+          message,
+          history,
+          strategy,
+        },
+        signal,
+      ),
+    ),
+    recruiterSpeech: (text: string, signal?: AbortSignal): Promise<Blob> =>
+      transport.postAudio("/agents/strategy-chat/speech", { text }, signal),
+    async *createAgentFromStrategy(
+      body: {
+        prompt: string;
+        strategy: RecipeOut;
+        name: string;
+        persona: string;
+        strategy_line: string;
+        pitch: string;
+      },
+      signal?: AbortSignal,
+    ): AsyncGenerator<CreateEvent> {
+      for await (
+        const raw of transport.stream(
+          "/agents/from-strategy",
+          body,
+          signal,
+        )
+      ) {
+        yield CreateEventSchema.parse(raw);
+      }
+    },
   };
 }
 
@@ -281,6 +338,8 @@ function resolveTransport(): Promise<Transport> {
 const lazyTransport: Transport = {
   get: async (path, signal) => (await resolveTransport()).get(path, signal),
   post: async (path, body, signal) => (await resolveTransport()).post(path, body, signal),
+  postAudio: async (path, body, signal) =>
+    (await resolveTransport()).postAudio(path, body, signal),
   async *stream(path, body, signal) {
     yield* (await resolveTransport()).stream(path, body, signal);
   },

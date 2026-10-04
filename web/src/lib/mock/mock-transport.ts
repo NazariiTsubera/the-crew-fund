@@ -116,6 +116,22 @@ export function mockTransport({ stageDelay = () => 1000 + Math.random() * 1000 }
     };
   }
 
+  // The recruiter chat cannot interpret words without Gemini; it keeps the strategy it was
+  // sent and marks it ready, so the creation flow can still be walked through.
+  function strategyChat(body: Json): Json {
+    const message = typeof body.message === "string" ? body.message.trim() : "";
+    const line = message.length > 80 ? `${message.slice(0, 79)}…` : message;
+    return {
+      reply: "Mock mode: I can't read strategies without Gemini, so I kept the current recipe. Ready when you are.",
+      ready: true,
+      strategy: body.strategy ?? TEMPLATE.recipe,
+      name: "The Recruit",
+      persona: "Eager, untested, keen to prove the backtest was no fluke.",
+      strategy_line: line || "User-defined investment strategy",
+      pitch: message || "I trade the recipe you gave me.",
+    };
+  }
+
   async function* create(body: Json, signal?: AbortSignal): AsyncGenerator<SseEvent> {
     const prompt = typeof body.prompt === "string" ? body.prompt.trim() : "";
     await sleep(stageDelay(), signal);
@@ -153,6 +169,7 @@ export function mockTransport({ stageDelay = () => 1000 + Math.random() * 1000 }
       const from = q.get("from");
       return { months: capital.months.filter((m) => !from || m.month >= from) };
     }
+    if (method === "POST" && url.pathname === "/agents/strategy-chat") return strategyChat(body);
     if (parts[0] === "agents" && parts.length >= 2) {
       const agent = findAgent(parts[1]);
       if (method === "GET" && parts.length === 2) return agent;
@@ -184,8 +201,11 @@ export function mockTransport({ stageDelay = () => 1000 + Math.random() * 1000 }
     async post(path, body) {
       return structuredClone(route("POST", path, (body ?? {}) as Json));
     },
+    async postAudio() {
+      throw new ApiError(503, "speech playback is unavailable in mock mode");
+    },
     stream(path, body, signal) {
-      if (path !== "/agents") throw new ApiError(404, `404 Not Found: POST ${path}`);
+      if (path !== "/agents" && path !== "/agents/from-strategy") throw new ApiError(404, `404 Not Found: POST ${path}`);
       return create((body ?? {}) as Json, signal);
     },
   };

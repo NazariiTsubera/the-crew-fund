@@ -74,6 +74,86 @@ def create(prompt: str, llm_factory: Callable[[], LLM]) -> Iterator[tuple[str, d
     yield "done", {"agent": agent}
 
 
+def create_from_recipe(
+    prompt: str,
+    recipe,
+    name: str,
+    persona: str,
+    strategy_line: str,
+    pitch: str,
+) -> Iterator[tuple[str, dict]]:
+    """Create an agent from an already validated Recipe.
+
+    Gemini has already interpreted the user's conversation. The Recipe has
+    already been validated and normalized. No second LLM compilation occurs,
+    so the user's weights cannot silently change between confirmation and
+    backtesting.
+    """
+
+    yield "compiling", {}
+
+    yield (
+        "backtesting",
+        {
+            "name": name,
+            "recipe": recipe.model_dump(),
+        },
+    )
+
+    try:
+        panel = crew_repository.panel()
+    except FileNotFoundError:
+        yield "error", {"message": "the panel cache is missing; run scripts/cache_panel.py"}
+        return
+
+    with _lock:
+        store = crew_repository.store()
+
+        run, report = evaluate(recipe, panel)
+
+        yield (
+            "redteam",
+            {
+                "kpis": run.kpis,
+            },
+        )
+
+        agents = store.list_agents()
+        taken = {a["id"] for a in agents}
+
+        shape, color = NEW_LOOKS[sum(a["id"] not in SEED_IDS for a in agents) % len(NEW_LOOKS)]
+
+        meta = {
+            "id": _agent_id(name, prompt, taken),
+            "name": name,
+            "persona": persona,
+            "strategy_line": strategy_line,
+            "pitch": pitch,
+            "shape": shape,
+            "color": color,
+            "prompt": prompt,
+        }
+
+        agent = publish(
+            store,
+            meta,
+            recipe,
+            run,
+            report,
+        )
+
+        rebalance(store, panel)
+
+        agent = store.get_agent(agent["id"])
+
+    yield (
+        "done",
+        {
+            "agent": agent,
+        },
+    )
+
+
 class AgentNotFound(LookupError):
     pass
 

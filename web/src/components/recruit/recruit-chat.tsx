@@ -1,61 +1,202 @@
 "use client";
 
-import { useEffect, useRef, type FormEvent, type KeyboardEvent } from "react";
+import {
+  Fragment,
+  useEffect,
+  useRef,
+  useState,
+  type FormEvent,
+  type KeyboardEvent,
+} from "react";
 
-import { AgentLine, SystemLine, UserLine } from "@/components/agent/chat-column";
-import { RecipeCard } from "@/components/agent/recipe-card";
-import { isRecruiting, type RecruitState } from "@/lib/recruit";
+import {
+  AgentLine,
+  SystemLine,
+  UserLine,
+} from "@/components/agent/chat-column";
 
-// The design's three example strategies ("FILE 00 // UNNAMED RECRUIT").
+import {
+  isRecruiting,
+  type RecruitState,
+} from "@/lib/recruit";
+import { api } from "@/lib/api";
+
 export const EXAMPLES = [
-  "Buy companies whose earnings beat what the market had priced in, and hold while the surprise decays.",
-  "Buy cheap quality megacaps when their fair-value gap starts closing fast. Skip anything illiquid.",
-  "Go to cash when funding stress spikes; otherwise hold long-duration large caps.",
+  "I want a value strategy focused on cheap companies with strong earnings surprises.",
+"I want momentum, but I want liquidity to matter more than anything else.",
+"I want a defensive strategy that reduces risk when funding stress becomes extreme.",
 ];
 
 function Waiting({ text }: { text: string }) {
   return (
     <div className="flex items-center gap-2.5 font-mono text-xs leading-none text-muted">
-      <span aria-hidden className="inline-block h-3.5 w-2 bg-accent" style={{ animation: "crew-blink 0.9s steps(2) infinite" }} />
-      {text}
+    <span
+    aria-hidden
+    className="inline-block h-3.5 w-2 bg-accent"
+    style={{
+      animation:
+      "crew-blink 0.9s steps(2) infinite",
+    }}
+    />
+    {text}
     </div>
   );
 }
 
-/** The chat column before the agent exists: the brief, examples, the stream's stages, the first message. */
+function StrategySummary({
+  state,
+}: {
+  state: RecruitState;
+}) {
+  const total = state.recipe.features.reduce(
+    (sum, feature) => sum + feature.weight,
+                                             0,
+  );
+
+  return (
+    <div className="border-b border-line-soft bg-side px-5 py-4">
+    <div className="mb-3 font-mono text-[10px] font-medium tracking-[0.14em] text-dim">
+    STRATEGY PARAMETERS
+    </div>
+
+    <div className="mb-3 text-xs text-muted">
+    Signal weights control stock selection. The selected
+    stocks are then equally weighted.
+    </div>
+
+    <div className="flex flex-col gap-2">
+    {state.recipe.features.map((feature) => (
+      <div
+      key={feature.name}
+      className="grid grid-cols-[minmax(0,1fr)_52px_42px] gap-2 font-mono text-xs"
+      >
+      <span className="truncate text-soft">
+      {feature.name}
+      </span>
+
+      <span className="text-right text-ink">
+      {(feature.weight * 100).toFixed(1)}%
+      </span>
+
+      <span className="text-right text-muted">
+      {feature.direction === "high"
+        ? "HIGH"
+        : "LOW"}
+        </span>
+        </div>
+    ))}
+    </div>
+
+    <div className="mt-3 grid grid-cols-[110px_minmax(0,1fr)] gap-y-1 font-mono text-xs">
+    <span className="text-faint">
+    weight total
+    </span>
+    <span className="text-soft">
+    {(total * 100).toFixed(1)}%
+    </span>
+
+    <span className="text-faint">
+    filters
+    </span>
+    <span className="text-soft">
+    {state.recipe.filters.length
+      ? state.recipe.filters.join(" · ")
+      : "none"}
+      </span>
+
+      <span className="text-faint">
+      lookback
+      </span>
+      <span className="text-soft">
+      {state.recipe.lookback_months} months
+      </span>
+
+      <span className="text-faint">
+      top N
+      </span>
+      <span className="text-soft">
+      {state.recipe.top_n}
+      </span>
+
+      <span className="text-faint">
+      rebalance
+      </span>
+      <span className="text-soft">
+      {state.recipe.rebalance}
+      </span>
+
+      <span className="text-faint">
+      sit out
+      </span>
+      <span className="text-soft">
+      {state.recipe.sit_out_if_trailing_sharpe_below ===
+        null
+        ? "disabled"
+        : `Sharpe < ${state.recipe.sit_out_if_trailing_sharpe_below}`}
+        </span>
+        </div>
+        </div>
+  );
+}
+
 export function RecruitChat({
   state,
   input,
   onInput,
+  onSend,
   onRecruit,
   className = "",
 }: {
   state: RecruitState;
   input: string;
   onInput: (value: string) => void;
+  onSend: () => void;
   onRecruit: () => void;
   className?: string;
 }) {
-  const scroller = useRef<HTMLDivElement>(null);
-  const field = useRef<HTMLTextAreaElement>(null);
-  const busy = isRecruiting(state);
-  const filed = state.stored;
-  const showBrief = state.phase === "idle" || state.phase === "failed";
+  const scroller =
+  useRef<HTMLDivElement>(null);
+
+  const field =
+  useRef<HTMLTextAreaElement>(null);
+
+  const audio = useRef<HTMLAudioElement>(null);
+  const audioUrl = useRef<string | null>(null);
+  const [playing, setPlaying] = useState<number | null>(null);
+  const [speechError, setSpeechError] = useState<number | null>(null);
+
+  const busy = isRecruiting(state) || state.thinking;
+
+  const showBrief =
+  state.phase === "idle" &&
+  state.lines.length === 0;
 
   useEffect(() => {
     const el = scroller.current;
-    if (el) el.scrollTop = el.scrollHeight;
-  }, [state.lines, state.phase]);
+
+    if (el) {
+      el.scrollTop = el.scrollHeight;
+    }
+  }, [
+    state.lines,
+    state.phase,
+    state.recipe,
+  ]);
 
   function onSubmit(e: FormEvent) {
     e.preventDefault();
-    onRecruit();
+    onSend();
   }
 
-  function onKeyDown(e: KeyboardEvent<HTMLTextAreaElement>) {
-    if (e.key === "Enter" && !e.shiftKey) {
+  function onKeyDown(
+    e: KeyboardEvent<HTMLTextAreaElement>,
+  ) {
+    if (
+      e.key === "Enter" &&
+      !e.shiftKey
+    ) {
       e.preventDefault();
-      onRecruit();
+      onSend();
     }
   }
 
@@ -64,85 +205,222 @@ export function RecruitChat({
     field.current?.focus();
   }
 
+  async function playReply(index: number, text: string) {
+    if (playing === index) {
+      audio.current?.pause();
+      audio.current = null;
+      setPlaying(null);
+      return;
+    }
+    audio.current?.pause();
+    if (audioUrl.current) URL.revokeObjectURL(audioUrl.current);
+    setPlaying(index);
+    setSpeechError(null);
+    try {
+      const blob = await api.recruiterSpeech(text);
+      const url = URL.createObjectURL(blob);
+      audioUrl.current = url;
+      const player = new Audio(url);
+      audio.current = player;
+      player.onended = () => setPlaying(null);
+      player.onerror = () => {
+        setPlaying(null);
+        setSpeechError(index);
+      };
+      await player.play();
+    } catch {
+      setPlaying(null);
+      setSpeechError(index);
+    }
+  }
+
+  useEffect(() => () => {
+    audio.current?.pause();
+    if (audioUrl.current) URL.revokeObjectURL(audioUrl.current);
+  }, []);
+
   return (
-    <section aria-label="Chat" className={`flex min-h-0 min-w-0 flex-col ${className}`}>
-      <div className="flex flex-none items-center justify-between gap-2.5 border-b border-line-soft px-5 py-4">
-        <div className="min-w-0 truncate text-[15px] leading-none font-medium">{state.name ?? "New agent"}</div>
-        <span className="flex-none text-right font-mono text-[10px] leading-tight text-faint">Gemini · compiles your words</span>
+    <section
+    aria-label="Agent strategy chat"
+    className={`flex min-h-0 min-w-0 flex-col ${className}`}
+    >
+    <div className="flex flex-none items-center justify-between gap-2.5 border-b border-line-soft px-5 py-4">
+    <div className="min-w-0 truncate text-[15px] font-medium">
+    New agent
+    </div>
+
+    <span className="flex-none text-right font-mono text-[10px] text-faint">
+    Gemini · strategy recruiter
+    </span>
+    </div>
+
+    {!showBrief && (
+      <StrategySummary state={state} />
+    )}
+
+    <div
+    ref={scroller}
+    role="log"
+    aria-live="polite"
+    aria-busy={busy}
+    className="flex min-h-0 flex-1 flex-col gap-[18px] overflow-y-auto p-5"
+    >
+    {showBrief && (
+      <div className="flex flex-col gap-4 py-2">
+      <div className="font-mono text-[10px] font-medium tracking-[0.14em] text-dim">
+      FILE 00 // NEW AGENT
       </div>
 
-      {state.recipe && <RecipeCard recipe={state.recipe} tone="var(--accent)" />}
+      <h1 className="m-0 text-base font-normal leading-normal text-pretty text-ink">
+      Tell Gemini how you want this agent to
+      invest. It will ask questions and build
+      the strategy with you.
+      </h1>
 
-      <div
-        ref={scroller}
-        role="log"
-        aria-live="polite"
-        aria-busy={busy}
-        className="flex min-h-0 flex-1 flex-col gap-[18px] overflow-y-auto p-5"
-      >
-        {showBrief && (
-          <div className="flex flex-col gap-4 py-2">
-            <div className="font-mono text-[10px] leading-none font-medium tracking-[0.14em] text-dim">
-              FILE 00 // UNNAMED RECRUIT
-            </div>
-            <h1 className="m-0 text-base leading-normal font-normal text-pretty text-ink">
-              Describe a strategy. Example: Buy stocks where options skew is rising and informed flow is building, but
-              skip anything illiquid.
-            </h1>
-            <p className="m-0 text-xs leading-normal text-muted">
-              Takes about 15 seconds: compile the recipe, backtest 2017–2026, survive the Red Team.
-            </p>
-            <div className="flex flex-col gap-1.5">
-              {EXAMPLES.map((example) => (
-                <button
-                  key={example}
-                  type="button"
-                  onClick={() => pick(example)}
-                  className="cursor-pointer rounded-[2px] border border-line-strong bg-transparent px-3 py-2.5 text-left text-[13px] leading-snug text-soft hover:border-ink hover:text-ink focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-ink"
-                >
-                  {example}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
+      <p className="m-0 text-xs leading-normal text-muted">
+      Defaults are already loaded. You can change
+      any weight, filter, lookback, position count,
+      or risk rule through the conversation.
+      </p>
 
-        {state.lines.map((line, i) =>
-          line.role === "system" ? (
-            <SystemLine key={i} text={line.text} />
-          ) : line.role === "user" ? (
-            <UserLine key={i} message={line} />
-          ) : filed ? (
-            <AgentLine key={i} agent={filed} message={line} dim={filed.status === "killed"} />
-          ) : null,
-        )}
-
-        {state.phase === "creating" && state.stage === null && <Waiting text="Sending your strategy to the compiler…" />}
-        {state.phase === "introducing" && filed && <Waiting text={`${filed.name} is introducing itself…`} />}
-      </div>
-
-      <form onSubmit={onSubmit} className="flex flex-none items-end gap-2 border-t border-line-soft px-5 pt-3 pb-[18px]">
-        <textarea
-          ref={field}
-          value={input}
-          onChange={(e) => onInput(e.target.value)}
-          onKeyDown={onKeyDown}
-          disabled={busy || state.phase === "ready"}
-          rows={2}
-          maxLength={2000}
-          aria-label="Describe a strategy in plain English"
-          placeholder="Describe a strategy in plain English…"
-          className="max-h-[140px] min-h-12 min-w-0 flex-1 resize-none rounded-[2px] border border-line-strong bg-panel px-3 py-[11px] text-sm leading-snug text-ink outline-none placeholder:text-faint focus:border-accent disabled:opacity-60"
-        />
+      <div className="flex flex-col gap-1.5">
+      {EXAMPLES.map((example) => (
         <button
-          type="submit"
-          disabled={busy || state.phase === "ready"}
-          className="h-12 flex-none cursor-pointer rounded-[2px] border-0 px-4 font-mono text-xs leading-none font-semibold tracking-[0.08em] text-bg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink disabled:cursor-default"
-          style={{ background: busy ? "var(--line-strong)" : "var(--accent)" }}
+        key={example}
+        type="button"
+        onClick={() => pick(example)}
+        className="cursor-pointer rounded-[2px] border border-line-strong bg-transparent px-3 py-2.5 text-left text-[13px] leading-snug text-soft hover:border-ink hover:text-ink"
         >
-          RECRUIT
+        {example}
         </button>
-      </form>
-    </section>
+      ))}
+      </div>
+      </div>
+    )}
+
+    {state.lines.map((line, i) =>
+      line.role === "system" ? (
+        <SystemLine
+        key={i}
+        text={line.text}
+        />
+      ) : line.role === "user" ? (
+        <UserLine
+        key={i}
+        message={line}
+        />
+      ) : (
+        <Fragment key={i}>
+        <AgentLine
+        agent={
+          state.stored ?? {
+            name:
+            state.name ??
+            "Gemini Recruiter",
+            persona:
+            state.persona ??
+            "Investment strategy recruiter.",
+            shape: "box",
+            color: "sky",
+            id: "recruiter",
+          } as never
+        }
+        message={line}
+        dim={false}
+        />
+        {line.role === "agent" && (
+          <button
+          type="button"
+          onClick={() => void playReply(i, line.text)}
+          aria-label={playing === i ? "Stop speech" : "Play reply aloud"}
+          className="ml-[42px] w-fit border border-line-strong px-2 py-1 font-mono text-[10px] text-muted hover:text-ink"
+          >
+          {playing === i ? "STOP AUDIO" : "PLAY AUDIO"}
+          {speechError === i && <span role="status"> · SPEECH UNAVAILABLE</span>}
+          </button>
+        )}
+        </Fragment>
+      ),
+    )}
+
+    {state.thinking && <Waiting text="Gemini is updating the strategy…" />}
+
+    {state.phase === "creating" &&
+      state.stage === null && (
+        <Waiting text="Sending the confirmed strategy to the backtester…" />
+      )}
+
+      {state.phase === "creating" &&
+        state.stage === "compiling" && (
+          <Waiting text="Locking the validated recipe…" />
+        )}
+
+        {state.ready &&
+          !busy &&
+          state.phase !== "ready" && (
+            <div className="border border-accent/40 bg-side p-3 font-mono text-xs text-soft">
+            Strategy confirmed. Review the parameters
+            above, then recruit the agent.
+            </div>
+          )}
+
+          {state.phase === "introducing" &&
+            state.stored && (
+              <Waiting
+              text={`${state.stored.name} is introducing itself…`}
+              />
+            )}
+            </div>
+
+            <form
+            onSubmit={onSubmit}
+            className="flex flex-none flex-col gap-2 border-t border-line-soft px-5 pt-3 pb-[18px]"
+            >
+            <textarea
+            ref={field}
+            value={input}
+            onChange={(e) =>
+              onInput(e.target.value)
+            }
+            onKeyDown={onKeyDown}
+            disabled={busy}
+            rows={2}
+            maxLength={2000}
+            aria-label="Tell Gemini about your investment strategy"
+            placeholder="Tell Gemini what you want this agent to invest in…"
+            className="max-h-[140px] min-h-12 min-w-0 resize-none rounded-[2px] border border-line-strong bg-panel px-3 py-[11px] text-sm leading-snug text-ink outline-none placeholder:text-faint focus:border-accent disabled:opacity-60"
+            />
+
+            <div className="flex justify-end gap-2">
+            <button
+            type="submit"
+            disabled={
+              busy ||
+              !input.trim()
+            }
+            className="h-10 rounded-[2px] border border-line-strong bg-transparent px-4 font-mono text-xs font-semibold tracking-[0.08em] text-soft hover:text-ink disabled:cursor-default disabled:opacity-40"
+            >
+            SEND
+            </button>
+
+            <button
+            type="button"
+            onClick={onRecruit}
+            disabled={
+              busy ||
+              !state.ready
+            }
+            className="h-10 rounded-[2px] border-0 px-4 font-mono text-xs font-semibold tracking-[0.08em] text-bg disabled:cursor-default disabled:opacity-40"
+            style={{
+              background: state.ready
+              ? "var(--accent)"
+              : "var(--line-strong)",
+            }}
+            >
+            RECRUIT AGENT
+            </button>
+            </div>
+            </form>
+            </section>
   );
 }

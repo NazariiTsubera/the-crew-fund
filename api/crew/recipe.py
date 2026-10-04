@@ -53,7 +53,7 @@ class Filter:
 
 class FeatureWeight(BaseModel):
     name: str
-    weight: float = Field(gt=0, le=10)
+    weight: float = Field(gt=0)
     direction: Literal["high", "low"]
 
     @field_validator("name")

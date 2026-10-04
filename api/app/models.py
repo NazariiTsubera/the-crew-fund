@@ -23,7 +23,46 @@ class CreateAgentRequest(BaseModel):
 
 class ChatRequest(BaseModel):
     # Omitted: the agent introduces itself (the creation flow's first message).
-    message: str | None = Field(default=None, min_length=1, max_length=1000)
+    message: str | None = Field(default=None, min_length=1, max_length=2000)
+
+
+class StrategyChatTurn(BaseModel):
+    role: Literal["user", "assistant"]
+    text: str = Field(min_length=1, max_length=2000)
+
+
+class StrategyFeatureRequest(BaseModel):
+    name: str
+    weight: float = Field(gt=0)
+    direction: Literal["high", "low"]
+
+
+class StrategyRequest(BaseModel):
+    features: list[StrategyFeatureRequest] = Field(min_length=1, max_length=8)
+    filters: list[str] = Field(default_factory=list, max_length=6)
+    lookback_months: int = Field(default=12, ge=1, le=60)
+    top_n: int = Field(default=10, ge=1, le=50)
+    rebalance: Literal["monthly"] = "monthly"
+    sit_out_if_trailing_sharpe_below: float | None = Field(default=None, ge=-3, le=3)
+
+
+class StrategyChatRequest(BaseModel):
+    message: str = Field(min_length=1, max_length=2000)
+    history: list[StrategyChatTurn] = Field(default_factory=list, max_length=30)
+    strategy: StrategyRequest | None = None
+
+
+class SpeechRequest(BaseModel):
+    text: str = Field(min_length=1, max_length=2000)
+
+
+class CreateAgentFromStrategyRequest(BaseModel):
+    prompt: str = Field(min_length=1, max_length=2000)
+    strategy: StrategyRequest
+    name: str = Field(min_length=1, max_length=40)
+    persona: str = Field(min_length=1, max_length=280)
+    strategy_line: str = Field(min_length=1, max_length=160)
+    pitch: str = Field(min_length=1, max_length=240)
 
 
 # --- The War Room's data contract (web/src/lib/api.ts mirrors these) ---

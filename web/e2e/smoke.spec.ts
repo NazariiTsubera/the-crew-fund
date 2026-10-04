@@ -32,9 +32,12 @@ test("a judge can recruit an agent and land on its page", async ({ page }) => {
   await page.goto("/agents/new");
 
   await page
-    .getByPlaceholder("Describe a strategy in plain English…")
+    .getByPlaceholder("Tell Gemini what you want this agent to invest in…")
     .fill("Buy stocks where options skew is rising, skip anything illiquid.");
-  await page.getByRole("button", { name: "RECRUIT", exact: true }).click();
+  await page.getByRole("button", { name: "SEND", exact: true }).click();
+  const recruit = page.getByRole("button", { name: "RECRUIT AGENT", exact: true });
+  await expect(recruit).toBeEnabled({ timeout: 10_000 });
+  await recruit.click();
 
   await expect(page).toHaveURL(/\/agents\/(?!new)[\w-]+$/, { timeout: 30_000 });
   await expect(page.getByText(/EVIDENCE/).filter({ visible: true }).last()).toBeVisible({ timeout: 30_000 });

@@ -2,9 +2,9 @@ import { describe, expect, it } from "vitest";
 
 import type { Agent, AgentReply, CreateEvent, Kpis, RecipeOut, StoredAgent } from "@/lib/api";
 import {
+  DEFAULT_RECIPE,
   initialRecruit,
   isRecruiting,
-  recruitPrompt,
   recruitReducer,
   type RecruitAction,
   type RecruitState,
@@ -63,14 +63,46 @@ const fullStream: RecruitAction[] = [
   ev({ event: "done", data: { agent: stored } }),
 ];
 
-describe("recruitPrompt", () => {
-  it("trims the strategy", () => {
-    expect(recruitPrompt("  Buy rising skew \n")).toBe("Buy rising skew");
+describe("the strategy chat", () => {
+  const user: RecruitAction = { type: "user", text: "Cheap names with earnings surprises", ts: TS };
+  const strategy: RecruitAction = {
+    type: "strategy",
+    recipe,
+    name: "The Skew Hunter",
+    persona: "Patient.",
+    strategyLine: "Buys rising skew.",
+    pitch: "I buy rising skew.",
+    ready: true,
+  };
+
+  it("starts from the default recipe, not ready", () => {
+    expect(initialRecruit.recipe).toEqual(DEFAULT_RECIPE);
+    expect(initialRecruit.ready).toBe(false);
   });
 
-  it("refuses an empty or blank strategy", () => {
-    expect(recruitPrompt("")).toBeNull();
-    expect(recruitPrompt("   \n")).toBeNull();
+  it("records the user's message and waits for Gemini", () => {
+    const s = run([user]);
+    expect(s.phase).toBe("chatting");
+    expect(s.thinking).toBe(true);
+    expect(s.history).toEqual([{ role: "user", text: user.type === "user" ? user.text : "" }]);
+    expect(s.lines).toEqual([{ role: "user", ts: TS, text: "Cheap names with earnings surprises" }]);
+  });
+
+  it("ignores a second message while Gemini is answering", () => {
+    const s = run([user]);
+    expect(run([user], s)).toBe(s);
+  });
+
+  it("takes Gemini's reply and strategy, and is ready when Gemini says so", () => {
+    const s = run([user, { type: "assistant", text: "Done.", ts: TS }, strategy]);
+    expect(s.thinking).toBe(false);
+    expect(s.history.at(-1)).toEqual({ role: "assistant", text: "Done." });
+    expect(s).toMatchObject({ recipe, name: "The Skew Hunter", ready: true });
+  });
+
+  it("is no longer ready once the user changes the strategy again", () => {
+    const s = run([user, { type: "assistant", text: "Done.", ts: TS }, strategy, user]);
+    expect(s.ready).toBe(false);
   });
 });
 
@@ -83,20 +115,20 @@ describe("recruitReducer", () => {
   it("puts the user's strategy in the chat when a creation starts", () => {
     const s = run([start]);
     expect(s.phase).toBe("creating");
-    expect(s.lines).toEqual([{ role: "user", ts: TS, text: "Buy rising skew" }]);
+    expect(s.lines).toEqual([{ role: "user", ts: TS, text: "CREATE THIS AGENT" }]);
     expect(isRecruiting(s)).toBe(true);
   });
 
   it("turns each stream event into a stage and a system line", () => {
     const compiling = run(fullStream.slice(0, 2));
     expect(compiling.stage).toBe("compiling");
-    expect(compiling.lines.at(-1)).toEqual({ role: "system", ts: TS, text: "COMPILING RECIPE…" });
+    expect(compiling.lines.at(-1)).toEqual({ role: "system", ts: TS, text: "RECRUITMENT CONFIRMED · COMPILING RECIPE…" });
 
     const backtesting = run(fullStream.slice(0, 3));
     expect(backtesting.stage).toBe("backtesting");
     expect(backtesting.name).toBe("The Skew Hunter");
     expect(backtesting.recipe).toEqual(recipe);
-    expect(backtesting.lines.at(-1)?.text).toBe("RECIPE COMPILED: THE SKEW HUNTER · BACKTESTING 2017–2026…");
+    expect(backtesting.lines.at(-1)?.text).toBe("RECIPE LOCKED: THE SKEW HUNTER · BACKTESTING 2017–2026…");
 
     const redteam = run(fullStream.slice(0, 4));
     expect(redteam.stage).toBe("redteam");
@@ -149,10 +181,11 @@ describe("recruitReducer", () => {
     expect(s.lines.at(-1)?.text).toBe("NOT RECRUITED · Failed to fetch");
   });
 
-  it("forgets the previous attempt's partial results on a retry", () => {
+  it("keeps the chat's recipe on a retry", () => {
     const failed = run([...fullStream.slice(0, 3), ev({ event: "error", data: { message: "x" } })]);
     const retry = run([start], failed);
-    expect(retry).toMatchObject({ name: null, recipe: null, kpis: null, stored: null });
+    expect(retry.phase).toBe("creating");
+    expect(retry.recipe).toEqual(recipe);
   });
 
   it("keeps the agent when only its introduction fails", () => {
@@ -166,17 +199,6 @@ describe("recruitReducer", () => {
     const s = run([...fullStream, { type: "loadFailed", message: "502", ts: TS }]);
     expect(s.phase).toBe("introducing");
     expect(s.lines.at(-1)?.text).toBe("PERFORMANCE UNAVAILABLE · 502");
-  });
-
-  it("refuses a blank strategy with a system line and stays idle", () => {
-    const s = run([{ type: "refused", message: "describe a strategy first", ts: TS }]);
-    expect(s.phase).toBe("idle");
-    expect(s.lines).toEqual([{ role: "system", ts: TS, text: "NOT RECRUITED · describe a strategy first" }]);
-  });
-
-  it("ignores a refusal while a creation runs", () => {
-    const s = run([start]);
-    expect(run([{ type: "refused", message: "x", ts: TS }], s)).toBe(s);
   });
 
   it("ignores a second start while a creation runs", () => {

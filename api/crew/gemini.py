@@ -6,7 +6,15 @@ from __future__ import annotations
 
 import json
 import os
+from pathlib import Path
 from typing import Protocol
+
+from dotenv import load_dotenv
+
+# Load the API .env regardless of the directory uvicorn is launched from.
+API_DIR = Path(__file__).resolve().parents[1]
+load_dotenv(API_DIR / ".env")
+load_dotenv()  # Environment variables always take precedence.
 
 DEFAULT_MODEL = "gemini-3.8-flash"
 
