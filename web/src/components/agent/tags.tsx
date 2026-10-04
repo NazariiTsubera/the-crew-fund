@@ -38,6 +38,7 @@ export function tagStyle(kind: TagKind): CSSProperties {
     case "RISK":
       return { ...TAG_BASE, border: "1px dashed var(--c-amber)", color: "var(--c-amber)", padding: "2px 0" };
     case "MM":
+    case "YOU":
       return { ...TAG_BASE, background: "var(--accent)", color: "var(--on-accent)" };
     case "FIRE":
       return { ...TAG_BASE, background: "var(--down)", color: "var(--bg)" };

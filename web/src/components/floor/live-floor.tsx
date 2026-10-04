@@ -27,11 +27,11 @@ const TITLE = "Live floor";
 const TYPES: [LogType, string][] = [
   ["trade", "TRADES"],
   ["risk", "RISK"],
-  ["mastermind", "MASTERMIND"],
+  ["judge", "YOU"],
   ["redteam", "RED TEAM"],
 ];
 
-const ALL_ON: Record<LogType, boolean> = { trade: true, risk: true, mastermind: true, redteam: true };
+const ALL_ON: Record<LogType, boolean> = { trade: true, risk: true, mastermind: true, redteam: true, judge: true };
 
 const BUTTON =
   "h-7 flex-none cursor-pointer rounded-[2px] border px-2.5 font-mono text-[11px] leading-none font-medium tracking-[0.08em] whitespace-nowrap focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-ink disabled:cursor-not-allowed disabled:opacity-40";

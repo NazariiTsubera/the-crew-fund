@@ -14,7 +14,7 @@ from app import crew_repository
 from crew import chat as crew_chat
 from crew.compiler import CompileError, compile_strategy
 from crew.gemini import LLM, LLMError
-from crew.pipeline import evaluate, now_ts, publish, rebalance
+from crew.pipeline import VERDICT_LABEL, evaluate, log_judge, now_ts, publish, rebalance
 from crew.recipe import Recipe
 from crew.seeds import SEEDS
 from crew.strategy_chat import build_strategy_chat
@@ -218,6 +218,11 @@ def recompile(agent_id: str, recipe: Recipe) -> Iterator[tuple[str, dict]]:
         )
         rebalance(store, panel)
         agent = store.get_agent(agent_id)
+        log_judge(
+            store,
+            f"You recompiled {agent['name']}: Sharpe {before.get('sharpe', 0):.2f} → "
+            f"{run.kpis['sharpe']:.2f}, Red Team {VERDICT_LABEL[report['verdict']]}",
+        )
     yield "done", {"agent": agent}
 
 
@@ -234,8 +239,9 @@ def _recompiled_line(before: dict, after: dict, verdict: str) -> str:
     )
 
 
-def set_allocations(allocations: dict[str, float]) -> None:
-    """The judge's split of capital; the fund is re-split and rewritten."""
+def set_allocations(allocations: dict[str, float], action: str = "split") -> None:
+    """The judge's split of capital; the fund is re-split and rewritten. `action` names the
+    decision on the tape: a new split, or firing or hiring one agent."""
     with _lock:
         store = crew_repository.store()
         agents = {a["id"]: a for a in store.list_agents()}
@@ -245,15 +251,26 @@ def set_allocations(allocations: dict[str, float]) -> None:
         for agent_id, weight in allocations.items():
             store.put_agent({**agents[agent_id], "allocation": weight})
         rebalance(store, crew_repository.panel())
+        if action == "split":
+            shares = ", ".join(
+                f"{a['name']} {a['capital_share']:.0%}"
+                for a in sorted(store.list_agents(), key=lambda a: -a["capital_share"])
+            )
+            log_judge(store, f"You set the split: {shares}")
+        else:
+            (agent_id,) = allocations
+            log_judge(store, f"You {action} {agents[agent_id]['name']}")
 
 
 def delete(agent_id: str) -> None:
     """The judge deletes an agent: it and everything stored under it are removed for good."""
     with _lock:
         store = crew_repository.store()
-        if store.get_agent(agent_id) is None:
+        agent = store.get_agent(agent_id)
+        if agent is None:
             raise AgentNotFound(agent_id)
         store.delete_agent(agent_id)
+        log_judge(store, f"You deleted {agent['name']}")
         rebalance(store, crew_repository.panel())
 
 

@@ -94,3 +94,26 @@ def test_the_judge_fires_and_rehires_an_agent(client):
     b = store.get_agent("b")
     assert b["status"] != "fired" and b["capital_share"] == pytest.approx(0.5)
     assert http.post("/agents/zz/fire").status_code == 404
+
+
+def judge_rows(store):
+    return [e["text"] for e in store.log(types=["judge"])]
+
+
+def test_every_decision_of_the_judge_is_on_the_tape(client):
+    http, store = client
+
+    http.post("/capital", json={"allocations": {"a": 3, "b": 1}})
+    http.post("/agents/b/fire")
+    http.post("/agents/b/hire")
+    http.delete("/agents/b")
+
+    rows = judge_rows(store)
+    assert any(r.startswith("You set the split") and "A 75%" in r for r in rows)
+    assert "You fired B" in rows and "You hired B" in rows and "You deleted B" in rows
+
+
+def test_the_red_team_row_reads_as_advice(client):
+    _, store = client
+    rows = [e["text"] for e in store.log(types=["redteam"])]
+    assert rows and not any("KILLED" in r or "PROBATION" in r for r in rows)

@@ -26,6 +26,18 @@ def evaluate(recipe: Recipe, panel: Panel, shuffles: int = 100) -> tuple[Run, di
     return run, attack(recipe, panel, run=run, shuffles=shuffles)
 
 
+# The Red Team advises; its verdict reads as advice everywhere it is written.
+VERDICT_LABEL = {"pass": "PASSED", "probation": "CAUTION", "killed": "FAILED"}
+
+
+def log_judge(store: Store, text: str) -> None:
+    """One of the judge's decisions on the fund's tape (type "judge", shown as YOU). Stored at
+    fund level, not under an agent, so deleting the agent keeps the record of the decision."""
+    rows = store.log(types=["judge"])
+    rows.append({"ts": now_ts(), "agent_id": None, "type": "judge", "text": text})
+    store.replace_log(rows, types=["judge"])
+
+
 def publish(store: Store, meta: dict, recipe: Recipe, run: Run, report: dict) -> dict:
     """Write a freshly evaluated agent. Replaces anything stored under the same id."""
     agent_id = meta["id"]
@@ -60,7 +72,7 @@ def publish(store: Store, meta: dict, recipe: Recipe, run: Run, report: dict) ->
             "type": "redteam",
             "text": f"Red Team: {len(failed)} of 4 tests failed"
             + (f" ({', '.join(failed)})" if failed else "")
-            + f", verdict {report['verdict'].upper()}",
+            + f", {VERDICT_LABEL[report['verdict']]}",
         }
     )
     store.replace_log(entries, agent_id=agent_id)

@@ -227,18 +227,18 @@ def set_capital(req: CapitalRequest):
 @router.post("/agents/{agent_id}/fire")
 def fire_agent(agent_id: str) -> dict:
     """The judge fires an agent: its share goes to 0 and the fund re-splits. It can be rehired."""
-    return _set_share(agent_id, 0.0)
+    return _set_share(agent_id, 0.0, "fired")
 
 
 @router.post("/agents/{agent_id}/hire")
 def hire_agent(agent_id: str) -> dict:
     """The judge (re)hires an agent at an equal weight."""
-    return _set_share(agent_id, 1.0)
+    return _set_share(agent_id, 1.0, "hired")
 
 
-def _set_share(agent_id: str, weight: float) -> dict:
+def _set_share(agent_id: str, weight: float, action: str) -> dict:
     try:
-        agents.set_allocations({agent_id: weight})
+        agents.set_allocations({agent_id: weight}, action)
     except agents.AgentNotFound as exc:
         raise HTTPException(404, f"no agent {exc}") from exc
     return {"id": agent_id, "allocation": weight}

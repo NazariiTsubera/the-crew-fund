@@ -173,7 +173,8 @@ class Agent(AgentSummary):
 
 class LogEntry(BaseModel):
     ts: str
-    type: Literal["trade", "risk", "mastermind", "redteam"]
+    # "judge": the judge's own decisions (split, fire, hire, recompile, delete), shown as YOU.
+    type: Literal["trade", "risk", "mastermind", "redteam", "judge"]
     text: str
     agent_id: str | None = None
 

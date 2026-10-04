@@ -107,7 +107,7 @@ export const StoredAgentSchema = AgentSchema.omit({
   holdings: true,
 });
 
-export const LogTypeSchema = z.enum(["trade", "risk", "mastermind", "redteam"]);
+export const LogTypeSchema = z.enum(["trade", "risk", "mastermind", "redteam", "judge"]);
 
 export const LogEntrySchema = z.object({
   ts: z.string(),

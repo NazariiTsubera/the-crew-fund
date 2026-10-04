@@ -1,7 +1,7 @@
 import type { LogEntry } from "@/lib/api";
 
 /** The design's feed tags. The engine writes trades as "Bought …"/"Sold …" and firings as "Fired …". */
-export type LogTag = "BUY" | "SELL" | "TRADE" | "RISK" | "MM" | "FIRE" | "RED";
+export type LogTag = "BUY" | "SELL" | "TRADE" | "RISK" | "MM" | "FIRE" | "RED" | "YOU";
 
 export function logTag(entry: LogEntry): LogTag {
   switch (entry.type) {
@@ -15,6 +15,9 @@ export function logTag(entry: LogEntry): LogTag {
       return entry.text.startsWith("Fired") ? "FIRE" : "MM";
     case "redteam":
       return "RED";
+    case "judge":
+      // The judge is the Mastermind: their decisions read YOU, a firing FIRE.
+      return entry.text.startsWith("You fired") ? "FIRE" : "YOU";
   }
 }
 

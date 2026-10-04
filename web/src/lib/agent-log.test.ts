@@ -6,6 +6,11 @@ import type { LogEntry } from "@/lib/api";
 const entry = (ts: string, type: LogEntry["type"], text: string): LogEntry => ({ ts, type, text, agent_id: "a" });
 
 describe("logTag", () => {
+  it("tags the judge's own decisions YOU, and a firing FIRE", () => {
+    expect(logTag(entry("2026-10-04 13:00", "judge", "You set the split: A 75%, B 25%"))).toBe("YOU");
+    expect(logTag(entry("2026-10-04 13:00", "judge", "You fired The Lookout"))).toBe("FIRE");
+  });
+
   it("tells buys from sells by the engine's verbs", () => {
     expect(logTag(entry("2026-08-03 15:30", "trade", "Bought MSFT 8.0% — x"))).toBe("BUY");
     expect(logTag(entry("2026-08-03 15:30", "trade", "Sold MSFT — faded"))).toBe("SELL");
