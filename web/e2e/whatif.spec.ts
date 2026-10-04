@@ -9,7 +9,11 @@ test("a judge adds and drops signals, asks the AI, runs the what-if and asks why
   await page.goto("/agents/accountant");
   if (isMobile) await page.getByRole("tab", { name: /PERFORMANCE/i }).click();
 
-  await page.getByRole("button", { name: /WHAT IF · TUNE THE RECIPE YOURSELF/ }).click();
+  // The panel starts open.
+  await expect(page.getByRole("button", { name: /WHAT IF · TUNE THE RECIPE YOURSELF/ })).toHaveAttribute(
+    "aria-expanded",
+    "true",
+  );
   const panel = page.getByRole("region", { name: "What if" });
 
   await panel.getByRole("combobox", { name: "Add a signal" }).selectOption("funding_stress");
