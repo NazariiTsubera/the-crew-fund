@@ -58,11 +58,12 @@ def test_off_universe_and_planted_names_are_dropped_and_the_rest_rescaled(client
     assert [(h["ticker"], h["weight"]) for h in holdings] == [("MSFT", 1.0)]
 
 
-def test_a_month_in_cash_serves_the_last_book_the_fund_held(client):
+def test_a_fund_in_cash_never_serves_an_old_book(client):
+    # The crew held nothing at the last decision: a book from months ago would be stale.
     store().put_holdings("fund", book("2026-06", ("NVDA", 1.0)))
     fund("2026-08")
 
     body = client.get("/portfolio/holdings").json()
 
-    assert body["as_of"] == "2026-06"
-    assert [h["ticker"] for h in body["holdings"]] == ["NVDA"]
+    assert body["method"] == "equal_weight_top_liquidity"
+    assert body["holdings"]

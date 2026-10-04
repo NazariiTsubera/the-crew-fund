@@ -27,22 +27,18 @@ def holdings(n: int) -> dict:
 
 
 def mastermind_holdings() -> dict | None:
-    """The fund's book at its last decision (always before the holdout cutoff). A month the
-    whole crew spent in cash has no book, so the last book the fund actually held is served,
-    dated by its own month."""
+    """The fund's book at its last decision (always before the holdout cutoff). When the crew
+    held nothing that month there is no current book, and an older one would be stale, so the
+    caller falls back to the template method."""
     store = crew_repository.store()
     fund = store.latest_run("fund")
     if not fund:
         return None
     universe = repository.universe()
-    by_month: dict[str, list[dict]] = {}
-    for h in store.holdings("fund"):
-        if h["month"] <= fund["as_of"] and h["ticker"] in universe:
-            by_month.setdefault(h["month"], []).append(h)
-    if not by_month:
+    month = fund["as_of"]
+    rows = [h for h in store.holdings("fund", month=month) if h["ticker"] in universe]
+    if not rows:
         return None
-    month = max(by_month)
-    rows = by_month[month]
     total = sum(h["weight"] for h in rows)
     return {
         "as_of": month,

@@ -34,7 +34,8 @@ def fund() -> dict:
     summary = store.latest_run("fund")
     if summary is None:
         raise NotFound("the fund has not been seeded; run scripts/seed_agents.py")
-    _, holdings = _latest_book("fund")
+    # Only the book of the as-of month: a fund in cash holds nothing, not an older book.
+    holdings = sorted(store.holdings("fund", month=summary["as_of"]), key=lambda h: -h["weight"])
     return {
         "as_of": summary["as_of"],
         "holdout_cutoff": summary["holdout_cutoff"],

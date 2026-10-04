@@ -98,3 +98,46 @@ def test_the_war_room_origin_may_call_the_api(client):
     response = client.get("/vault", headers={"Origin": "https://crewfund.vodka"})
 
     assert response.headers["access-control-allow-origin"] == "https://crewfund.vodka"
+
+
+def test_the_vault_book_is_only_the_as_of_month(monkeypatch, tmp_path):
+    store = JsonStore(tmp_path / "s.json")
+    store.put_run(
+        "fund",
+        {
+            "as_of": "2026-08",
+            "holdout_cutoff": "2026-08-22",
+            "invested": {"2026-08": 0.0},
+            "kpis": KPIS,
+            "spx_kpis": KPIS,
+            "shares": {},
+            "latest_memo": None,
+        },
+    )
+    store.put_holdings(
+        "fund",
+        [
+            {
+                "month": "2021-12",
+                "ticker": "AGL",
+                "weight": 1.0,
+                "agent_id": "wheelman",
+                "reason": "r",
+            }
+        ],
+    )
+    monkeypatch.setattr(crew_repository, "store", lambda: store)
+
+    fund = TestClient(app).get("/vault").json()
+
+    assert fund["holdings"] == []  # all cash in August, not December 2021's book
+
+
+KPIS = {
+    "total_return": 0.0,
+    "ann_return": 0.0,
+    "ann_vol": 0.0,
+    "sharpe": 0.0,
+    "max_drawdown": 0.0,
+    "max_drawdown_month": None,
+}
