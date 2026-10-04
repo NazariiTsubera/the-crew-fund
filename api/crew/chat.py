@@ -221,8 +221,13 @@ def fallback(agent: dict, question: str | None, facts: list[dict]) -> tuple[str,
     )
 
 
+# "[F43, F50-F62]" or "(F2)": fact ids belong in `cited`, never in the words a judge reads.
+_FACT_IDS = re.compile(r"\s*[\[(]\s*F\d+(?:\s*[-–,]\s*F?\d+)*\s*[\])]")
+
+
 def _paragraphs(text: str) -> str:
     """Collapse stray whitespace inside paragraphs, keep the blank lines between them."""
+    text = _FACT_IDS.sub("", text)
     paras = [" ".join(p.split()) for p in re.split(r"\n\s*\n", text)]
     return "\n\n".join(p for p in paras if p)
 
@@ -252,6 +257,7 @@ def answer(
         "what the numbers show, and what they mean for an investor, including the weak spots "
         "(a failed Red Team test, a drawdown, lagging the S&P 500). Plain English; explain any "
         "feature name you mention.\n"
+        "Never write fact ids like F12 in the text; list them only in `cited`. "
         "Use only the numbered facts; never invent a number, date, ticker, trade or result. If "
         "the facts do not answer the question, say so and offer what they do show. Cite the "
         "ids of every fact you use in `cited`.\n"
@@ -288,6 +294,9 @@ def answer(
     if question is not None:
         store.add_chat(agent["id"], {"ts": ts, "role": "user", "text": question})
     message = {"ts": ts, "role": "agent", "text": text, "evidence": evidence, "source": source}
+    if source == "gemini" and getattr(llm, "provider", None):
+        # `source` says the model wrote it (the value predates OpenAI); `provider` says which.
+        message["provider"] = llm.provider
     if follow_ups:
         message["follow_ups"] = follow_ups
     if why:

@@ -1,5 +1,8 @@
-"""The one place that talks to Gemini. Everything else gets an `LLM`: the real client, or a
-fake in tests. Judged endpoints never import this (tests/test_import_boundary.py).
+"""The one place that talks to a language model. Everything else gets an `LLM`: the real chain,
+or a fake in tests. Judged endpoints never import this (tests/test_import_boundary.py).
+
+The chain tries OpenAI first when OPENAI_KEY (or OPENAI_API_KEY) is set, then Gemini when
+GEMINI_API_KEY is set; each answer records which provider wrote it.
 """
 
 from __future__ import annotations
@@ -94,6 +97,8 @@ class LLM(Protocol):
 
 
 class GeminiClient:
+    provider = "gemini"
+
     def __init__(
         self,
         api_key: str | None = None,
@@ -171,5 +176,79 @@ class GeminiClient:
         raise last or LLMError("every Gemini model is out of quota today", "rate limited (429)")
 
 
+DEFAULT_OPENAI_MODEL = "gpt-5.4-mini"  # newest cheap tier; ~3 s for a chat answer
+
+
+class OpenAIClient:
+    provider = "openai"
+
+    def __init__(self, api_key: str | None = None, model: str | None = None, client=None):
+        if client is None:
+            import openai
+
+            key = api_key or os.environ.get("OPENAI_KEY") or os.environ.get("OPENAI_API_KEY")
+            if not key:
+                raise LLMError("OPENAI_KEY is not set", "no OpenAI key")
+            client = openai.OpenAI(api_key=key, timeout=CALL_TIMEOUT_MS / 1000, max_retries=1)
+        self._client = client
+        self.model = model or os.environ.get("OPENAI_MODEL") or DEFAULT_OPENAI_MODEL
+
+    def generate_json(self, system: str, prompt: str, schema: dict) -> dict:
+        # JSON mode with the schema in the prompt: our schemas use optional fields and nested
+        # objects that strict structured outputs refuse.
+        instructions = (
+            f"{system}\n\nReply with one JSON object that follows this JSON schema exactly:\n"
+            f"{json.dumps(schema)}"
+        )
+        try:
+            response = self._client.chat.completions.create(
+                model=self.model,
+                messages=[
+                    {"role": "system", "content": instructions},
+                    {"role": "user", "content": prompt},
+                ],
+                response_format={"type": "json_object"},
+            )
+            return json.loads(response.choices[0].message.content or "")
+        except Exception as e:
+            code = getattr(e, "status_code", None)
+            if isinstance(e, json.JSONDecodeError):
+                why = "malformed JSON"
+            elif code == 429:
+                why = "rate limited (429)"
+            elif code:
+                why = f"OpenAI error {code}"
+            else:
+                why = type(e).__name__
+            log.warning("openai %s failed: %s · %s", self.model, why, redact(str(e))[:300])
+            raise LLMError(str(e), why) from e
+
+
+class ChainLLM:
+    """Providers in priority order; the first that answers wins. `provider` names it."""
+
+    def __init__(self, providers: list):
+        self.providers = providers
+        self.provider: str | None = None
+
+    def generate_json(self, system: str, prompt: str, schema: dict) -> dict:
+        last: LLMError | None = None
+        for p in self.providers:
+            try:
+                out = p.generate_json(system, prompt, schema)
+                self.provider = p.provider
+                return out
+            except LLMError as e:
+                last = e
+        raise last or LLMError("no AI provider is configured", "no AI key")
+
+
 def default_llm() -> LLM:
-    return GeminiClient()
+    providers: list = []
+    if os.environ.get("OPENAI_KEY") or os.environ.get("OPENAI_API_KEY"):
+        providers.append(OpenAIClient())
+    if os.environ.get("GEMINI_API_KEY"):
+        providers.append(GeminiClient())
+    if not providers:
+        raise LLMError("neither OPENAI_KEY nor GEMINI_API_KEY is set", "no AI key")
+    return ChainLLM(providers)

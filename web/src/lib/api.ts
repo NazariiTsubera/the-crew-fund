@@ -146,6 +146,8 @@ export const ChatMessageSchema = z.object({
   source: z.enum(["gemini", "fallback"]).optional(),
   // Why a fallback answer is one (rate limited, no key…), from the API's Gemini client.
   fallback_reason: z.string().optional(),
+  // Which model wrote a model answer ("openai" or "gemini"); absent on older rows.
+  provider: z.string().optional(),
   // Questions the agent suggests next, shown as chips under the chat.
   follow_ups: z.array(z.string()).optional(),
 });

@@ -32,7 +32,7 @@ test("a judge can recruit an agent and land on its page", async ({ page }) => {
   await page.goto("/agents/new");
 
   await page
-    .getByPlaceholder("Tell Gemini what you want this agent to invest in…")
+    .getByPlaceholder("Tell the recruiter what you want this agent to invest in…")
     .fill("Buy stocks where options skew is rising, skip anything illiquid.");
   await page.getByRole("button", { name: "SEND", exact: true }).click();
   const recruit = page.getByRole("button", { name: "RECRUIT AGENT", exact: true });

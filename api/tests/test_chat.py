@@ -277,3 +277,22 @@ def test_a_what_if_is_given_to_gemini_as_facts_to_compare(store):
     assert all(
         "What-if" not in c.get("text", "") or c["role"] != "user" for c in store.chats("lookout")
     )
+
+
+def test_an_answer_records_which_provider_wrote_it(store):
+    llm = FakeLLM({"text": "Fine.", "cited": [], "follow_ups": []})
+    llm.provider = "openai"
+
+    out = answer(store, AGENT, "How are you doing?", llm)
+
+    assert out["provider"] == "openai"
+
+
+def test_fact_ids_never_show_in_the_answer_text(store):
+    llm = FakeLLM(
+        {"text": "I sat out [F43,F50, F51-F62]. Fine (F2).", "cited": [], "follow_ups": []}
+    )
+
+    out = answer(store, AGENT, "2022?", llm)
+
+    assert out["text"] == "I sat out. Fine."

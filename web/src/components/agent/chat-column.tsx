@@ -68,7 +68,7 @@ export function AgentLine({
           {message.source === "fallback" && (
             <span className="text-faint" title={message.fallback_reason}>
               {" "}
-              · FROM ITS FILE{message.fallback_reason && ` · GEMINI ${message.fallback_reason.toUpperCase()}`}
+              · FROM ITS FILE{message.fallback_reason && ` · AI ${message.fallback_reason.toUpperCase()}`}
             </span>
           )}
         </span>
@@ -187,7 +187,7 @@ export function ChatColumn({
     <section aria-label="Chat" className={`flex min-h-0 min-w-0 flex-col ${className}`}>
       <div className="flex flex-none items-center justify-between gap-2.5 border-b border-line-soft px-5 py-4">
         <div className="min-w-0 truncate text-[15px] leading-none font-medium">{agent.name}</div>
-        <span className="flex-none text-right font-mono text-[10px] leading-tight text-faint">Gemini · cites its log</span>
+        <span className="flex-none text-right font-mono text-[10px] leading-tight text-faint">AI · cites its log</span>
       </div>
 
       <RecipeCard recipe={agent.recipe} tone={tone} />

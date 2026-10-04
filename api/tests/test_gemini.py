@@ -190,3 +190,92 @@ def test_stops_when_the_time_budget_is_spent():
         c.generate_json("s", "p", {})
     assert models.calls <= 3
     assert e.value.reason == "timeout"
+
+
+class FakeCompletions:
+    def __init__(self, *outcomes):
+        self.outcomes = list(outcomes)
+        self.calls = []
+
+    def create(self, **kw):
+        self.calls.append(kw)
+        out = self.outcomes.pop(0)
+        if isinstance(out, Exception):
+            raise out
+        msg = SimpleNamespace(content=out)
+        return SimpleNamespace(choices=[SimpleNamespace(message=msg)])
+
+
+def openai_client(*outcomes):
+    from crew.gemini import OpenAIClient
+
+    completions = FakeCompletions(*outcomes)
+    fake = SimpleNamespace(chat=SimpleNamespace(completions=completions))
+    return OpenAIClient(client=fake, model="m"), completions
+
+
+def test_openai_answers_in_json_with_the_schema_in_the_prompt():
+    c, completions = openai_client('{"text": "hi"}')
+
+    assert c.generate_json("sys", "p", {"type": "object", "required": ["text"]}) == {"text": "hi"}
+    call = completions.calls[0]
+    assert call["response_format"] == {"type": "json_object"}
+    assert '"required": ["text"]' in call["messages"][0]["content"]
+
+
+def test_openai_failures_carry_a_reason():
+    c, _ = openai_client(RuntimeError("boom"))
+    with pytest.raises(LLMError):
+        c.generate_json("s", "p", {})
+    c, _ = openai_client("not json")
+    with pytest.raises(LLMError) as e:
+        c.generate_json("s", "p", {})
+    assert e.value.reason == "malformed JSON"
+
+
+class Named:
+    def __init__(self, provider, *outcomes):
+        self.provider = provider
+        self.outcomes = list(outcomes)
+
+    def generate_json(self, system, prompt, schema):
+        out = self.outcomes.pop(0)
+        if isinstance(out, Exception):
+            raise out
+        return out
+
+
+def test_the_chain_falls_back_to_the_next_provider_and_says_which_answered():
+    from crew.gemini import ChainLLM
+
+    chain = ChainLLM([Named("openai", LLMError("down", "timeout")), Named("gemini", {"ok": 1})])
+
+    assert chain.generate_json("s", "p", {}) == {"ok": 1}
+    assert chain.provider == "gemini"
+
+
+def test_the_chain_raises_the_last_reason_when_all_fail():
+    from crew.gemini import ChainLLM
+
+    chain = ChainLLM(
+        [
+            Named("openai", LLMError("a", "timeout")),
+            Named("gemini", LLMError("b", "rate limited (429)")),
+        ]
+    )
+    with pytest.raises(LLMError) as e:
+        chain.generate_json("s", "p", {})
+    assert e.value.reason == "rate limited (429)"
+
+
+def test_openai_comes_first_when_its_key_is_set(monkeypatch):
+    from crew import gemini
+
+    monkeypatch.setenv("OPENAI_KEY", "sk-test")
+    monkeypatch.setenv("GEMINI_API_KEY", "g-test")
+    llm = gemini.default_llm()
+    assert [p.provider for p in llm.providers] == ["openai", "gemini"]
+
+    monkeypatch.delenv("OPENAI_KEY")
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+    assert [p.provider for p in gemini.default_llm().providers] == ["gemini"]

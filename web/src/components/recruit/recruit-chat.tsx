@@ -250,7 +250,7 @@ export function RecruitChat({
     </div>
 
     <span className="flex-none text-right font-mono text-[10px] text-faint">
-    Gemini · strategy recruiter
+    AI · strategy recruiter
     </span>
     </div>
 
@@ -272,7 +272,7 @@ export function RecruitChat({
       </div>
 
       <h1 className="m-0 text-base font-normal leading-normal text-pretty text-ink">
-      Tell Gemini how you want this agent to
+      Tell the recruiter how you want this agent to
       invest. It will ask questions and build
       the strategy with you.
       </h1>
@@ -280,7 +280,7 @@ export function RecruitChat({
       <p className="m-0 text-xs leading-normal text-muted">
       Research first: ask what a signal means or which
       ones suit your idea, and nothing changes until you
-      ask for it. Gemini asks before it compiles.
+      ask for it. The recruiter asks before it compiles.
       </p>
 
       <div className="flex flex-col gap-1.5">
@@ -316,7 +316,7 @@ export function RecruitChat({
           state.stored ?? {
             name:
             state.name ??
-            "Gemini Recruiter",
+            "The Recruiter",
             persona:
             state.persona ??
             "Investment strategy recruiter.",
@@ -343,7 +343,7 @@ export function RecruitChat({
       ),
     )}
 
-    {state.thinking && <Waiting text="Gemini is updating the strategy…" />}
+    {state.thinking && <Waiting text="The recruiter is thinking…" />}
 
     {state.phase === "creating" &&
       state.stage === null && (
@@ -386,8 +386,8 @@ export function RecruitChat({
             disabled={busy}
             rows={2}
             maxLength={2000}
-            aria-label="Tell Gemini about your investment strategy"
-            placeholder="Tell Gemini what you want this agent to invest in…"
+            aria-label="Tell the recruiter about your investment strategy"
+            placeholder="Tell the recruiter what you want this agent to invest in…"
             className="max-h-[140px] min-h-12 min-w-0 resize-none rounded-[2px] border border-line-strong bg-panel px-3 py-[11px] text-sm leading-snug text-ink outline-none placeholder:text-faint focus:border-accent disabled:opacity-60"
             />
 
