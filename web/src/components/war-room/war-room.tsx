@@ -18,6 +18,8 @@ export function WarRoom() {
   const { vault, capital, retry } = useFundData({ withCapital: true });
   // Agents drawn on the fund chart, toggled from the crew table; null until the crew loads (all).
   const [picked, setShown] = useState<Set<string> | null>(null);
+  // The month the capital scrubber or replay is on; the fund chart is cut there and grows.
+  const [endMonth, setEndMonth] = useState<string | null>(null);
   const shown = picked ?? new Set(vault.status === "ready" ? vault.data.agents.map((a) => a.id) : []);
 
   if (vault.status !== "ready") {
@@ -54,12 +56,13 @@ export function WarRoom() {
             <div className="flex min-w-0 flex-col @4xl:col-span-2">
               <FundChart
                 vault={fund}
+                endMonth={endMonth}
                 lines={fund.agents
                   .filter((a) => shown.has(a.id))
                   .map((a) => ({ id: a.id, color: a.color, values: contributionValues(a.spark, a.capital_share) }))}
               />
             </div>
-            <CapitalPanel agents={fund.agents} capital={capital} latestMemo={fund.latest_memo} onSplitSaved={retry} />
+            <CapitalPanel agents={fund.agents} capital={capital} latestMemo={fund.latest_memo} onSplitSaved={retry} onMonth={setEndMonth} />
           </div>
         </div>
         <AgentsTable agents={fund.agents} slots={slots} shown={shown} onShow={setShown} />

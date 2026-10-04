@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, type KeyboardEvent, type PointerEvent } from "react";
+import { useId, useMemo, useState, type KeyboardEvent, type PointerEvent } from "react";
 
 import { KICKER } from "@/components/war-room/page-frame";
 import { agentColorVar } from "@/components/glyph";
@@ -37,7 +37,17 @@ function ScaleToggle({ log, onChange }: { log: boolean; onChange: (log: boolean)
 /** An agent's contribution line: 1 + its share × its return, in its colour. */
 export type AgentLine = { id: string; color: AgentColor; values: number[] };
 
-export function FundChart({ vault, lines = [] }: { vault: Fund; lines?: AgentLine[] }) {
+export function FundChart({
+  vault,
+  lines = [],
+  endMonth = null,
+}: {
+  vault: Fund;
+  lines?: AgentLine[];
+  /** Draw only up to this month, with a playhead: the War Room's replay and scrubber. */
+  endMonth?: string | null;
+}) {
+  const clipId = useId();
   const [log, setLog] = useState(true);
   const [hover, setHover] = useState<number | null>(null);
   const points = useMemo(() => alignSeries(vault.curve, vault.benchmark), [vault.curve, vault.benchmark]);
@@ -75,6 +85,8 @@ export function FundChart({ vault, lines = [] }: { vault: Fund; lines?: AgentLin
     setHover(Math.min(Math.max(next, 0), points.length - 1));
   };
 
+  const endIndex = endMonth ? points.findIndex((p) => p.month === endMonth.slice(0, 7)) : -1;
+  const end = endIndex >= 0 ? { x: m.x(endIndex), month: points[endIndex].month, fund: points[endIndex].fund } : null;
   const h = hover === null ? null : points[hover];
   const hx = hover === null ? 0 : m.x(hover);
   const tipLeftSide = hx > W * 0.62;
@@ -144,6 +156,13 @@ export function FundChart({ vault, lines = [] }: { vault: Fund; lines?: AgentLin
             </div>
           )}
 
+          {end !== null && (
+            <div aria-hidden className="pointer-events-none absolute inset-y-0 z-[1] border-l border-accent" style={{ left: pctX(end.x) }}>
+              <span className="absolute -top-4 -translate-x-1/2 bg-accent px-[5px] py-[2px] font-mono text-[10px] leading-none font-semibold whitespace-nowrap text-on-accent">
+                {formatMonth(end.month).toUpperCase()} · {formatPct(end.fund - 1)}
+              </span>
+            </div>
+          )}
           <svg
             aria-hidden
             viewBox={`0 0 ${W} ${H}`}
@@ -151,6 +170,13 @@ export function FundChart({ vault, lines = [] }: { vault: Fund; lines?: AgentLin
             // Drawn in once on mount; toggling the scale swaps the paths without replaying it.
             className="crew-draw absolute inset-0 size-full overflow-visible"
           >
+
+            <defs>
+              <clipPath id={clipId}>
+                <rect x={-10} y={-50} width={end === null ? W + 20 : end.x + 10} height={H + 100} />
+              </clipPath>
+            </defs>
+            <g clipPath={`url(#${clipId})`}>
             <path
               d={m.spxPath}
               fill="none"
@@ -171,6 +197,7 @@ export function FundChart({ vault, lines = [] }: { vault: Fund; lines?: AgentLin
               />
             ))}
             <path d={m.fundPath} fill="none" stroke="var(--fund)" strokeWidth={2} vectorEffect="non-scaling-stroke" />
+            </g>
           </svg>
 
           {m.dd && (

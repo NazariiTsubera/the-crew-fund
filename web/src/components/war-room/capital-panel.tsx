@@ -26,10 +26,12 @@ type Props = {
   latestMemo: string | null;
   /** Reloads the fund after the judge saves a new split. */
   onSplitSaved?: () => void;
+  /** The month the scrubber or replay is on, or null at the latest month with no replay. */
+  onMonth?: (month: string | null) => void;
 };
 
 /** "Who runs the money": each agent's slice of capital, month by month, from GET /capital. */
-export function CapitalPanel({ agents, capital, latestMemo, onSplitSaved }: Props) {
+export function CapitalPanel({ agents, capital, latestMemo, onSplitSaved, onMonth }: Props) {
   const [editing, setEditing] = useState(false);
   const months = capital.status === "ready" ? capital.data.months : [];
   const count = months.length;
@@ -57,6 +59,13 @@ export function CapitalPanel({ agents, capital, latestMemo, onSplitSaved }: Prop
     const id = setInterval(() => setPicked((i) => (i ?? count - 1) + 1), REPLAY_STEP_MS);
     return () => clearInterval(id);
   }, [replaying, count]);
+
+  // The fund chart follows the scrubber back in time and grows with the replay; at the latest
+  // month, with no replay, it is the plain static chart.
+  const followed = count > 1 && (index < count - 1 || replaying) ? months[index].month : null;
+  useEffect(() => {
+    onMonth?.(followed);
+  }, [followed, onMonth]);
 
   const toggleReplay = () => {
     if (replaying) return setReplaying(false);
@@ -184,6 +193,8 @@ export function CapitalPanel({ agents, capital, latestMemo, onSplitSaved }: Prop
                   const i = Number(e.target.value);
                   setPicked(i === count - 1 ? null : i);
                 }}
+                // Let go back in time and the history plays forward from there.
+                onPointerUp={() => picked !== null && index < count - 1 && setReplaying(true)}
                 aria-label="Allocation month"
                 aria-valuetext={month ? formatMonth(month.month) : undefined}
                 className="m-0 w-full accent-accent"
