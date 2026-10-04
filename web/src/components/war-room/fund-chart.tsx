@@ -81,7 +81,7 @@ export function FundChart({ vault }: { vault: Fund }) {
     `${lastPoint.spx === null ? "unavailable" : formatPct(lastPoint.spx - 1)}, ${formatMonth(first)} to ${formatMonth(last)}.`;
 
   return (
-    <section aria-label="Performance" className="flex min-w-0 flex-col gap-2.5">
+    <section aria-label="Performance" className="flex min-w-0 flex-1 flex-col gap-2.5">
       <div className="flex flex-wrap items-center justify-between gap-2.5">
         <div className={KICKER}>
           FUND VS S&amp;P 500 · {first.slice(0, 4)} → {formatMonth(last).toUpperCase()}
@@ -98,7 +98,7 @@ export function FundChart({ vault }: { vault: Fund }) {
           <ScaleToggle log={log} onChange={setLog} />
         </div>
       </div>
-      <div className="border border-line bg-panel px-3 pt-4 pb-[30px] sm:px-4">
+      <div className="flex flex-1 flex-col border border-line bg-panel px-3 pt-4 pb-[30px] sm:px-4">
         <div
           tabIndex={0}
           role="img"
@@ -108,7 +108,7 @@ export function FundChart({ vault }: { vault: Fund }) {
           onPointerLeave={() => setHover(null)}
           onBlur={() => setHover(null)}
           onKeyDown={onKey}
-          className="relative h-[220px] cursor-crosshair touch-pan-y outline-none select-none focus-visible:outline-1 focus-visible:outline-offset-[6px] focus-visible:outline-ink sm:h-[280px]"
+          className="relative min-h-[220px] flex-1 cursor-crosshair touch-pan-y outline-none select-none focus-visible:outline-1 focus-visible:outline-offset-[6px] focus-visible:outline-ink sm:min-h-[280px]"
         >
           {m.yTicks.map((t) => (
             <div key={t.value} aria-hidden>

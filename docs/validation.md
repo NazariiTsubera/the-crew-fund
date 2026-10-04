@@ -67,7 +67,7 @@ earns FAILED on its own, because a leaky backtest makes the other three numbers 
 - The judge sets each agent's share of capital in the War Room (SET SPLIT); every agent starts
   equal. Shares are normalized over the agents holding a book that month, and the fund's curve
   is a backtest of the judge's current split over the whole history.
-- Nothing is fired or benched automatically. A share of 0 benches an agent; FIRE on its page
+- Nothing is fired automatically. A share of 0 (or FIRE on its page) fires an agent; DELETE
   deletes it. (An earlier version fired agents on a trailing Sharpe rule; a concentrated book's
   12-month Sharpe has a standard error near 1, so it fired zero-skill agents on noise.)
 - The fund book: invested agents' books weighted by capital, universe only, every position

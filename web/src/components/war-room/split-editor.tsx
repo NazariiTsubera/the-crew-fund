@@ -8,7 +8,7 @@ import { api, type AgentSummary } from "@/lib/api";
 
 /**
  * The judge is the Mastermind: a slider per agent sets its weight, shown as its share of the
- * fund. SAVE re-splits the fund on the server (0 benches an agent; FIRE on its page deletes it).
+ * fund. SAVE re-splits the fund on the server (a share of 0 fires the agent; DELETE removes it).
  */
 export function SplitEditor({ agents, onSaved }: { agents: AgentSummary[]; onSaved: () => void }) {
   const [weights, setWeights] = useState<Record<string, number>>(() =>
@@ -63,7 +63,7 @@ export function SplitEditor({ agents, onSaved }: { agents: AgentSummary[]; onSav
           {saving ? "RE-SPLITTING…" : "SAVE SPLIT"}
         </button>
         <span className="font-mono text-[10.5px] text-faint">
-          {total === 0 ? "Give at least one agent a share." : "0 benches an agent. The fund backtests your split."}
+          {total === 0 ? "Give at least one agent a share." : "A share of 0 fires an agent. The fund backtests your split."}
         </span>
       </div>
       {error && <div className="font-mono text-xs text-down">SPLIT NOT SAVED · {error}</div>}

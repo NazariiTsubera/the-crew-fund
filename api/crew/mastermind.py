@@ -2,7 +2,7 @@
 
 The judge is the Mastermind. Each agent's share of capital is the allocation the judge set
 (equal by default), normalized over the agents holding a book that month. Nothing is fired or
-benched automatically: a Red Team verdict is advice, and an allocation of 0 benches an agent.
+fired automatically: a Red Team verdict is advice, and an allocation of 0 fires an agent.
 
 The fund's book is the invested agents' books weighted by capital. A sitting-out agent's share
 flows to the others, because the organizers' checker demands weights summing to 1.0; "invested"
@@ -129,8 +129,8 @@ def allocate(agents: list[dict], universe: set[str], benchmark: list[dict] | Non
     fired: dict[str, str] = {}
 
     # The judge is the Mastermind: each agent's share is its allocation weight (equal by
-    # default), normalized over the agents with a book that month. No one is fired or benched
-    # automatically; a Red Team verdict is advice, and an allocation of 0 benches an agent.
+    # default), normalized over the agents with a book that month. No one is fired
+    # automatically; a Red Team verdict is advice, and an allocation of 0 fires an agent.
     weight = {a["id"]: max(float(a.get("allocation", 1.0)), 0.0) for a in crew}
     for k, month in enumerate(months):
         settled = months[: max(0, k - 1)]

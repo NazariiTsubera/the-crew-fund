@@ -43,8 +43,9 @@ export function WarRoom() {
       <PageBody>
         <KpiTiles vault={fund} />
         <div className="@container">
-          <div className="grid grid-cols-1 items-start gap-7 @4xl:grid-cols-3">
-            <div className="min-w-0 @4xl:col-span-2">
+          {/* Stretched rows: the chart and the capital panel end on the same line. */}
+          <div className="grid grid-cols-1 items-stretch gap-7 @4xl:grid-cols-3">
+            <div className="flex min-w-0 flex-col @4xl:col-span-2">
               <FundChart vault={fund} />
             </div>
             <CapitalPanel agents={fund.agents} capital={capital} latestMemo={fund.latest_memo} onSplitSaved={retry} />

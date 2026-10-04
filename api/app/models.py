@@ -57,7 +57,7 @@ class ChatRequest(BaseModel):
 
 
 class CapitalRequest(BaseModel):
-    # The judge's split: a non-negative weight per agent, normalized by the fund; 0 benches one.
+    # The judge's split: a non-negative weight per agent, normalized by the fund; 0 fires one.
     allocations: dict[str, Annotated[float, Field(ge=0)]] = Field(min_length=1)
 
 
@@ -149,7 +149,7 @@ class AgentSummary(BaseModel):
     pitch: str
     shape: str
     color: str
-    # "fired": the judge benched it (share 0, can be rehired); "killed" is no longer produced.
+    # "fired": the judge fired it (share 0, can be rehired); "killed" is no longer produced.
     status: Literal["trading", "sitting_out", "killed", "fired"]
     verdict: Literal["pass", "probation", "killed"]
     capital_share: float

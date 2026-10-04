@@ -10,7 +10,7 @@ const BTN =
   "h-[26px] cursor-pointer rounded-[2px] border bg-transparent px-2.5 font-mono text-[10.5px] leading-none font-semibold tracking-[0.08em] disabled:cursor-default disabled:opacity-40";
 
 /**
- * The judge's controls: FIRE benches the agent (share 0, it can be hired back), HIRE brings it
+ * The judge's controls: FIRE takes the agent off the fund (share 0, it can be hired back), HIRE brings it
  * back at an equal weight, DELETE removes it for good. `onChanged` reloads the agent file.
  */
 export function AgentActions({ agent, onChanged }: { agent: Agent; onChanged: () => void }) {

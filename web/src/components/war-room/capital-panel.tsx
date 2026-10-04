@@ -100,7 +100,7 @@ export function CapitalPanel({ agents, capital, latestMemo, onSplitSaved }: Prop
         )}
         </div>
       </div>
-      <div className="flex flex-col gap-3.5 border border-line bg-panel p-4">
+      <div className="flex flex-1 flex-col gap-3.5 border border-line bg-panel p-4">
         {editing && (
           <SplitEditor
             agents={agents}
@@ -147,7 +147,7 @@ export function CapitalPanel({ agents, capital, latestMemo, onSplitSaved }: Prop
         <ul className="m-0 flex list-none flex-col p-0">
           {rows.map((r) => {
             const a = byId.get(r.id);
-            // A 0 share is the judge benching the agent; nothing is fired automatically.
+            // A 0 share is the judge firing the agent; nothing is fired automatically.
             const out = r.share < 0.001;
             return (
               <li
@@ -164,7 +164,7 @@ export function CapitalPanel({ agents, capital, latestMemo, onSplitSaved }: Prop
                   className="text-right font-mono text-[11px] leading-none font-medium whitespace-nowrap"
                   style={{ color: changeTone(r, out) }}
                 >
-                  {out ? "BENCHED" : formatChange(r.change)}
+                  {out ? "FIRED" : formatChange(r.change)}
                 </span>
               </li>
             );
