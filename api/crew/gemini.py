@@ -16,10 +16,17 @@ from dotenv import load_dotenv
 
 from app.redact import redact
 
-# Load the API .env regardless of the directory uvicorn is launched from.
+# Load api/.env (only that file) regardless of where uvicorn starts; variables already set win.
+# A bare load_dotenv() searches upward and would pick up the repo root's .env, which holds the
+# production DATABASE_URL.
 API_DIR = Path(__file__).resolve().parents[1]
-load_dotenv(API_DIR / ".env")
-load_dotenv()  # Environment variables always take precedence.
+
+
+def load_api_env() -> None:
+    load_dotenv(API_DIR / ".env")
+
+
+load_api_env()
 
 DEFAULT_MODEL = "gemini-3.8-flash"
 # The free tier allows 20 requests a day per model, each model counted apart; when one model's
@@ -32,6 +39,8 @@ FALLBACK_MODELS = [
     "gemini-3.1-flash-lite",
 ]
 RETRY_CODES = {429, 500, 502, 503, 504}
+CALL_TIMEOUT_MS = 15_000
+BUDGET_S = 25.0  # a chat answer falls back to the agent's file rather than wait longer
 RETRY_DELAY = 1.5  # seconds; long enough for a per-minute quota bucket to start refilling
 DAILY_QUOTA = "PerDay"
 
@@ -92,6 +101,7 @@ class GeminiClient:
         client=None,
         sleep: Callable[[float], None] = time.sleep,
         exhausted: set[str] | None = None,
+        clock: Callable[[], float] = time.monotonic,
     ):
         if client is None:
             from google import genai
@@ -99,9 +109,15 @@ class GeminiClient:
             key = api_key or os.environ.get("GEMINI_API_KEY")
             if not key:
                 raise LLMError("GEMINI_API_KEY is not set", "no Gemini key")
-            client = genai.Client(api_key=key)
+            from google.genai import types
+
+            # Without a timeout a call on an overloaded model can hang a chat indefinitely.
+            client = genai.Client(
+                api_key=key, http_options=types.HttpOptions(timeout=CALL_TIMEOUT_MS)
+            )
         self._client = client
         self._sleep = sleep
+        self._clock = clock
         self._exhausted = _EXHAUSTED if exhausted is None else exhausted
         self.models = models or default_models()
 
@@ -119,8 +135,14 @@ class GeminiClient:
             temperature=0.4,
         )
         last: LLMError | None = None
-        for model in [m for m in self.models if m not in self._exhausted]:
+        started = self._clock()
+        chain = [m for m in self.models if m not in self._exhausted]
+        for n, model in enumerate(chain):
             for attempt in (1, 2):
+                if self._clock() - started > BUDGET_S:
+                    raise LLMError(
+                        f"no answer within {BUDGET_S:.0f} s ({last})", "timeout"
+                    ) from last
                 try:
                     response = self._client.models.generate_content(
                         model=model, contents=prompt, config=config
@@ -142,6 +164,8 @@ class GeminiClient:
                         break  # no point retrying today; try the next model
                     if not retry:
                         raise last from e
+                    if getattr(e, "code", None) != 429 and n + 1 < len(chain):
+                        break  # a busy or slow model: another one is likely free right now
                     if attempt == 1:
                         self._sleep(RETRY_DELAY)
         raise last or LLMError("every Gemini model is out of quota today", "rate limited (429)")

@@ -141,3 +141,52 @@ def test_the_default_chain_starts_from_gemini_model(monkeypatch):
     monkeypatch.setenv("GEMINI_MODEL", "gemini-3.6-flash")
     chain = default_models()
     assert chain[0] == "gemini-3.6-flash" and chain.count("gemini-3.6-flash") == 1
+
+
+def test_only_api_env_is_loaded_never_the_repo_root_one(monkeypatch, tmp_path):
+    import os
+
+    from crew.gemini import load_api_env
+
+    monkeypatch.delenv("DATABASE_URL", raising=False)
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / ".env").write_text("DATABASE_URL=postgres://prod\n")
+    load_api_env()
+    assert "DATABASE_URL" not in os.environ
+
+
+def test_a_busy_model_moves_on_to_the_next_without_waiting():
+    models = ModelAware(server(), '{"ok": 1}')
+    sleeps = []
+    c = GeminiClient(
+        models=["a", "b"],
+        client=SimpleNamespace(models=models),
+        sleep=sleeps.append,
+        exhausted=set(),
+    )
+    assert c.generate_json("s", "p", {}) == {"ok": 1}
+    assert models.models == ["a", "b"]
+    assert sleeps == []
+
+
+def test_stops_when_the_time_budget_is_spent():
+    # Each call takes 10 s on this clock; a chat cannot wait for every model in the chain.
+    now = [0.0]
+
+    class Slow(ModelAware):
+        def generate_content(self, model, **kw):
+            now[0] += 10
+            return super().generate_content(model=model, **kw)
+
+    models = Slow(*[server() for _ in range(6)])
+    c = GeminiClient(
+        models=list("abcdef"),
+        client=SimpleNamespace(models=models),
+        sleep=print,
+        exhausted=set(),
+        clock=lambda: now[0],
+    )
+    with pytest.raises(LLMError) as e:
+        c.generate_json("s", "p", {})
+    assert models.calls <= 3
+    assert e.value.reason == "timeout"
