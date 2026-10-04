@@ -80,9 +80,11 @@ jobs:
           printf '%s' "$GHCR_TOKEN" | ssh "$TARGET" "docker login ghcr.io -u ${{ github.actor }} --password-stdin"
           # The deployed tags go into .env, which compose reads, so any later compose command on
           # the box (a manual seed, an up -d) runs these images rather than a stale "latest".
+          # Old tags are removed wherever they sit (an earlier run could glue one onto the last
+          # line when .env had no final newline), and the file gets a final newline first.
           # The cache directory (panel, store file, day-file mirror) must belong to the app user,
           # and Caddy reads its bind-mounted Caddyfile only at start: fix both, then restart.
-          ssh "$TARGET" "cd /opt/crew && sed -i '/^API_TAG=/d;/^WEB_TAG=/d' .env && printf 'API_TAG=%s\\nWEB_TAG=%s\\n' $SHA $SHA >> .env && docker compose pull && mkdir -p cache && docker compose up -d --remove-orphans && docker compose exec -T --user root api chown -R 10001:10001 /app/cache && docker compose restart api caddy; status=\$?; docker logout ghcr.io; docker image prune -f >/dev/null; exit \$status"
+          ssh "$TARGET" "cd /opt/crew && sed -i -E 's/(API|WEB)_TAG=[0-9a-f]*//g; /^$/d' .env && sed -i -e '\$a\\' .env && printf 'API_TAG=%s\\nWEB_TAG=%s\\n' $SHA $SHA >> .env && docker compose pull && mkdir -p cache && docker compose up -d --remove-orphans && docker compose exec -T --user root api chown -R 10001:10001 /app/cache && docker compose restart api caddy; status=\$?; docker logout ghcr.io; docker image prune -f >/dev/null; exit \$status"
 
       - name: Health check
         run: |
