@@ -143,3 +143,36 @@ def test_a_file_that_never_downloads_is_read_remotely_alone(tmp_path, monkeypatc
 
     assert frame.height == 3  # all three days, one of them read remotely
     assert len(list((tmp_path / "m" / "stocks_daily").iterdir())) == 2
+
+
+def test_whole_table_panels_are_routed_through_the_mirror(tmp_path):
+    # The SDK's point-in-time fundamentals read two whole-file tables over HTTP on every call
+    # (~10 s); routed through the mirror they are fetched once.
+    from app.repository import route_through_mirror
+
+    src = tmp_path / "remote/canonical"
+    src.mkdir(parents=True)
+    pl.DataFrame({"ticker": ["AAPL"], "date": [date(2024, 3, 31)]}).write_parquet(
+        src / "fundamentals_actuals.parquet"
+    )
+    calls = []
+    ds = SimpleNamespace(
+        base="https://data.example",
+        token=None,
+        _index={
+            "panels": {
+                "fundamentals_actuals": {"files": ["canonical/fundamentals_actuals.parquet"]}
+            }
+        },
+        _url=lambda rel: (tmp_path / "remote" / rel).as_uri(),
+        _scan=lambda name, start=None, end=None: calls.append(name) or pl.LazyFrame(),
+    )
+    route_through_mirror(ds, tmp_path / "mirror")
+
+    first = ds._scan("fundamentals_actuals").collect()
+    (src / "fundamentals_actuals.parquet").unlink()
+    second = ds._scan("fundamentals_actuals").collect()
+    ds._scan("stocks_daily")
+
+    assert first.height == 1 and second.equals(first)
+    assert calls == ["stocks_daily"]  # other panels still go to the SDK's own scan

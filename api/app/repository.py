@@ -25,10 +25,29 @@ def is_option(t: str) -> bool:
     return t.startswith("O:")
 
 
+# Whole-file tables the SDK's point-in-time fundamentals read on every /asof call.
+MIRRORED_TABLES = {"fundamentals_actuals", "report_calendar_us"}
+
+
+def route_through_mirror(ds, mirror) -> None:
+    """Serve MIRRORED_TABLES from the local mirror, including the SDK's own internal reads
+    (its asof_fundamentals scans both over HTTP each call, ~10 s, past the scorer's patience)."""
+    remote = ds._scan
+
+    def scan(name, start=None, end=None):
+        if name in MIRRORED_TABLES:
+            return mirrored_scan(ds, name, start, end, mirror, remote=remote)
+        return remote(name, start, end)
+
+    ds._scan = scan
+
+
 @lru_cache(maxsize=1)
 def dataset() -> Dataset:
     # Lazy so importing the app never needs a dataset root.
-    return Dataset()
+    ds = Dataset()
+    route_through_mirror(ds, cache_dir() / "mirror")
+    return ds
 
 
 def stocks_daily(start: str | None, end: str | None = None) -> pl.LazyFrame:
@@ -41,6 +60,7 @@ def warm_mirror() -> None:
     try:
         stocks_daily("2020-01-01", "2020-12-31").select("date").head(1).collect()
         stocks_daily(str(date.today() - timedelta(days=45))).select("date").head(1).collect()
+        fundamentals_asof("AAPL", date(2024, 3, 31))
     except Exception:  # warming is best effort; the queries still work without it
         pass
 

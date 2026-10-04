@@ -83,10 +83,14 @@ def _write(path: Path, data: bytes) -> None:
         raise
 
 
-def mirrored_scan(ds, name: str, start: str | None, end: str | None, mirror: Path) -> pl.LazyFrame:
-    """The SDK's `_scan(name, start, end)`, served from the local mirror when remote."""
+def mirrored_scan(
+    ds, name: str, start: str | None, end: str | None, mirror: Path, remote=None
+) -> pl.LazyFrame:
+    """The SDK's `_scan(name, start, end)`, served from the local mirror when remote. `remote`
+    is the SDK's own scan to fall back on (default `ds._scan`)."""
+    remote = remote or ds._scan
     if ds.base is None:
-        return ds._scan(name, start, end)
+        return remote(name, start, end)
     try:
         files = [
             rel
@@ -103,7 +107,7 @@ def mirrored_scan(ds, name: str, start: str | None, end: str | None, mirror: Pat
                 ok = pool.map(lambda rel: _download(ds, rel, local[rel]), missing)
                 failed = {rel for rel, done in zip(missing, ok, strict=True) if not done}
         if not local:
-            return ds._scan(name, start, end)
+            return remote(name, start, end)
         scans = []
         for rel, path in local.items():
             # A file that would not download is read remotely; the rest stay local.
@@ -114,4 +118,4 @@ def mirrored_scan(ds, name: str, start: str | None, end: str | None, mirror: Pat
         return pl.concat(scans, how="diagonal_relaxed")
     except Exception as e:  # any mirror failure: the SDK's own remote scan still answers
         log.warning("day-file mirror unavailable for %s (%s); scanning remotely", name, e)
-        return ds._scan(name, start, end)
+        return remote(name, start, end)
