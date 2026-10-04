@@ -63,6 +63,58 @@ def reference(ds: Dataset, universe: list[str]) -> pl.DataFrame:
         return pl.DataFrame({"ticker": []}, schema={"ticker": pl.String})
 
 
+def splits(ds: Dataset, universe: list[str], start: date, end: date) -> pl.DataFrame:
+    """Stock splits from the corporate-actions table: ticker, ex_date, ratio (to/from, so a
+    2-for-1 is 2.0 and a 1-for-10 reverse split is 0.1)."""
+    empty = pl.DataFrame(schema={"ticker": pl.String, "ex_date": pl.Date, "ratio": pl.Float64})
+    try:
+        return (
+            ds._scan("corporate_actions")
+            .filter(
+                (pl.col("kind") == "split")
+                & pl.col("ticker").is_in(universe)
+                & pl.col("ex_date").cast(pl.Date).is_between(start, end)
+                & (pl.col("value") > 0)
+            )
+            .select(
+                "ticker",
+                pl.col("ex_date").cast(pl.Date),
+                pl.col("value").cast(pl.Float64).alias("ratio"),
+            )
+            .collect()
+        )
+    except Exception as e:
+        progress(f"no corporate actions ({redact(str(e))[:200]}); closes left unadjusted")
+        return empty
+
+
+def split_adjust(closes: pl.DataFrame, splits: pl.DataFrame) -> pl.DataFrame:
+    """Closes on the latest split basis: each close divided by the product of the ratios of
+    every split after its date. The raw panel turns a 2-for-1 split into a -50% day and a
+    reverse split into a several-fold gain; the engine must see neither."""
+    if splits.is_empty():
+        return closes
+    after = (
+        splits.group_by(["ticker", "ex_date"])
+        .agg(pl.col("ratio").product())
+        .sort(["ticker", "ex_date"], descending=[False, True])
+        .with_columns(pl.col("ratio").cum_prod().over("ticker").alias("factor"))
+        .sort(["ticker", "ex_date"])
+    )
+    adjusted = closes.sort(["ticker", "date"]).join_asof(
+        after.select("ticker", "ex_date", "factor"),
+        left_on="date",
+        right_on="ex_date",
+        by="ticker",
+        strategy="forward",
+        allow_exact_matches=False,
+        check_sortedness=False,  # both sides are sorted by (ticker, date) just above
+    )
+    return adjusted.with_columns(
+        (pl.col("close") / pl.col("factor").fill_null(1.0)).alias("close")
+    ).select(closes.columns)
+
+
 def build(ds: Dataset, out: Path, max_tickers: int | None = None) -> dict:
     cutoff = holdout_cutoff(end=last_trading_day(ds))
     universe = sorted(set(ds.universe()) - {PLANTED_TICKER})
@@ -84,6 +136,9 @@ def build(ds: Dataset, out: Path, max_tickers: int | None = None) -> dict:
         .collect()
         .sort(["ticker", "date"])
     )
+    split_rows = splits(ds, universe, CLOSES_FROM, cutoff)
+    closes = split_adjust(closes, split_rows)
+    progress(f"{closes.height} closes, adjusted for {split_rows.height} splits")
     decision_dates = (
         closes.filter(pl.col("date") >= DECISIONS_FROM)
         .group_by(pl.col("date").dt.strftime("%Y-%m").alias("month"))
@@ -160,6 +215,7 @@ def build(ds: Dataset, out: Path, max_tickers: int | None = None) -> dict:
         "tickers": vectors["ticker"].n_unique(),
         "features": present,
         "rows": {name: frame.height for name, frame in frames.items()},
+        "splits_applied": split_rows.height,
     }
     (out / "manifest.json").write_text(json.dumps(manifest, indent=2))
     return manifest

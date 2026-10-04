@@ -22,6 +22,8 @@ from crew.features import CONTROL_FLAGS, FEATURES, PLANTED_TICKER
 START = date(2016, 1, 1)
 SIGNAL = "kl_surprise_bits"
 SIGNAL_DRIFT = 0.02  # monthly drift per unit of the planted signal
+# Raw closes carry splits, as the organizers' stocks_daily does: (ticker index, ex-date, to/from).
+SPLITS = [(0, date(2020, 6, 1), 2.0), (1, date(2021, 3, 1), 0.1)]
 
 
 def tickers(n: int) -> list[str]:
@@ -67,6 +69,17 @@ def build(root: Path, n_tickers: int = 12, end: date | None = None, seed: int = 
             row["snapshot_track_used"] = int(rng.random() < 0.05)
             vectors.append(row)
 
+    split_rows = []
+    for i, ex, ratio in SPLITS:
+        if i < n_tickers:
+            t = tickers(n_tickers)[i]
+            for row in closes:
+                if row["ticker"] == t and row["date"] >= ex:
+                    row["close"] /= ratio
+            split_rows.append(
+                {"ticker": t, "ex_date": ex, "kind": "split", "value": ratio, "raw": "{}"}
+            )
+
     canonical = root / "data/canonical"
     (canonical / "state_vector").mkdir(parents=True, exist_ok=True)
     (root / "data/structural").mkdir(parents=True, exist_ok=True)
@@ -95,6 +108,25 @@ def build(root: Path, n_tickers: int = 12, end: date | None = None, seed: int = 
             "market_cap": [1e10] * len(names),
         }
     ).write_parquet(root / "data/raw/massive/reference_tickers.parquet")
+    pl.DataFrame(
+        split_rows
+        + [
+            {
+                "ticker": "T00",
+                "ex_date": date(2019, 3, 1),
+                "kind": "dividend:cash",
+                "value": 0.5,
+                "raw": "{}",
+            }
+        ],
+        schema={
+            "ticker": pl.String,
+            "ex_date": pl.Date,
+            "kind": pl.String,
+            "value": pl.Float64,
+            "raw": pl.String,
+        },
+    ).write_parquet(root / "data/structural/corporate_actions.parquet")
     (root / "data/structural/universe_us.txt").write_text("\n".join(tickers(n_tickers)) + "\n")
     return root
 

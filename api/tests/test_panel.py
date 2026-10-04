@@ -103,3 +103,34 @@ def test_a_reference_table_without_sic_description_does_not_stop_the_pull(tmp_pa
     sectors = pl.read_parquet(tmp_path / "out" / "sectors.parquet")
     assert sectors.height == 4
     assert "sic_description" not in sectors.columns
+
+
+def _jump(closes, ticker, ex):
+    rows = closes.filter(pl.col("ticker") == ticker).sort("date")
+    before = rows.filter(pl.col("date") < ex)["close"][-1]
+    after = rows.filter(pl.col("date") >= ex)["close"][0]
+    return after / before
+
+
+def test_cached_closes_are_split_adjusted(built):
+    root, out, manifest = built
+    raw = pl.read_parquet(root / "data/canonical/stocks_daily.parquet")
+    cached = load_panel(out).closes
+
+    for i, ex, ratio in panelroot.SPLITS:
+        t = panelroot.tickers(12)[i]
+        assert _jump(raw, t, ex) == pytest.approx(1 / ratio, rel=0.1)  # the raw panel jumps
+        assert _jump(cached, t, ex) == pytest.approx(1.0, abs=0.1)  # the cache does not
+    assert manifest["splits_applied"] == len(panelroot.SPLITS)
+
+
+def test_split_adjustment_keeps_the_latest_prices_unchanged(built):
+    root, out, _ = built
+    raw = pl.read_parquet(root / "data/canonical/stocks_daily.parquet")
+    cached = load_panel(out).closes
+    last = cached["date"].max()
+
+    def at(frame):
+        return frame.filter(pl.col("date") == last).sort("ticker")["close"].to_list()
+
+    assert at(cached) == pytest.approx(at(raw.filter(pl.col("ticker") != "ORKD")))
