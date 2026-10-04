@@ -209,9 +209,14 @@ def agent_log(
 
 
 @router.get("/log", response_model=list[LogEntry])
-def fund_log(limit: Annotated[int, Query(ge=1, le=500)] = 100, type: str | None = None):  # noqa: A002
-    """Fund-wide log, newest first: the Live floor's replay tape."""
-    return vault.fund_log(limit, type)
+def fund_log(
+    limit: Annotated[int, Query(ge=1, le=500)] = 100,
+    type: str | None = None,  # noqa: A002 - the contract's name
+    since: Annotated[str | None, Query(pattern=r"^\d{4}-\d{2}$")] = None,
+):
+    """Fund-wide log, newest first: the Live floor's replay tape. `since` (YYYY-MM) returns the
+    oldest `limit` entries from that month on, so the tape can start anywhere in the history."""
+    return vault.fund_log(limit, type, since)
 
 
 @router.post("/capital", response_model=Capital)

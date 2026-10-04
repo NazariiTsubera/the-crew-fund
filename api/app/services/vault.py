@@ -76,8 +76,12 @@ def agent_log(agent_id: str, month: str | None, type_: str | None) -> list[dict]
     return store.log(agent_id=agent_id, month=month, types=[type_] if type_ else None)
 
 
-def fund_log(limit: int, type_: str | None) -> list[dict]:
-    return crew_repository.store().log(types=[type_] if type_ else None, limit=limit)
+def fund_log(limit: int, type_: str | None, since: str | None = None) -> list[dict]:
+    types = [type_] if type_ else None
+    if since is None:
+        return crew_repository.store().log(types=types, limit=limit)
+    rows = [e for e in crew_repository.store().log(types=types) if e["ts"] >= since]
+    return sorted(rows, key=lambda e: e["ts"])[:limit][::-1]
 
 
 def capital(start: str | None) -> dict:

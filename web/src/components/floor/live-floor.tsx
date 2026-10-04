@@ -40,10 +40,20 @@ const chip = (on: boolean) =>
   `${BUTTON} ${on ? "border-ink bg-ink text-bg" : "border-line-strong bg-transparent text-muted hover:text-ink"}`;
 
 /** FILE 02: the fund's stored log replayed as a tape. Nothing here is live or invented. */
-export function LiveFloor() {
-  const { data, retry } = useFloorData();
+// Where the tape starts: the latest stretch, or any year of the history (a full nine years at
+// a steady pace would never end, so the judge picks the start).
+const STARTS: [string | null, string][] = [
+  [null, "LATEST"],
+  ...Array.from({ length: 10 }, (_, i): [string, string] => [`${2017 + i}-01`, String(2017 + i)]),
+  ["2020-02", "COVID '20"],
+];
 
-  if (data.status === "ready" && data.log.length > 0) return <Tape log={data.log} crew={data.crew} />;
+export function LiveFloor() {
+  const [since, setSince] = useState<string | null>(null);
+  const { data, retry } = useFloorData(since);
+
+  if (data.status === "ready" && data.log.length > 0)
+    return <Tape log={data.log} crew={data.crew} since={since} onSince={setSince} />;
 
   return (
     <>
@@ -59,7 +69,17 @@ export function LiveFloor() {
   );
 }
 
-function Tape({ log, crew }: { log: LogEntry[]; crew: AgentSummary[] }) {
+function Tape({
+  log,
+  crew,
+  since,
+  onSince,
+}: {
+  log: LogEntry[];
+  crew: AgentSummary[];
+  since: string | null;
+  onSince: (since: string | null) => void;
+}) {
   const ordered = useMemo(() => replayOrder(log), [log]);
   const byId = useMemo(() => new Map(crew.map((a) => [a.id, a])), [crew]);
   const keys = useMemo(() => new Map(ordered.map((e, i) => [e, i])), [ordered]);
@@ -147,6 +167,21 @@ function Tape({ log, crew }: { log: LogEntry[]; crew: AgentSummary[] }) {
                 </button>
               </div>
             )}
+          </div>
+
+          <div role="group" aria-label="Start the tape" className="flex flex-wrap items-center gap-1.5">
+            <span className="mr-1 font-mono text-[10.5px] tracking-[0.12em] text-dim">FROM</span>
+            {STARTS.map(([value, label]) => (
+              <button
+                key={label}
+                type="button"
+                aria-pressed={since === value}
+                onClick={() => onSince(value)}
+                className={chip(since === value)}
+              >
+                {label}
+              </button>
+            ))}
           </div>
 
           <div role="group" aria-label="Filter the tape" className="flex flex-wrap gap-1.5">

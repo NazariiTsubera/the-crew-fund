@@ -141,3 +141,13 @@ KPIS = {
     "max_drawdown": 0.0,
     "max_drawdown_month": None,
 }
+
+
+def test_fund_log_can_start_the_tape_at_a_chosen_month(client):
+    rows = client.get("/log?since=2020-02&limit=50").json()
+
+    assert len(rows) == 50
+    assert all(r["ts"] >= "2020-02" for r in rows)
+    # The oldest 50 from Feb 2020 onward, still newest first like every log response.
+    assert min(r["ts"] for r in rows) < "2020-04"
+    assert [r["ts"] for r in rows] == sorted((r["ts"] for r in rows), reverse=True)

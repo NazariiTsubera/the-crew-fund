@@ -180,6 +180,11 @@ export function mockTransport({ stageDelay = () => 1000 + Math.random() * 1000 }
     if (method === "GET" && url.pathname === "/log") {
       const type = q.get("type");
       const limit = Number(q.get("limit") ?? 100);
+      const since = q.get("since");
+      if (since) {
+        const rows = LOG.filter((e) => (!type || e.type === type) && e.ts >= since);
+        return [...rows].sort((a, b) => a.ts.localeCompare(b.ts)).slice(0, limit).reverse();
+      }
       return LOG.filter((e) => !type || e.type === type).slice(0, limit);
     }
     if (method === "GET" && url.pathname === "/capital") {

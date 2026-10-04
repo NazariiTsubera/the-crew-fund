@@ -301,7 +301,8 @@ export function createClient(transport: Transport) {
       z
         .array(LogEntrySchema)
         .parse(await transport.get(`/agents/${enc(id)}/log${query(opts)}`, signal)),
-    log: async (opts: { limit?: number; type?: LogType } = {}, signal?: AbortSignal) =>
+    /** `since` (YYYY-MM): the oldest `limit` entries from that month on, still newest first. */
+    log: async (opts: { limit?: number; type?: LogType; since?: string } = {}, signal?: AbortSignal) =>
       z.array(LogEntrySchema).parse(await transport.get(`/log${query(opts)}`, signal)),
     capital: async (opts: { from?: string } = {}, signal?: AbortSignal) =>
       CapitalSchema.parse(await transport.get(`/capital${query(opts)}`, signal)),
