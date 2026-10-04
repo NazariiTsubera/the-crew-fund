@@ -61,7 +61,8 @@ function Delta({ label, live, test, pct = true }: { label: string; live: number;
  * variant up, so a judge can ask the agent why it did better or worse.
  */
 export function WhatIfPanel({ agent, variant, onVariant, onAskWhy }: Props) {
-  const [open, setOpen] = useState(variant !== null);
+  // Open by default: the panel is the page's main interaction and a collapsed header got missed.
+  const [open, setOpen] = useState(true);
   const [draft, setDraft] = useState<RecipeOut>(variant?.recipe ?? agent.recipe);
   const [running, setRunning] = useState(false);
   const [error, setError] = useState<string | null>(null);
