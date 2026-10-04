@@ -332,7 +332,9 @@ def answer(
         "`proposal_json` as JSON with keys features [{name, weight, direction}], filters, "
         'lookback_months (1-60), top_n (1-50), rebalance "monthly" and '
         "sit_out_if_trailing_sharpe_below (number or null), starting from the recipe on screen "
-        "and changing only what they asked; say what you changed and ask whether to recompile. "
+        "and changing only what they asked (never add a signal they did not ask for); say what "
+        "you changed and ask whether to recompile. "
+        "Say you are recompiling only when you set `recompile` true. "
         "Otherwise leave `proposal_json` empty. Set `recompile` true only when the judge "
         "explicitly agrees to recompile now. Market-wide signals (funding_stress, "
         "inflation_expectation, treasury_funding_interact) cannot rank stocks; warn if asked. "
@@ -358,7 +360,10 @@ def answer(
         reply = llm.generate_json(system, prompt, SCHEMA)
         text = _paragraphs(str(reply.get("text") or ""))
         proposal = _proposal(reply.get("proposal_json"))
-        recompile = bool(reply.get("recompile")) and proposal is not None
+        # Agreement compiles the new proposal, or the edit already on screen; with neither
+        # there is nothing to recompile, so the flag is dropped.
+        pending = draft is not None and draft != agent.get("recipe")
+        recompile = bool(reply.get("recompile")) and (proposal is not None or pending)
         follow_ups = _follow_ups(reply.get("follow_ups"))
         evidence = [by_id[i] for i in reply.get("cited") or [] if i in by_id]
         if not text:
@@ -380,6 +385,7 @@ def answer(
         message["follow_ups"] = follow_ups
     if source == "gemini" and proposal is not None:
         message["proposal"] = proposal
+    if source == "gemini" and (proposal is not None or recompile):
         message["recompile"] = recompile
     if why:
         message["fallback_reason"] = why

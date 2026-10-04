@@ -381,3 +381,46 @@ def test_the_agent_knows_how_it_did_against_the_market_month_by_month(store):
     assert "2022-02: me +2.0% (in cash) vs S&P 500 +10.0%" in texts
     assert not any(t.startswith("2023-01: me") for t in texts)  # only the year asked about
     assert any(t.startswith("2022 vs market: me") for t in texts)
+
+
+def test_agreeing_to_recompile_the_draft_on_screen_keeps_the_flag(store):
+    llm = FakeLLM(
+        {
+            "text": "Recompiling.",
+            "cited": [],
+            "follow_ups": [],
+            "proposal_json": "",
+            "recompile": True,
+        }
+    )
+
+    out = answer(store, {**AGENT, "recipe": RECIPE}, "Yes, recompile it", llm, draft=PROPOSAL)
+
+    assert out["recompile"] is True and "proposal" not in out
+
+
+def test_there_is_nothing_to_recompile_without_a_change(store):
+    llm = FakeLLM(
+        {
+            "text": "Recompiling.",
+            "cited": [],
+            "follow_ups": [],
+            "proposal_json": "",
+            "recompile": True,
+        }
+    )
+
+    out = answer(store, {**AGENT, "recipe": RECIPE}, "Recompile", llm)
+
+    assert "recompile" not in out
+
+
+def test_the_prompt_forbids_unrequested_signals_and_false_claims(store):
+    llm = FakeLLM(
+        {"text": "x", "cited": [], "follow_ups": [], "proposal_json": "", "recompile": False}
+    )
+    answer(store, AGENT, "hi", llm)
+    system = llm.calls[0][0]
+
+    assert "never add a signal" in system
+    assert "only when you set `recompile`" in system
