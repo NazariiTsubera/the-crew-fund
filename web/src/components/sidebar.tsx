@@ -60,7 +60,7 @@ export function Sidebar({ model }: { model: ShellModel }) {
         {crew?.map((a) => {
           const href = `/agents/${encodeURIComponent(a.id)}`;
           const on = pathname === href;
-          const killed = a.status === "killed";
+          const killed = (a.status === "killed" || a.status === "fired");
           return (
             <Link
               key={a.id}
@@ -72,7 +72,7 @@ export function Sidebar({ model }: { model: ShellModel }) {
               <Glyph shape={a.shape} color={a.color} size={11} dim={killed} />
               <span className="truncate text-[13px] leading-[1.1] font-medium">{a.name}</span>
               <span className="font-mono text-[11px] leading-none font-medium text-muted">
-                {killed ? "OUT" : formatShare(a.capital_share)}
+                {killed ? "FIRED" : formatShare(a.capital_share)}
               </span>
             </Link>
           );

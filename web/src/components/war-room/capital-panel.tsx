@@ -123,7 +123,7 @@ export function CapitalPanel({ agents, capital, latestMemo, onSplitSaved }: Prop
             .filter((r) => r.share > 0.001)
             .map((r) => {
               const a = byId.get(r.id);
-              const killed = a?.status === "killed";
+              const killed = (a?.status === "killed" || a?.status === "fired");
               return (
                 <div
                   key={r.id}
@@ -155,7 +155,7 @@ export function CapitalPanel({ agents, capital, latestMemo, onSplitSaved }: Prop
                 className="grid grid-cols-[14px_minmax(0,1fr)_54px_78px] items-center gap-2.5 border-t border-line-soft py-2"
                 style={{ opacity: r.share < 0.001 ? 0.45 : 1 }}
               >
-                {a ? <Glyph shape={a.shape} color={a.color} size={11} dim={a.status === "killed"} /> : <span />}
+                {a ? <Glyph shape={a.shape} color={a.color} size={11} dim={(a.status === "killed" || a.status === "fired")} /> : <span />}
                 <span className="truncate text-[13px] leading-[1.2] font-medium">{a?.name ?? r.id}</span>
                 <span className="text-right font-mono text-[13px] leading-none font-medium">
                   {(r.share * 100).toFixed(1)}%

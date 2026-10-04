@@ -149,7 +149,8 @@ class AgentSummary(BaseModel):
     pitch: str
     shape: str
     color: str
-    status: Literal["trading", "sitting_out", "killed"]
+    # "fired": the judge benched it (share 0, can be rehired); "killed" is no longer produced.
+    status: Literal["trading", "sitting_out", "killed", "fired"]
     verdict: Literal["pass", "probation", "killed"]
     capital_share: float
     capital_trend: Literal["up", "down", "flat"]

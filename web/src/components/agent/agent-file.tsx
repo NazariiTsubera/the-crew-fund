@@ -92,7 +92,7 @@ function AgentScreen({ agent: initial }: { agent: Agent }) {
       chat={(className) => (
         <ChatColumn agent={agent} version={version} className={className} onRecompiled={() => void reload()} />
       )}
-      perf={(className) => <PerformanceColumn agent={agent} version={version} className={className} />}
+      perf={(className) => <PerformanceColumn agent={agent} version={version} className={className} onChanged={() => void reload()} />}
     />
   );
 }

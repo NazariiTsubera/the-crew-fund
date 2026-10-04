@@ -4,37 +4,55 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { refreshVault } from "@/components/use-vault";
-import { api } from "@/lib/api";
+import { api, type Agent } from "@/lib/api";
 
-/** The judge fires an agent: deleted with its record and chat, and the fund re-splits. */
-export function FireButton({ id, name }: { id: string; name: string }) {
+const BTN =
+  "h-[26px] cursor-pointer rounded-[2px] border bg-transparent px-2.5 font-mono text-[10.5px] leading-none font-semibold tracking-[0.08em] disabled:cursor-default disabled:opacity-40";
+
+/**
+ * The judge's controls: FIRE benches the agent (share 0, it can be hired back), HIRE brings it
+ * back at an equal weight, DELETE removes it for good. `onChanged` reloads the agent file.
+ */
+export function AgentActions({ agent, onChanged }: { agent: Agent; onChanged: () => void }) {
   const router = useRouter();
-  const [firing, setFiring] = useState(false);
+  const [working, setWorking] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const fired = agent.status === "fired";
 
-  async function fire() {
-    if (!window.confirm(`Fire ${name}? It is deleted with its record and chat, and the fund re-splits.`)) return;
-    setFiring(true);
+  async function run(action: () => Promise<void>, after: () => void) {
+    setWorking(true);
     setError(null);
     try {
-      await api.fireAgent(id);
+      await action();
       refreshVault();
-      router.push("/");
+      after();
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
-      setFiring(false);
+    } finally {
+      setWorking(false);
     }
   }
 
   return (
-    <span className="flex items-center gap-2">
+    <span className="flex items-center gap-1.5">
       <button
         type="button"
-        onClick={() => void fire()}
-        disabled={firing}
-        className="h-[26px] cursor-pointer rounded-[2px] border border-down/60 bg-transparent px-2.5 font-mono text-[10.5px] leading-none font-semibold tracking-[0.08em] text-down hover:bg-down hover:text-bg disabled:cursor-default disabled:opacity-40"
+        disabled={working}
+        onClick={() => void run(() => (fired ? api.hire(agent.id) : api.fire(agent.id)), onChanged)}
+        className={`${BTN} ${fired ? "border-up text-up hover:bg-up hover:text-bg" : "border-down text-down hover:bg-down hover:text-bg"}`}
       >
-        {firing ? "FIRING…" : "FIRE"}
+        {fired ? "HIRE" : "FIRE"}
+      </button>
+      <button
+        type="button"
+        disabled={working}
+        onClick={() => {
+          if (!window.confirm(`Delete ${agent.name} for good? Its record and chat are removed; this cannot be undone.`)) return;
+          void run(() => api.deleteAgent(agent.id), () => router.push("/"));
+        }}
+        className={`${BTN} border-line-strong text-muted hover:border-down hover:text-down`}
+      >
+        DELETE
       </button>
       {error && <span className="text-down">{error}</span>}
     </span>

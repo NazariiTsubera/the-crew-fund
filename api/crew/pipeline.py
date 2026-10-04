@@ -108,7 +108,8 @@ def rebalance(store: Store, panel: Panel) -> Plan:
         trend = "flat" if abs(share - before) < TREND_STEP else ("up" if share > before else "down")
         fired = plan.fired.get(a["id"])
         run = store.latest_run(a["id"]) or {}
-        status = run.get("status", a["status"])
+        # The judge fired it (share 0, rehirable); otherwise the agent's own trading state.
+        status = "fired" if a.get("allocation", 1.0) == 0 else run.get("status", a["status"])
         store.put_agent(
             {
                 **a,

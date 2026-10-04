@@ -76,7 +76,7 @@ export const AgentSummarySchema = z.object({
   // instead of failing the whole response.
   shape: AgentShapeSchema.catch("square"),
   color: AgentColorSchema.catch("slate"),
-  status: z.enum(["trading", "sitting_out", "killed"]),
+  status: z.enum(["trading", "sitting_out", "killed", "fired"]),
   verdict: VerdictSchema,
   capital_share: z.number(),
   capital_trend: z.enum(["up", "down", "flat"]),
@@ -322,9 +322,16 @@ export function createClient(transport: Transport) {
     /** The judge is the Mastermind: a weight per agent (normalized by the fund; 0 benches one). */
     setCapital: async (allocations: Record<string, number>, signal?: AbortSignal) =>
       CapitalSchema.parse(await transport.post("/capital", { allocations }, signal)),
-    /** The judge fires an agent: it is deleted and the fund re-splits. */
-    fireAgent: async (id: string, signal?: AbortSignal) => {
+    /** The judge deletes an agent for good; the fund re-splits. */
+    deleteAgent: async (id: string, signal?: AbortSignal) => {
       await transport.delete(`/agents/${enc(id)}`, signal);
+    },
+    /** The judge fires an agent: share 0, the fund re-splits; it can be rehired. */
+    fire: async (id: string, signal?: AbortSignal) => {
+      await transport.post(`/agents/${enc(id)}/fire`, {}, signal);
+    },
+    hire: async (id: string, signal?: AbortSignal) => {
+      await transport.post(`/agents/${enc(id)}/hire`, {}, signal);
     },
     /** POST /agents/{id}/recompile: the full pipeline again under the same identity. */
     async *recompile(id: string, recipe: RecipeOut, signal?: AbortSignal): AsyncGenerator<CreateEvent> {

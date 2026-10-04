@@ -22,7 +22,7 @@ function HeldBy({ agent, id }: { agent: AgentSummary | undefined; id: string | n
   if (!agent) return <span className="text-[13px] text-muted">{id ?? "—"}</span>;
   return (
     <span className="flex items-center gap-2 text-[13px] leading-none text-soft">
-      <Glyph shape={agent.shape} color={agent.color} size={10} dim={agent.status === "killed"} />
+      <Glyph shape={agent.shape} color={agent.color} size={10} dim={(agent.status === "killed" || agent.status === "fired")} />
       {agent.name}
     </span>
   );

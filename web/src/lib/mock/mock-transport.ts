@@ -187,6 +187,13 @@ export function mockTransport({ stageDelay = () => 1000 + Math.random() * 1000 }
       return { months: capital.months.filter((m) => !from || m.month >= from) };
     }
     if (method === "POST" && url.pathname === "/agents/strategy-chat") return strategyChat(body);
+    const fireHire = url.pathname.match(/^\/agents\/([^/]+)\/(fire|hire)$/);
+    if (method === "POST" && fireHire) {
+      const agent = findAgent(decodeURIComponent(fireHire[1]));
+      const fired = fireHire[2] === "fire";
+      agents.set(agent.id, { ...agent, status: fired ? "fired" : "trading", capital_share: fired ? 0 : agent.capital_share });
+      return { id: agent.id, allocation: fired ? 0 : 1 };
+    }
     if (method === "POST" && url.pathname === "/capital") {
       // Mock mode keeps the fixture history; the judge's split shows as the latest month.
       const allocations = (body.allocations ?? {}) as Record<string, number>;

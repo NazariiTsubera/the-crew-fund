@@ -275,18 +275,22 @@ describe("httpTransport", () => {
     expect(JSON.parse(String(calls[0].init?.body))).toEqual({ recipe });
   });
 
-  it("sets the judge's capital split and fires an agent", async () => {
+  it("sets the split, deletes, fires and rehires agents", async () => {
     const { impl, calls } = fakeFetch((url, init) =>
       init?.method === "DELETE" ? Response.json({ fired: "fence" }) : Response.json({ months: [] }),
     );
     const client = createClient(httpTransport("http://api.test", impl));
 
     await client.setCapital({ fence: 2, lookout: 0 });
-    await client.fireAgent("fence");
+    await client.deleteAgent("fence");
+    await client.fire("lookout");
+    await client.hire("lookout");
 
     expect(calls[0].url).toBe("http://api.test/capital");
     expect(JSON.parse(String(calls[0].init?.body))).toEqual({ allocations: { fence: 2, lookout: 0 } });
     expect(calls[1]).toMatchObject({ url: "http://api.test/agents/fence", init: { method: "DELETE" } });
+    expect(calls[2]).toMatchObject({ url: "http://api.test/agents/lookout/fire", init: { method: "POST" } });
+    expect(calls[3]).toMatchObject({ url: "http://api.test/agents/lookout/hire", init: { method: "POST" } });
   });
 
   it("streams POST /agents as parsed creation events", async () => {

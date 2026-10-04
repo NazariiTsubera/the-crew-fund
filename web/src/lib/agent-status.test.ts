@@ -7,6 +7,10 @@ describe("statusLabel", () => {
     expect(statusLabel({ status: "killed", verdict: "killed", stop_month: null })).toBe("Killed");
   });
 
+  it("names the judge's firing a firing", () => {
+    expect(statusLabel({ status: "fired", verdict: "pass", stop_month: null })).toBe("Fired");
+  });
+
   it("names a Mastermind firing a firing, whatever the Red Team said", () => {
     expect(statusLabel({ status: "killed", verdict: "probation", stop_month: "2020-05" })).toBe("Fired");
   });

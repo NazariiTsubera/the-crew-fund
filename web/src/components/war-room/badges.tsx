@@ -51,7 +51,7 @@ function dotStyle(status: AgentSummary["status"]): CSSProperties {
       boxShadow: "0 0 0 3px color-mix(in oklch, var(--up) 22%, transparent)",
     };
   }
-  return { border: `1.5px solid ${status === "killed" ? "var(--down)" : "var(--muted)"}` };
+  return { border: `1.5px solid ${status === "killed" || status === "fired" ? "var(--down)" : "var(--muted)"}` };
 }
 
 /** Status dot plus its word: filled for trading, hollow for sitting out or killed. */

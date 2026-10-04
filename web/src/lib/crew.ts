@@ -6,7 +6,7 @@ type Sortable = Pick<AgentSummary, "name" | "status" | "capital_share">;
 export function sortCrew<T extends Sortable>(agents: readonly T[]): T[] {
   return [...agents].sort(
     (a, b) =>
-      Number(a.status === "killed") - Number(b.status === "killed") ||
+      Number(a.status === "killed" || a.status === "fired") - Number(b.status === "killed" || b.status === "fired") ||
       b.capital_share - a.capital_share ||
       a.name.localeCompare(b.name),
   );

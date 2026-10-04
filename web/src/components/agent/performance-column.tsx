@@ -7,7 +7,7 @@ import { EquityChart } from "@/components/agent/equity-chart";
 import { KpiTiles } from "@/components/agent/kpi-tiles";
 import { LogFeed } from "@/components/agent/log-feed";
 import { RedTeamCard } from "@/components/agent/red-team-card";
-import { FireButton } from "@/components/agent/fire-button";
+import { AgentActions } from "@/components/agent/fire-button";
 import { statusDotStyle } from "@/components/agent/tags";
 import { isFired, statusLabel } from "@/lib/agent-status";
 import { VerdictBadge } from "@/components/agent/verdict-badge";
@@ -57,16 +57,19 @@ export function PerformanceColumn({
   agent,
   className = "",
   version = 0,
+  onChanged,
 }: {
   agent: Agent;
   className?: string;
   /** Bumped after a recompile so the log reloads. */
   version?: number;
+  /** Reloads the agent after the judge fires or hires it. */
+  onChanged?: () => void;
 }) {
   const [selected, setSelected] = useState<string | null>(null);
   const log = useAgentLog(agent.id, version);
   const holdoutCutoff = useHoldoutCutoff();
-  const killed = agent.status === "killed";
+  const killed = (agent.status === "killed" || agent.status === "fired");
   const tone = killed ? "var(--faint)" : agentColorVar(agent.color);
 
   const latest = lastMonthReturn(agent.curve);
@@ -107,7 +110,7 @@ export function PerformanceColumn({
             <span style={statusDotStyle(agent.status)} />
             {statusLabel(agent)}
           </span>
-          <FireButton id={agent.id} name={agent.name} />
+          {onChanged && <AgentActions agent={agent} onChanged={onChanged} />}
           {killed && agent.stop_month && (
             <span className="text-down">
               {isFired(agent) ? "FIRED BY THE MASTERMIND" : "STOPPED"} {formatMonth(agent.stop_month).toUpperCase()}

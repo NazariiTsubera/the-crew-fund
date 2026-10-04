@@ -104,7 +104,7 @@ export function TopBar({ model }: { model: ShellModel }) {
           {crew?.map((a) => {
             const href = `/agents/${encodeURIComponent(a.id)}`;
             const on = pathname === href;
-            const out = a.status === "killed";
+            const out = (a.status === "killed" || a.status === "fired");
             return (
               <Link
                 key={a.id}

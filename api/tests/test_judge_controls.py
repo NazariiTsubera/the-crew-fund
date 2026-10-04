@@ -72,7 +72,7 @@ def test_a_split_must_name_real_agents_and_not_be_negative(client):
     assert http.post("/capital", json={"allocations": {"a": -1}}).status_code == 422
 
 
-def test_the_judge_fires_an_agent(client):
+def test_the_judge_deletes_an_agent(client):
     http, store = client
 
     assert http.delete("/agents/b").status_code == 200
@@ -80,3 +80,17 @@ def test_the_judge_fires_an_agent(client):
     assert [a["id"] for a in store.list_agents()] == ["a"]
     assert store.get_agent("a")["capital_share"] == pytest.approx(1.0)
     assert http.delete("/agents/b").status_code == 404
+
+
+def test_the_judge_fires_and_rehires_an_agent(client):
+    http, store = client
+
+    assert http.post("/agents/b/fire").status_code == 200
+    b = store.get_agent("b")
+    assert b["status"] == "fired" and b["capital_share"] == 0.0
+    assert store.get_agent("a")["capital_share"] == pytest.approx(1.0)
+
+    assert http.post("/agents/b/hire").status_code == 200
+    b = store.get_agent("b")
+    assert b["status"] != "fired" and b["capital_share"] == pytest.approx(0.5)
+    assert http.post("/agents/zz/fire").status_code == 404

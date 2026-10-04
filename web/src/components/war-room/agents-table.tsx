@@ -22,12 +22,12 @@ const TREND = {
 
 function sharpeOf(a: AgentSummary): string {
   const s = a.kpis.trailing_12m_sharpe;
-  return a.status === "killed" || s === null ? "—" : formatNum(s);
+  return (a.status === "killed" || a.status === "fired") || s === null ? "—" : formatNum(s);
 }
 
 function Capital({ a }: { a: AgentSummary }) {
   const t = TREND[a.capital_trend];
-  const killed = a.status === "killed";
+  const killed = (a.status === "killed" || a.status === "fired");
   return (
     <span className="flex items-center justify-end gap-1.5 font-mono text-sm leading-none font-medium">
       {formatShare(a.capital_share, 1)}
@@ -64,7 +64,7 @@ export function AgentsTable({ agents, slots }: { agents: AgentSummary[]; slots: 
           </div>
           <ul className="m-0 list-none p-0">
             {crew.map((a, i) => {
-              const killed = a.status === "killed";
+              const killed = (a.status === "killed" || a.status === "fired");
               const tone = killed ? "var(--faint)" : agentColorVar(a.color);
               return (
                 <li key={a.id} className="border-t border-line-soft first:border-t-0 @2xl:first:border-t">

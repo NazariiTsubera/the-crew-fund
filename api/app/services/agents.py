@@ -234,8 +234,8 @@ def set_allocations(allocations: dict[str, float]) -> None:
         rebalance(store, crew_repository.panel())
 
 
-def fire(agent_id: str) -> None:
-    """The judge fires an agent: it and everything stored under it are deleted."""
+def delete(agent_id: str) -> None:
+    """The judge deletes an agent: it and everything stored under it are removed for good."""
     with _lock:
         store = crew_repository.store()
         if store.get_agent(agent_id) is None:

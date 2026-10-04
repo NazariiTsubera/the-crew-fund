@@ -135,7 +135,7 @@ export function ChatColumn({
   }
   const edited = isEdited(agent.recipe, draft);
   const scroller = useRef<HTMLDivElement>(null);
-  const dim = agent.status === "killed";
+  const dim = (agent.status === "killed" || agent.status === "fired");
 
   useEffect(() => {
     if (preloaded) return;

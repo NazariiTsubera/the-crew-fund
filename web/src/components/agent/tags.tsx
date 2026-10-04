@@ -89,7 +89,7 @@ export function badgeStyle(verdict: Verdict): CSSProperties {
   }
 }
 
-export function statusDotStyle(status: "trading" | "sitting_out" | "killed"): CSSProperties {
+export function statusDotStyle(status: "trading" | "sitting_out" | "killed" | "fired"): CSSProperties {
   const trading = status === "trading";
   return {
     display: "inline-block",
@@ -99,7 +99,7 @@ export function statusDotStyle(status: "trading" | "sitting_out" | "killed"): CS
     flex: "none",
     background: trading ? "var(--up)" : "transparent",
     boxShadow: trading ? "0 0 0 3px color-mix(in oklch, var(--up) 22%, transparent)" : "none",
-    border: trading ? "none" : `1.5px solid ${status === "killed" ? "var(--down)" : "var(--muted)"}`,
+    border: trading ? "none" : `1.5px solid ${status === "killed" || status === "fired" ? "var(--down)" : "var(--muted)"}`,
   };
 }
 

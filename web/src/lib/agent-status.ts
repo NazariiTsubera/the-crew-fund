@@ -10,10 +10,11 @@ export const STATUS_TEXT: Record<AgentSummary["status"], string> = {
   trading: "Trading",
   sitting_out: "Sitting out",
   killed: "Killed",
+  fired: "Fired",
 };
 
 export function isFired(a: StatusFields): boolean {
-  return a.status === "killed" && a.verdict !== "killed" && a.stop_month !== null;
+  return a.status === "fired" || (a.status === "killed" && a.verdict !== "killed" && a.stop_month !== null);
 }
 
 export function statusLabel(a: StatusFields): string {

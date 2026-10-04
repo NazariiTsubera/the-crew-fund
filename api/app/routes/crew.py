@@ -224,14 +224,34 @@ def set_capital(req: CapitalRequest):
     return _found(vault.capital, None)
 
 
-@router.delete("/agents/{agent_id}")
+@router.post("/agents/{agent_id}/fire")
 def fire_agent(agent_id: str) -> dict:
-    """The judge fires an agent: deleted with its runs, book, log and chat; the fund re-splits."""
+    """The judge fires an agent: its share goes to 0 and the fund re-splits. It can be rehired."""
+    return _set_share(agent_id, 0.0)
+
+
+@router.post("/agents/{agent_id}/hire")
+def hire_agent(agent_id: str) -> dict:
+    """The judge (re)hires an agent at an equal weight."""
+    return _set_share(agent_id, 1.0)
+
+
+def _set_share(agent_id: str, weight: float) -> dict:
     try:
-        agents.fire(agent_id)
+        agents.set_allocations({agent_id: weight})
     except agents.AgentNotFound as exc:
         raise HTTPException(404, f"no agent {exc}") from exc
-    return {"fired": agent_id}
+    return {"id": agent_id, "allocation": weight}
+
+
+@router.delete("/agents/{agent_id}")
+def delete_agent(agent_id: str) -> dict:
+    """The judge deletes an agent for good: its runs, book, log and chat go; the fund re-splits."""
+    try:
+        agents.delete(agent_id)
+    except agents.AgentNotFound as exc:
+        raise HTTPException(404, f"no agent {exc}") from exc
+    return {"deleted": agent_id}
 
 
 @router.get("/capital", response_model=Capital)
