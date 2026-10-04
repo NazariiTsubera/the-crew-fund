@@ -12,13 +12,15 @@ function errorText(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
 
+// The API stamps chat rows in UTC; the user's own lines must match or they read hours apart.
 export function localStamp(): string {
-  const d = new Date();
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  return new Date().toISOString().slice(0, 16).replace("T", " ");
 }
 
-function suggestionsFor(agent: Agent): string[] {
+function suggestionsFor(agent: Agent, lines: ChatLine[]): string[] {
+  // The agent's latest answer suggests what to ask next; before that, a standard set.
+  const last = [...lines].reverse().find((l) => l.role === "agent");
+  if (last && "follow_ups" in last && last.follow_ups?.length) return last.follow_ups;
   const top = [...agent.holdings].sort((a, b) => b.weight - a.weight)[0];
   return [
     "How are you doing?",
@@ -210,7 +212,7 @@ export function ChatColumn({
 
       {!loading && !busy && (
         <div className="flex flex-none gap-1.5 overflow-x-auto px-5 pb-2.5">
-          {suggestionsFor(agent).map((label) => (
+          {suggestionsFor(agent, lines).map((label) => (
             <button
               key={label}
               type="button"
@@ -223,7 +225,7 @@ export function ChatColumn({
         </div>
       )}
 
-      <form onSubmit={onSubmit} className="flex flex-none items-end gap-2 border-t border-line-soft px-5 pt-3 pb-[18px]">
+      <form onSubmit={onSubmit} className="flex flex-none items-stretch gap-2 border-t border-line-soft px-5 pt-3 pb-[18px]">
         <textarea
           value={input}
           onChange={(e) => setInput(e.target.value)}
@@ -238,7 +240,7 @@ export function ChatColumn({
         <button
           type="submit"
           disabled={busy || !input.trim()}
-          className="h-12 flex-none cursor-pointer rounded-[2px] border-0 px-4 font-mono text-xs leading-none font-semibold tracking-[0.08em] text-bg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink disabled:cursor-default"
+          className="min-h-12 flex-none cursor-pointer rounded-[2px] border-0 px-4 font-mono text-xs leading-none font-semibold tracking-[0.08em] text-bg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink disabled:cursor-default"
           style={{ background: busy || !input.trim() ? "var(--line-strong)" : "var(--accent)" }}
         >
           SEND

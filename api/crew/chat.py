@@ -12,6 +12,7 @@ from __future__ import annotations
 import logging
 import re
 
+from crew.features import FEATURES
 from crew.gemini import LLM, LLMError, reason
 from crew.pipeline import now_ts
 from crew.store import Store
@@ -19,15 +20,25 @@ from crew.store import Store
 log = logging.getLogger(__name__)
 
 INTRO = "Introduce yourself: what you trade, your track record in one sentence, your verdict."
-MAX_LOG_FACTS = 12
+MAX_LOG_FACTS = 20
+MAX_FOLLOW_UPS = 3
 SCHEMA = {
     "type": "object",
     "properties": {
         "text": {"type": "string"},
         "cited": {"type": "array", "items": {"type": "string"}},
+        "follow_ups": {"type": "array", "items": {"type": "string"}},
     },
-    "required": ["text", "cited"],
+    "required": ["text", "cited", "follow_ups"],
 }
+# What a judge might ask next, offered as chips when Gemini cannot suggest any.
+DEFAULT_FOLLOW_UPS = [
+    "How are you doing?",
+    "How does your strategy pick stocks?",
+    "What did the Red Team find?",
+    "What happened in 2022?",
+    "Why did the Mastermind move your capital?",
+]
 STATUS = {"trading": "trading", "sitting_out": "sitting out in cash", "killed": "out of the fund"}
 
 
@@ -73,6 +84,24 @@ def facts_for(store: Store, agent: dict, question: str | None) -> list[dict]:
             f"Trailing 12-month Sharpe {num(k.get('trailing_12m_sharpe', 0.0))}",
             f"Turnover {num(k.get('turnover', 0.0))} per month",
         ]
+    recipe = agent.get("recipe") or {}
+    for f in recipe.get("features", []):
+        meaning = FEATURES.get(f["name"], "")
+        texts.append(
+            f"Ranks on {f['name']} ({f['direction']} first, weight {f['weight']:.0%}): {meaning}"
+        )
+    if recipe:
+        floor = recipe.get("sit_out_if_trailing_sharpe_below")
+        rule = (
+            f"sit out in cash when my trailing {recipe['lookback_months']}-month Sharpe is "
+            f"below {num(floor)}"
+            if floor is not None
+            else "never sit out"
+        )
+        filters = ", ".join(recipe.get("filters") or []) or "no filters"
+        texts.append(
+            f"Each month I hold the top {recipe['top_n']} names equally ({filters}) and {rule}"
+        )
     texts.append(
         f"Capital share {pct(agent.get('capital_share', 0.0), False)}, "
         f"trend {agent.get('capital_trend', 'flat')}"
@@ -188,16 +217,36 @@ def fallback(agent: dict, question: str | None, facts: list[dict]) -> tuple[str,
     )
 
 
+def _paragraphs(text: str) -> str:
+    """Collapse stray whitespace inside paragraphs, keep the blank lines between them."""
+    paras = [" ".join(p.split()) for p in re.split(r"\n\s*\n", text)]
+    return "\n\n".join(p for p in paras if p)
+
+
+def _follow_ups(raw) -> list[str]:
+    out = [" ".join(str(q).split())[:80] for q in raw or []]
+    return [q for q in out if q][:MAX_FOLLOW_UPS]
+
+
 def answer(store: Store, agent: dict, question: str | None, llm: LLM | None) -> dict:
     """Answer `question` (None: the agent introduces itself) and store the exchange."""
     facts = facts_for(store, agent, question)
     by_id = {f["id"]: f["text"] for f in facts}
     system = (
-        f"You are {agent['name']}, a trading agent in a heist-crew hedge fund. "
-        f"Persona: {agent.get('persona', '')} "
-        "Answer in first person, in persona, in two to four sentences. Use only the numbered "
-        "facts you are given; never invent a number, date, trade or result. Cite the ids of "
-        "every fact you use in `cited`."
+        f"You are {agent['name']}, a trading agent in a heist-crew hedge fund, talking to a "
+        f"judge who is evaluating the fund. Character: {agent.get('persona', '')} Let the "
+        "character colour your voice, but stay courteous and helpful: no attitude, no "
+        "dismissiveness, no blaming the user.\n"
+        "Answer in first person in two to four short paragraphs separated by a blank line. "
+        "Answer the question directly first, then explain the why: what my strategy does, "
+        "what the numbers show, and what they mean for an investor, including the weak spots "
+        "(a failed Red Team test, a drawdown, lagging the S&P 500). Plain English; explain any "
+        "feature name you mention.\n"
+        "Use only the numbered facts; never invent a number, date, ticker, trade or result. If "
+        "the facts do not answer the question, say so and offer what they do show. Cite the "
+        "ids of every fact you use in `cited`.\n"
+        f"In `follow_ups` suggest {MAX_FOLLOW_UPS} short questions (under 60 characters) the "
+        "judge could ask you next that your facts can answer."
     )
     prompt = f"Question: {question or INTRO}\n\nFacts:\n" + "\n".join(
         f"{f['id']}: {f['text']}" for f in facts
@@ -207,7 +256,8 @@ def answer(store: Store, agent: dict, question: str | None, llm: LLM | None) -> 
         if llm is None:
             raise LLMError("no Gemini client", "no Gemini key")
         reply = llm.generate_json(system, prompt, SCHEMA)
-        text = " ".join(str(reply.get("text") or "").split())
+        text = _paragraphs(str(reply.get("text") or ""))
+        follow_ups = _follow_ups(reply.get("follow_ups"))
         evidence = [by_id[i] for i in reply.get("cited") or [] if i in by_id]
         if not text:
             raise LLMError("empty answer")
@@ -215,11 +265,14 @@ def answer(store: Store, agent: dict, question: str | None, llm: LLM | None) -> 
         source, why = "fallback", reason(e)
         log.warning("chat %s fell back: %s", agent["id"], why)
         text, evidence = fallback(agent, question, facts)
+        follow_ups = [q for q in DEFAULT_FOLLOW_UPS if q != question][:MAX_FOLLOW_UPS]
 
     ts = now_ts()
     if question is not None:
         store.add_chat(agent["id"], {"ts": ts, "role": "user", "text": question})
     message = {"ts": ts, "role": "agent", "text": text, "evidence": evidence, "source": source}
+    if follow_ups:
+        message["follow_ups"] = follow_ups
     if why:
         message["fallback_reason"] = why
     store.add_chat(agent["id"], message)

@@ -210,3 +210,51 @@ def test_a_gemini_answer_has_no_fallback_reason(store):
     assert out["source"] == "gemini"
     assert "fallback_reason" not in out
     assert facts
+
+
+RECIPE = {
+    "features": [{"name": "kyle_lambda", "weight": 1.0, "direction": "low"}],
+    "filters": [],
+    "lookback_months": 12,
+    "top_n": 10,
+    "rebalance": "monthly",
+    "sit_out_if_trailing_sharpe_below": 0.25,
+}
+
+
+def test_the_facts_explain_the_recipe_in_plain_words(store):
+    facts = [f["text"] for f in facts_for(store, {**AGENT, "recipe": RECIPE}, "What do you do?")]
+
+    assert any("kyle_lambda" in t and "low" in t and "price impact" in t for t in facts)
+    assert any("top 10" in t and "sit out" in t.lower() for t in facts)
+
+
+def test_gemini_answers_keep_paragraphs_and_offer_follow_ups(store):
+    llm = FakeLLM(
+        {
+            "text": "First  point.\n\nSecond point.",
+            "cited": [],
+            "follow_ups": ["What about 2020?", "  ", "Why MSFT?", "a", "b"],
+        }
+    )
+
+    out = answer(store, AGENT, "How are you doing?", llm)
+
+    assert out["text"] == "First point.\n\nSecond point."
+    assert out["follow_ups"] == ["What about 2020?", "Why MSFT?", "a"]
+
+
+def test_the_prompt_asks_for_a_full_answer_not_attitude(store):
+    llm = FakeLLM({"text": "Fine.", "cited": [], "follow_ups": []})
+    answer(store, AGENT, "How are you doing?", llm)
+    system = llm.calls[0][0]
+
+    assert "two to four sentences" not in system
+    assert "paragraph" in system and "follow_ups" in system
+
+
+def test_a_fallback_also_offers_follow_ups(store):
+    out = answer(store, AGENT, "How are you doing?", offline())
+
+    assert 1 <= len(out["follow_ups"]) <= 3
+    assert "How are you doing?" not in out["follow_ups"]

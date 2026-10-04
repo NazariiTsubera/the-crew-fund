@@ -28,16 +28,16 @@ export function BookTable({ holdings, holdingsMonth, selected, tone, stopMonth }
         {rows.map((h) => (
           <div
             key={h.ticker}
-            className="grid grid-cols-[56px_50px_minmax(0,1fr)] items-center gap-2.5 border-t border-line-soft px-3 py-2 font-mono text-xs leading-snug first:border-t-0"
+            className="grid grid-cols-[56px_92px_minmax(0,1fr)] items-center gap-2.5 border-t border-line-soft px-3 py-2 font-mono text-xs leading-snug first:border-t-0"
           >
             <span className="font-semibold">{h.ticker}</span>
-            <span className="flex flex-col gap-1">
-              <span>{formatShare(h.weight, 1)}</span>
-              <span className="relative h-[3px] bg-flash">
+            <span className="flex items-center gap-2">
+              <span className="w-10 flex-none text-right tabular-nums">{formatShare(h.weight, 1)}</span>
+              <span className="relative h-[3px] flex-1 bg-flash">
                 <span className="absolute inset-y-0 left-0" style={{ width: `${(h.weight / max) * 100}%`, background: tone }} />
               </span>
             </span>
-            <span className="truncate text-muted" title={h.reason ?? undefined}>
+            <span className="line-clamp-2 break-words text-muted" title={h.reason ?? undefined}>
               {h.reason ?? "—"}
             </span>
           </div>
