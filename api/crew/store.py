@@ -55,10 +55,15 @@ def open_store() -> Store:
         try:
             store = PgStore(url)
             store.migrate()
+            # Said at warning level so it shows in `docker compose logs api` without config:
+            # which store the fund writes to must never be a guess.
+            log.warning("crew store: Tiger Data (DATABASE_URL)")
             return store
         except Exception as e:  # any connect or migrate failure: serve from the file instead
             log.warning("DATABASE_URL unreachable (%s); using the JSON store", e)
-    return JsonStore(Path(os.environ.get("CREW_STORE_PATH") or DEFAULT_JSON_PATH))
+    path = Path(os.environ.get("CREW_STORE_PATH") or DEFAULT_JSON_PATH)
+    log.warning("crew store: JSON file %s", path)
+    return JsonStore(path)
 
 
 def _sort_holdings(rows: list[dict]) -> list[dict]:
