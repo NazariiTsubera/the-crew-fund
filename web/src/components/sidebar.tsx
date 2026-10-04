@@ -80,7 +80,7 @@ export function Sidebar({ model }: { model: ShellModel }) {
         <Link
           href="/agents/new"
           aria-current={pathname === "/agents/new" ? "page" : undefined}
-          className="mt-2 flex h-[38px] items-center justify-center gap-2 rounded-[2px] bg-accent font-mono text-xs leading-none font-semibold tracking-[0.08em] text-on-accent no-underline hover:bg-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+          className="mt-2 flex h-[38px] items-center justify-center gap-2 rounded-[2px] bg-accent font-mono text-xs leading-none font-semibold tracking-[0.08em] text-on-accent no-underline hover:bg-ink hover:text-bg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
         >
           + NEW AGENT
         </Link>
