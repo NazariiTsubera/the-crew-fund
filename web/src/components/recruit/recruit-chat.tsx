@@ -1,10 +1,8 @@
 "use client";
 
 import {
-  Fragment,
   useEffect,
   useRef,
-  useState,
   type FormEvent,
   type KeyboardEvent,
 } from "react";
@@ -14,12 +12,12 @@ import {
   SystemLine,
   UserLine,
 } from "@/components/agent/chat-column";
+import { MicButton } from "@/components/mic-button";
 
 import {
   isRecruiting,
   type RecruitState,
 } from "@/lib/recruit";
-import { api } from "@/lib/api";
 
 export const EXAMPLES = [
   "Which signals here capture cheap companies with improving earnings?",
@@ -160,11 +158,6 @@ export function RecruitChat({
   const field =
   useRef<HTMLTextAreaElement>(null);
 
-  const audio = useRef<HTMLAudioElement>(null);
-  const audioUrl = useRef<string | null>(null);
-  const [playing, setPlaying] = useState<number | null>(null);
-  const [speechError, setSpeechError] = useState<number | null>(null);
-
   const busy = isRecruiting(state) || state.thinking;
 
   const showBrief =
@@ -204,40 +197,6 @@ export function RecruitChat({
     onInput(example);
     field.current?.focus();
   }
-
-  async function playReply(index: number, text: string) {
-    if (playing === index) {
-      audio.current?.pause();
-      audio.current = null;
-      setPlaying(null);
-      return;
-    }
-    audio.current?.pause();
-    if (audioUrl.current) URL.revokeObjectURL(audioUrl.current);
-    setPlaying(index);
-    setSpeechError(null);
-    try {
-      const blob = await api.recruiterSpeech(text);
-      const url = URL.createObjectURL(blob);
-      audioUrl.current = url;
-      const player = new Audio(url);
-      audio.current = player;
-      player.onended = () => setPlaying(null);
-      player.onerror = () => {
-        setPlaying(null);
-        setSpeechError(index);
-      };
-      await player.play();
-    } catch {
-      setPlaying(null);
-      setSpeechError(index);
-    }
-  }
-
-  useEffect(() => () => {
-    audio.current?.pause();
-    if (audioUrl.current) URL.revokeObjectURL(audioUrl.current);
-  }, []);
 
   return (
     <section
@@ -310,8 +269,8 @@ export function RecruitChat({
         message={line}
         />
       ) : (
-        <Fragment key={i}>
         <AgentLine
+        key={i}
         agent={
           state.stored ?? {
             name:
@@ -328,18 +287,6 @@ export function RecruitChat({
         message={line}
         dim={false}
         />
-        {line.role === "agent" && (
-          <button
-          type="button"
-          onClick={() => void playReply(i, line.text)}
-          aria-label={playing === i ? "Stop speech" : "Play reply aloud"}
-          className="ml-[42px] w-fit border border-line-strong px-2 py-1 font-mono text-[10px] text-muted hover:text-ink"
-          >
-          {playing === i ? "STOP AUDIO" : "PLAY AUDIO"}
-          {speechError === i && <span role="status"> · SPEECH UNAVAILABLE</span>}
-          </button>
-        )}
-        </Fragment>
       ),
     )}
 
@@ -392,6 +339,13 @@ export function RecruitChat({
             />
 
             <div className="flex justify-end gap-2">
+            <MicButton
+            value={input}
+            onChange={onInput}
+            disabled={busy}
+            className="h-10"
+            />
+
             <button
             type="submit"
             disabled={

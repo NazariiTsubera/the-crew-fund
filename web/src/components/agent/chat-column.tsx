@@ -4,6 +4,8 @@ import { useEffect, useImperativeHandle, useRef, useState, type FormEvent, type 
 
 import { RecipeCard } from "@/components/agent/recipe-card";
 import { Glyph, agentColorVar } from "@/components/glyph";
+import { MicButton } from "@/components/mic-button";
+import { SpeakButton } from "@/components/speak-button";
 import { api, type Agent, type ChatMessage, type RecipeOut } from "@/lib/api";
 
 export type ChatLine = ChatMessage | { role: "system"; ts: string; text: string };
@@ -86,6 +88,7 @@ export function AgentLine({
             ))}
           </div>
         )}
+        {message.text.trim() && <SpeakButton text={message.text} />}
       </div>
     </div>
   );
@@ -258,6 +261,7 @@ export function ChatColumn({
           placeholder={`Ask ${agent.name} anything. "How are you doing?"`}
           className="max-h-[140px] min-h-12 min-w-0 flex-1 resize-none rounded-[2px] border border-line-strong bg-panel px-3 py-[11px] text-sm leading-snug text-ink outline-none placeholder:text-faint focus:border-accent disabled:opacity-60"
         />
+        <MicButton value={input} onChange={setInput} disabled={busy} />
         <button
           type="submit"
           disabled={busy || !input.trim()}
