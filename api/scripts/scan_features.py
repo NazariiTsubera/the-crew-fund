@@ -14,6 +14,7 @@ import sys
 
 import polars as pl
 
+from crew.env import load_api_env
 from crew.features import FEATURES
 from crew.panel import Panel, load_panel
 from crew.pipeline import evaluate
@@ -35,6 +36,7 @@ def stock_level(panel: Panel) -> list[str]:
 
 
 def main() -> int:
+    load_api_env()
     ap = argparse.ArgumentParser()
     ap.add_argument("--top-n", type=int, default=10)
     args = ap.parse_args()

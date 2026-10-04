@@ -7,6 +7,7 @@ import json
 import sys
 
 from crew.compiler import CompileError, compile_strategy
+from crew.env import load_api_env
 from crew.gemini import default_llm
 
 PROMPTS = [
@@ -18,6 +19,7 @@ PROMPTS = [
 
 
 def main() -> int:
+    load_api_env()
     llm = default_llm()
     failures = 0
     for prompt in sys.argv[1:] or PROMPTS:

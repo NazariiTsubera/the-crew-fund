@@ -12,24 +12,9 @@ import logging
 import os
 import time
 from collections.abc import Callable
-from pathlib import Path
 from typing import Protocol
 
-from dotenv import load_dotenv
-
 from app.redact import redact
-
-# Load api/.env (only that file) regardless of where uvicorn starts; variables already set win.
-# A bare load_dotenv() searches upward and would pick up the repo root's .env, which holds the
-# production DATABASE_URL.
-API_DIR = Path(__file__).resolve().parents[1]
-
-
-def load_api_env() -> None:
-    load_dotenv(API_DIR / ".env")
-
-
-load_api_env()
 
 DEFAULT_MODEL = "gemini-3.8-flash"
 # The free tier allows 20 requests a day per model, each model counted apart; when one model's

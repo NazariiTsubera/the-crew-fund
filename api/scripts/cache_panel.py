@@ -24,6 +24,7 @@ from statevector.pit import holdout_cutoff
 
 from app.mirror import mirrored_scan
 from app.redact import redact
+from crew.env import load_api_env
 from crew.features import CLOCK_FIELDS, CONTROL_FLAGS, FEATURES, PLANTED_TICKER
 from crew.panel import cache_dir
 
@@ -222,6 +223,7 @@ def build(ds: Dataset, out: Path, max_tickers: int | None = None) -> dict:
 
 
 def main() -> int:
+    load_api_env()
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", type=Path, default=cache_dir())
     ap.add_argument("--max-tickers", type=int, default=None)

@@ -146,7 +146,7 @@ def test_the_default_chain_starts_from_gemini_model(monkeypatch):
 def test_only_api_env_is_loaded_never_the_repo_root_one(monkeypatch, tmp_path):
     import os
 
-    from crew.gemini import load_api_env
+    from crew.env import load_api_env
 
     monkeypatch.delenv("DATABASE_URL", raising=False)
     monkeypatch.chdir(tmp_path)

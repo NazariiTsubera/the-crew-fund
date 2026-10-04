@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import sys
 
+from crew.env import load_api_env
 from crew.panel import Panel, load_panel
 from crew.pipeline import evaluate, publish, rebalance
 from crew.recipe import Recipe
@@ -32,6 +33,7 @@ def seed(store: Store, panel: Panel) -> None:
 
 
 def main() -> int:
+    load_api_env()
     seed(open_store(), load_panel())
     return 0
 
