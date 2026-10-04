@@ -1,5 +1,6 @@
 "use client";
 
+import { SignalPicker } from "@/components/agent/signal-picker";
 import type { RecipeOut } from "@/lib/api";
 import { formatNum } from "@/lib/format";
 import {
@@ -19,7 +20,7 @@ import {
 
 const INPUT = "h-7 rounded-[2px] border border-line-strong bg-bg px-2 text-ink disabled:opacity-40";
 const SMALL_BTN =
-  "h-7 cursor-pointer rounded-[2px] border border-line-strong bg-transparent px-2 font-mono text-[10.5px] font-semibold text-soft hover:border-ink hover:text-ink disabled:cursor-default disabled:opacity-40";
+  "h-7 cursor-pointer whitespace-nowrap rounded-[2px] border border-line-strong bg-transparent px-2 font-mono text-[10.5px] font-semibold text-soft hover:border-ink hover:text-ink disabled:cursor-default disabled:opacity-40";
 
 type Props = {
   /** The compiled, live recipe. */
@@ -62,7 +63,10 @@ export function RecipeCard({ recipe, draft, onDraft, onRecompile, open, onOpen, 
         <div className="flex max-h-[46vh] flex-col gap-3 overflow-y-auto px-5 pt-0.5 pb-4 font-mono text-xs leading-snug">
           <div className="flex flex-col gap-1.5">
             {draft.features.map((f, i) => (
-              <div key={f.name} className="grid grid-cols-[minmax(0,1fr)_minmax(70px,1fr)_36px_58px_26px] items-center gap-2">
+              <div
+                key={f.name}
+                className="grid grid-cols-[minmax(0,1.3fr)_minmax(72px,1fr)_38px_68px_28px] items-center gap-2"
+              >
                 <span className="truncate text-ink" title={f.name}>
                   {f.name}
                 </span>
@@ -101,21 +105,7 @@ export function RecipeCard({ recipe, draft, onDraft, onRecompile, open, onOpen, 
           </div>
 
           {canAdd(draft) && (
-            <select
-              aria-label="Add a signal"
-              value=""
-              disabled={busy}
-              onChange={(e) => e.target.value && onDraft(addFeature(draft, e.target.value))}
-              className="h-8 rounded-[2px] border border-line-strong bg-bg px-2 font-mono text-xs text-soft"
-            >
-              <option value="">+ ADD A SIGNAL…</option>
-              {options.map((o) => (
-                <option key={o.name} value={o.name}>
-                  {o.name} · {o.meaning}
-                  {o.marketWide ? " (market-wide: cannot rank stocks)" : ""}
-                </option>
-              ))}
-            </select>
+            <SignalPicker options={options} disabled={busy} onPick={(name) => onDraft(addFeature(draft, name))} />
           )}
 
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-soft">
