@@ -5,6 +5,7 @@ import { useEffect, useState, type ReactNode } from "react";
 
 import { ChatColumn } from "@/components/agent/chat-column";
 import { PerformanceColumn } from "@/components/agent/performance-column";
+import type { Variant } from "@/components/agent/what-if-panel";
 import { ApiError, api, type Agent } from "@/lib/api";
 
 type State =
@@ -68,11 +69,18 @@ export function AgentFile({ id }: { id: string }) {
     );
   }
 
-  const { agent } = state;
+  return <AgentScreen agent={state.agent} />;
+}
+
+function AgentScreen({ agent }: { agent: Agent }) {
+  // The what-if lives here so the chart draws it and the chat can ask the agent about it.
+  const [variant, setVariant] = useState<Variant | null>(null);
   return (
     <FileLayout
-      chat={(className) => <ChatColumn agent={agent} className={className} />}
-      perf={(className) => <PerformanceColumn agent={agent} className={className} />}
+      chat={(className) => <ChatColumn agent={agent} className={className} whatif={variant?.recipe} />}
+      perf={(className) => (
+        <PerformanceColumn agent={agent} className={className} variant={variant} onVariant={setVariant} />
+      )}
     />
   );
 }

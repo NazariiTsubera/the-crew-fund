@@ -180,6 +180,31 @@ describe("httpTransport", () => {
     expect(calls[0].init?.body).toBe("{}");
   });
 
+  it("sends a what-if recipe with a chat question, and posts a what-if run", async () => {
+    const recipe = {
+      features: [{ name: "kyle_lambda", weight: 1, direction: "low" as const }],
+      filters: [],
+      lookback_months: 12,
+      top_n: 10,
+      rebalance: "monthly" as const,
+      sit_out_if_trailing_sharpe_below: null,
+    };
+    const kpis = { total_return: 0.1, ann_return: 0.01, ann_vol: 0.1, sharpe: 0.1, max_drawdown: -0.1, max_drawdown_month: "2020-03" };
+    const { impl, calls } = fakeFetch((url) =>
+      url.endsWith("/whatif")
+        ? Response.json({ recipe, kpis, curve: [], yearly_returns: { "2020": 0.1 }, redteam: { verdict: "pass", tests: [] } })
+        : Response.json({ ts: "t", role: "agent", text: "x", evidence: [], source: "gemini" }),
+    );
+    const client = createClient(httpTransport("http://api.test", impl));
+
+    await client.chat("fence", "Better?", undefined, recipe);
+    const run = await client.whatif("fence", recipe);
+
+    expect(JSON.parse(String(calls[0].init?.body))).toEqual({ message: "Better?", whatif: recipe });
+    expect(calls[1].url).toBe("http://api.test/agents/fence/whatif");
+    expect(run.redteam.verdict).toBe("pass");
+  });
+
   it("streams POST /agents as parsed creation events", async () => {
     const body = 'event: compiling\ndata: {}\n\nevent: error\ndata: {"message": "no Gemini key"}\n\n';
     const { impl, calls } = fakeFetch(() => new Response(body, { headers: { "Content-Type": "text/event-stream" } }));

@@ -16,15 +16,17 @@ type Props = {
   holdoutCutoff: string | null;
   selected: string | null;
   onSelect: (month: string | null) => void;
+  /** A what-if run of an edited recipe, drawn dashed on the same axes. */
+  variant?: CurvePoint[] | null;
 };
 
 const pctOf = (v: number, of: number) => `${(v / of) * 100}%`;
 
 /** Equity vs the S&P 500 on a log axis; clicking a month filters the book and log below. */
-export function EquityChart({ curve, benchmark, tone, holdoutCutoff, selected, onSelect }: Props) {
+export function EquityChart({ curve, benchmark, tone, holdoutCutoff, selected, onSelect, variant = null }: Props) {
   const chart = useMemo(
-    () => equityChart(curve, benchmark, { width: W, height: H, holdoutCutoff, holdoutDays: 30 }),
-    [curve, benchmark, holdoutCutoff],
+    () => equityChart(curve, benchmark, { width: W, height: H, holdoutCutoff, holdoutDays: 30, variant }),
+    [curve, benchmark, holdoutCutoff, variant],
   );
   const [hover, setHover] = useState<ChartMonth | null>(null);
   const sel = selected ? (chart.months.find((m) => m.month === selected) ?? null) : null;
@@ -59,6 +61,12 @@ export function EquityChart({ curve, benchmark, tone, holdoutCutoff, selected, o
             <span className="h-0.5 w-4" style={{ background: tone }} />
             AGENT
           </span>
+          {variant && (
+            <span className="flex items-center gap-1.5 text-ink">
+              <span className="w-4 border-t-2 border-dashed border-accent" />
+              WHAT-IF
+            </span>
+          )}
           <span className="flex items-center gap-1.5">
             <span className="w-4 border-t-2 border-dashed border-spx" />
             S&amp;P 500
@@ -120,6 +128,16 @@ export function EquityChart({ curve, benchmark, tone, holdoutCutoff, selected, o
               vectorEffect="non-scaling-stroke"
             />
             <path d={chart.mainPath} fill="none" stroke={tone} strokeWidth={2} vectorEffect="non-scaling-stroke" />
+            {chart.variantPath && (
+              <path
+                d={chart.variantPath}
+                fill="none"
+                stroke="var(--accent)"
+                strokeWidth={2}
+                strokeDasharray="6 3"
+                vectorEffect="non-scaling-stroke"
+              />
+            )}
           </svg>
           {sel && (
             <>

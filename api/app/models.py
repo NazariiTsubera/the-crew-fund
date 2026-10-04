@@ -21,11 +21,6 @@ class CreateAgentRequest(BaseModel):
     prompt: str = Field(min_length=1, max_length=2000)
 
 
-class ChatRequest(BaseModel):
-    # Omitted: the agent introduces itself (the creation flow's first message).
-    message: str | None = Field(default=None, min_length=1, max_length=2000)
-
-
 class StrategyChatTurn(BaseModel):
     role: Literal["user", "assistant"]
     text: str = Field(min_length=1, max_length=2000)
@@ -50,6 +45,17 @@ class StrategyChatRequest(BaseModel):
     message: str = Field(min_length=1, max_length=2000)
     history: list[StrategyChatTurn] = Field(default_factory=list, max_length=30)
     strategy: StrategyRequest | None = None
+
+
+class ChatRequest(BaseModel):
+    # Omitted: the agent introduces itself (the creation flow's first message).
+    message: str | None = Field(default=None, min_length=1, max_length=2000)
+    # A what-if recipe the judge is testing; the server re-runs it rather than trust numbers.
+    whatif: StrategyRequest | None = None
+
+
+class WhatIfRequest(BaseModel):
+    recipe: StrategyRequest
 
 
 class SpeechRequest(BaseModel):

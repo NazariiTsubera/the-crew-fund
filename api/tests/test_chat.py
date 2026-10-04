@@ -258,3 +258,22 @@ def test_a_fallback_also_offers_follow_ups(store):
 
     assert 1 <= len(out["follow_ups"]) <= 3
     assert "How are you doing?" not in out["follow_ups"]
+
+
+def test_a_what_if_is_given_to_gemini_as_facts_to_compare(store):
+    llm = FakeLLM({"text": "Better.", "cited": ["F1"], "follow_ups": []})
+    extra = [
+        "What-if (unsaved variant the user is testing, not trading): ranks on x",
+        "What-if Sharpe 0.90 vs live 0.62",
+    ]
+
+    out = answer(store, AGENT, "Is this version better?", llm, whatif=extra)
+
+    system, prompt, _ = llm.calls[0]
+    assert "What-if Sharpe 0.90 vs live 0.62" in prompt
+    assert "what-if" in system.lower()
+    assert out["evidence"] == [extra[0]]
+    # The what-if is a sketch, not part of the agent's record: it is not stored as a fact row.
+    assert all(
+        "What-if" not in c.get("text", "") or c["role"] != "user" for c in store.chats("lookout")
+    )

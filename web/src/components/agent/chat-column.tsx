@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from 
 
 import { RecipeCard } from "@/components/agent/recipe-card";
 import { Glyph, agentColorVar } from "@/components/glyph";
-import { api, type Agent, type ChatMessage } from "@/lib/api";
+import { api, type Agent, type ChatMessage, type RecipeOut } from "@/lib/api";
 
 export type ChatLine = ChatMessage | { role: "system"; ts: string; text: string };
 
@@ -16,6 +16,12 @@ function errorText(error: unknown): string {
 export function localStamp(): string {
   return new Date().toISOString().slice(0, 16).replace("T", " ");
 }
+
+const WHATIF_QUESTIONS = [
+  "Is my what-if better than you?",
+  "What changed for the what-if in 2022?",
+  "Should I trust the what-if?",
+];
 
 function suggestionsFor(agent: Agent, lines: ChatLine[]): string[] {
   // The agent's latest answer suggests what to ask next; before that, a standard set.
@@ -98,11 +104,14 @@ export function ChatColumn({
   agent,
   className = "",
   initialLines,
+  whatif,
 }: {
   agent: Agent;
   className?: string;
   /** A transcript the caller already holds (the recruit flow's); skips reading the history. */
   initialLines?: ChatLine[];
+  /** A what-if recipe the judge ran; questions go with it so the agent can compare. */
+  whatif?: RecipeOut;
 }) {
   const [lines, setLines] = useState<ChatLine[]>(initialLines ?? []);
   const [loading, setLoading] = useState(!initialLines);
@@ -148,7 +157,7 @@ export function ChatColumn({
     setBusy(true);
     setLines((ls) => [...ls, { role: "user", ts: localStamp(), text: message }]);
     try {
-      const reply = await api.chat(agent.id, message);
+      const reply = await api.chat(agent.id, message, undefined, whatif);
       setLines((ls) => [...ls, reply]);
     } catch (error) {
       setLines((ls) => [
@@ -210,9 +219,14 @@ export function ChatColumn({
         )}
       </div>
 
+      {whatif && (
+        <div className="mx-5 mb-2 border border-dashed border-accent px-3 py-2 font-mono text-[10.5px] leading-snug text-soft">
+          WHAT-IF ACTIVE · {agent.name} will compare it with its live recipe.
+        </div>
+      )}
       {!loading && !busy && (
         <div className="flex flex-none gap-1.5 overflow-x-auto px-5 pb-2.5">
-          {suggestionsFor(agent, lines).map((label) => (
+          {(whatif ? WHATIF_QUESTIONS : suggestionsFor(agent, lines)).map((label) => (
             <button
               key={label}
               type="button"

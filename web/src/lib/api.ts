@@ -169,6 +169,16 @@ export type Kpis = z.infer<typeof KpisSchema>;
 export type Verdict = z.infer<typeof VerdictSchema>;
 export type RedTeamTest = z.infer<typeof RedTeamTestSchema>;
 export type RedTeam = z.infer<typeof RedTeamSchema>;
+
+// POST /agents/{id}/whatif: an edited recipe through the same backtest and red team, unsaved.
+export const WhatIfSchema = z.object({
+  recipe: RecipeOutSchema,
+  kpis: KpisSchema,
+  curve: z.array(CurvePointSchema),
+  yearly_returns: z.record(z.string(), z.number()),
+  redteam: RedTeamSchema,
+});
+export type WhatIf = z.infer<typeof WhatIfSchema>;
 export type RecipeFeature = z.infer<typeof RecipeFeatureSchema>;
 export type RecipeOut = z.infer<typeof RecipeOutSchema>;
 export type Holding = z.infer<typeof HoldingSchema>;
@@ -274,10 +284,17 @@ export function createClient(transport: Transport) {
       z.array(LogEntrySchema).parse(await transport.get(`/log${query(opts)}`, signal)),
     capital: async (opts: { from?: string } = {}, signal?: AbortSignal) =>
       CapitalSchema.parse(await transport.get(`/capital${query(opts)}`, signal)),
-    chat: async (id: string, message?: string, signal?: AbortSignal) =>
+    /** `whatif`: an unsaved variant the judge is testing; the server re-runs it for the facts. */
+    chat: async (id: string, message?: string, signal?: AbortSignal, whatif?: RecipeOut) =>
       AgentReplySchema.parse(
-        await transport.post(`/agents/${enc(id)}/chat`, message === undefined ? {} : { message }, signal),
+        await transport.post(
+          `/agents/${enc(id)}/chat`,
+          { ...(message === undefined ? {} : { message }), ...(whatif ? { whatif } : {}) },
+          signal,
+        ),
       ),
+    whatif: async (id: string, recipe: RecipeOut, signal?: AbortSignal) =>
+      WhatIfSchema.parse(await transport.post(`/agents/${enc(id)}/whatif`, { recipe }, signal)),
     chatHistory: async (id: string, signal?: AbortSignal) =>
       z.array(ChatMessageSchema).parse(await transport.get(`/agents/${enc(id)}/chat`, signal)),
     /** POST /agents: yields each creation stage as the server reports it. */

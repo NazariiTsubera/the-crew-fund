@@ -9,6 +9,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import Response, StreamingResponse
+from pydantic import ValidationError
 
 from app.models import (
     Agent,
@@ -21,10 +22,11 @@ from app.models import (
     LogEntry,
     SpeechRequest,
     StrategyChatRequest,
+    WhatIfRequest,
 )
 from app.services import agents, vault
 from crew.gemini import LLM, default_llm
-from crew.recipe import Recipe
+from crew.recipe import Recipe, explain
 from crew.speech import SpeechError, synthesize
 from crew.strategy_chat import StrategyChatResponse, build_strategy_chat
 
@@ -82,8 +84,26 @@ def chat(
     agent_id: str, req: ChatRequest, llm: Annotated[Callable[[], LLM], Depends(get_llm)]
 ) -> dict:
     """{text, evidence, source, ts}: the agent's answer and the stored facts it cites."""
+    variant = _recipe(req.whatif.model_dump()) if req.whatif else None
     try:
-        return agents.chat(agent_id, req.message, llm)
+        return agents.chat(agent_id, req.message, llm, variant)
+    except agents.AgentNotFound as exc:
+        raise HTTPException(404, f"no agent {exc}") from exc
+
+
+def _recipe(raw: dict) -> Recipe:
+    try:
+        return Recipe.model_validate(raw)
+    except ValidationError as exc:
+        raise HTTPException(422, f"invalid recipe: {explain(exc)}") from exc
+
+
+@router.post("/agents/{agent_id}/whatif")
+def whatif(agent_id: str, req: WhatIfRequest) -> dict:
+    """{recipe, kpis, curve, yearly_returns, redteam}: an edited recipe through the same
+    backtest and red team as every agent. Nothing is stored."""
+    try:
+        return agents.whatif(agent_id, _recipe(req.recipe.model_dump()))
     except agents.AgentNotFound as exc:
         raise HTTPException(404, f"no agent {exc}") from exc
 

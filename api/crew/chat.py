@@ -71,7 +71,9 @@ def _topic(q: str) -> set[str]:
     return topics
 
 
-def facts_for(store: Store, agent: dict, question: str | None) -> list[dict]:
+def facts_for(
+    store: Store, agent: dict, question: str | None, whatif: list[str] | None = None
+) -> list[dict]:
     q = question or ""
     k = agent.get("kpis") or {}
     texts: list[str] = []
@@ -141,6 +143,8 @@ def facts_for(store: Store, agent: dict, question: str | None) -> list[dict]:
     texts += [
         f"{e['ts']} · {e['type']} · {e['text']}" for e in (wanted or rows[:5])[:MAX_LOG_FACTS]
     ]
+    # A what-if the judge is testing comes first: it is what the question is about.
+    texts = [*(whatif or []), *texts]
     return [{"id": f"F{i + 1}", "text": t} for i, t in enumerate(texts)]
 
 
@@ -228,9 +232,15 @@ def _follow_ups(raw) -> list[str]:
     return [q for q in out if q][:MAX_FOLLOW_UPS]
 
 
-def answer(store: Store, agent: dict, question: str | None, llm: LLM | None) -> dict:
+def answer(
+    store: Store,
+    agent: dict,
+    question: str | None,
+    llm: LLM | None,
+    whatif: list[str] | None = None,
+) -> dict:
     """Answer `question` (None: the agent introduces itself) and store the exchange."""
-    facts = facts_for(store, agent, question)
+    facts = facts_for(store, agent, question, whatif)
     by_id = {f["id"]: f["text"] for f in facts}
     system = (
         f"You are {agent['name']}, a trading agent in a heist-crew hedge fund, talking to a "
@@ -248,6 +258,13 @@ def answer(store: Store, agent: dict, question: str | None, llm: LLM | None) -> 
         f"In `follow_ups` suggest {MAX_FOLLOW_UPS} short questions (under 60 characters) the "
         "judge could ask you next that your facts can answer."
     )
+    if whatif:
+        system += (
+            "\nThe judge is testing a what-if: an unsaved variant of your recipe (the facts that "
+            "start with 'What-if'). Compare it with your live record: what changed, whether it "
+            "did better or worse and when, and what its Red Team result says about trusting it. "
+            "A hand-tuned curve that fails the shuffle or lookahead test is likely overfit; say so."
+        )
     prompt = f"Question: {question or INTRO}\n\nFacts:\n" + "\n".join(
         f"{f['id']}: {f['text']}" for f in facts
     )

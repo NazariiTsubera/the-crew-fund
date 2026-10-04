@@ -15,7 +15,9 @@ from crew import chat as crew_chat
 from crew.compiler import CompileError, compile_strategy
 from crew.gemini import LLM, LLMError
 from crew.pipeline import evaluate, publish, rebalance
+from crew.recipe import Recipe
 from crew.seeds import SEEDS
+from crew.whatif import run_whatif, whatif_facts
 
 # The design's shapes and colours for agents beyond the five seeds, in turn.
 NEW_LOOKS = [("box", "sky"), ("half", "orange"), ("plus", "lime")]
@@ -158,7 +160,19 @@ class AgentNotFound(LookupError):
     pass
 
 
-def chat(agent_id: str, message: str | None, llm_factory: Callable[[], LLM]) -> dict:
+def whatif(agent_id: str, recipe: Recipe) -> dict:
+    """The agent's recipe as edited by a judge, backtested and red-teamed, never stored."""
+    if crew_repository.store().get_agent(agent_id) is None:
+        raise AgentNotFound(agent_id)
+    return run_whatif(recipe, crew_repository.panel())
+
+
+def chat(
+    agent_id: str,
+    message: str | None,
+    llm_factory: Callable[[], LLM],
+    variant: Recipe | None = None,
+) -> dict:
     store = crew_repository.store()
     agent = store.get_agent(agent_id)
     if agent is None:
@@ -167,7 +181,9 @@ def chat(agent_id: str, message: str | None, llm_factory: Callable[[], LLM]) -> 
         llm = llm_factory()
     except LLMError:
         llm = None  # no key: the agent still answers, from its facts alone
-    return crew_chat.answer(store, agent, message, llm)
+    # Re-run the variant here (cached) rather than trust numbers sent by the browser.
+    facts = whatif_facts(agent, whatif(agent_id, variant)) if variant else None
+    return crew_chat.answer(store, agent, message, llm, whatif=facts)
 
 
 def chat_history(agent_id: str) -> list[dict]:

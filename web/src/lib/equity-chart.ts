@@ -30,6 +30,8 @@ export type EquityChart = {
   y: (value: number) => number;
   mainPath: string;
   benchPath: string;
+  /** A what-if variant of the agent, on the same axes; "" when there is none. */
+  variantPath: string;
   yTicks: { value: number; y: number }[];
   years: { label: string; x: number }[];
   months: ChartMonth[];
@@ -43,6 +45,7 @@ type Options = {
   /** The first sealed date; the axis runs `holdoutDays` past it so the window shows. */
   holdoutCutoff?: string | null;
   holdoutDays?: number;
+  variant?: CurvePoint[] | null;
 };
 
 function sorted(series: CurvePoint[]): CurvePoint[] {
@@ -67,7 +70,8 @@ export function equityChart(mainIn: CurvePoint[], benchIn: CurvePoint[], opts: O
   const { width, height } = opts;
   const main = sorted(mainIn);
   const bench = sorted(benchIn);
-  const all = [...main, ...bench];
+  const variant = sorted(opts.variant ?? []);
+  const all = [...main, ...bench, ...variant];
 
   const days = all.map((p) => day(p.date));
   let d0 = days.length ? Math.min(...days) : 0;
@@ -118,6 +122,7 @@ export function equityChart(mainIn: CurvePoint[], benchIn: CurvePoint[], opts: O
     y,
     mainPath: path(main),
     benchPath: path(bench),
+    variantPath: path(variant),
     yTicks,
     years,
     months,

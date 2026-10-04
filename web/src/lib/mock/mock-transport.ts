@@ -182,6 +182,10 @@ export function mockTransport({ stageDelay = () => 1000 + Math.random() * 1000 }
           (e) => e.agent_id === agent.id && (!month || e.ts.startsWith(month)) && (!type || e.type === type),
         );
       }
+      if (method === "POST" && parts[2] === "whatif") {
+        // Mock mode cannot backtest; it echoes the agent's own record for the edited recipe.
+        return { recipe: body.recipe, kpis: agent.kpis, curve: agent.curve, yearly_returns: {}, redteam: agent.redteam };
+      }
       if (parts[2] === "chat") {
         const history = chats.get(agent.id) ?? [];
         if (method === "GET") return history;

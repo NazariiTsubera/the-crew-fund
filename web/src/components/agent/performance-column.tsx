@@ -8,6 +8,7 @@ import { KpiTiles } from "@/components/agent/kpi-tiles";
 import { LogFeed } from "@/components/agent/log-feed";
 import { RedTeamCard } from "@/components/agent/red-team-card";
 import { statusDotStyle } from "@/components/agent/tags";
+import { WhatIfPanel, type Variant } from "@/components/agent/what-if-panel";
 import { isFired, statusLabel } from "@/lib/agent-status";
 import { VerdictBadge } from "@/components/agent/verdict-badge";
 import { Glyph, agentColorVar } from "@/components/glyph";
@@ -52,7 +53,18 @@ function useHoldoutCutoff(): string | null {
   return cutoff;
 }
 
-export function PerformanceColumn({ agent, className = "" }: { agent: Agent; className?: string }) {
+export function PerformanceColumn({
+  agent,
+  className = "",
+  variant = null,
+  onVariant,
+}: {
+  agent: Agent;
+  className?: string;
+  /** A what-if the judge is running; the agent file owns it so the chat can see it too. */
+  variant?: Variant | null;
+  onVariant?: (v: Variant | null) => void;
+}) {
   const [selected, setSelected] = useState<string | null>(null);
   const log = useAgentLog(agent.id);
   const holdoutCutoff = useHoldoutCutoff();
@@ -120,7 +132,9 @@ export function PerformanceColumn({ agent, className = "" }: { agent: Agent; cla
           holdoutCutoff={holdoutCutoff}
           selected={selected}
           onSelect={setSelected}
+          variant={variant?.result.curve}
         />
+        {onVariant && <WhatIfPanel agent={agent} variant={variant} onVariant={onVariant} />}
         <RedTeamCard redteam={agent.redteam} />
         <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,280px),1fr))] gap-5">
           <BookTable

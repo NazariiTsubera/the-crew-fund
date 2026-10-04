@@ -110,3 +110,23 @@ describe("benchmarkReturnAt", () => {
     expect(benchmarkReturnAt([], "2020-03-31")).toBeNull();
   });
 });
+
+describe("a what-if line", () => {
+  it("is drawn on the same axes and widens them to fit", () => {
+    const main = [
+      { date: "2020-01-02", value: 1 },
+      { date: "2021-01-04", value: 1.5 },
+    ];
+    const variant = [
+      { date: "2020-01-02", value: 1 },
+      { date: "2021-01-04", value: 3 },
+    ];
+    const without = equityChart(main, [], { width: 100, height: 100 });
+    const withIt = equityChart(main, [], { width: 100, height: 100, variant });
+
+    expect(without.variantPath).toBe("");
+    expect(withIt.variantPath.startsWith("M")).toBe(true);
+    expect(withIt.y(3)).toBeGreaterThanOrEqual(0);
+    expect(withIt.y(1.5)).toBeGreaterThan(without.y(1.5));
+  });
+});
