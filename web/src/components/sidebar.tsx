@@ -3,6 +3,7 @@
 import Link from "next/link";
 
 import { Clock } from "@/components/clock";
+import { CrewMark } from "@/components/crew-mark";
 import { Glyph } from "@/components/glyph";
 import { isCurrent, StatusDot, type ShellModel } from "@/components/shell-parts";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -23,9 +24,7 @@ export function Sidebar({ model }: { model: ShellModel }) {
       className="sticky top-0 hidden h-screen w-[236px] flex-none flex-col overflow-y-auto border-r border-line bg-side wide:flex"
     >
       <Link href="/" className="flex items-center gap-3 border-b border-line px-[18px] py-5 text-ink no-underline">
-        <span className="grid size-[34px] flex-none place-items-center bg-accent font-mono text-xs font-semibold tracking-[0.04em] text-on-accent">
-          TC
-        </span>
+        <CrewMark size={34} className="flex-none" />
         <span className="flex flex-col gap-[5px]">
           <span className="font-mono text-[15px] leading-none font-semibold tracking-[0.22em]">THE CREW</span>
           <span className="text-[11px] leading-none text-muted">AI hedge fund · War Room</span>

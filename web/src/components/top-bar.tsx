@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import { Clock } from "@/components/clock";
+import { CrewMark } from "@/components/crew-mark";
 import { Glyph } from "@/components/glyph";
 import { isCurrent, StatusDot, type ShellModel } from "@/components/shell-parts";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -51,8 +52,9 @@ export function TopBar({ model }: { model: ShellModel }) {
           </button>
           <Link
             href="/"
-            className="font-mono text-sm leading-none font-semibold tracking-[0.22em] whitespace-nowrap text-ink no-underline"
+            className="flex items-center gap-2 font-mono text-sm leading-none font-semibold tracking-[0.22em] whitespace-nowrap text-ink no-underline"
           >
+            <CrewMark size={22} />
             THE CREW
           </Link>
           {here && <span className="hidden truncate text-xs leading-none text-muted min-[440px]:inline">/ {here}</span>}
