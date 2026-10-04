@@ -216,6 +216,7 @@ export type CreateEvent = z.infer<typeof CreateEventSchema>;
 export interface Transport {
   get(path: string, signal?: AbortSignal): Promise<unknown>;
   post(path: string, body: unknown, signal?: AbortSignal): Promise<unknown>;
+  delete(path: string, signal?: AbortSignal): Promise<unknown>;
   postAudio(path: string, body: unknown, signal?: AbortSignal): Promise<Blob>;
   stream(path: string, body: unknown, signal?: AbortSignal): AsyncIterable<SseEvent>;
 }
@@ -253,6 +254,11 @@ export function httpTransport(base: string, fetchImpl: typeof fetch = fetch): Tr
   return {
     async get(path, signal) {
       const res = await fetchImpl(url(path), { signal, headers: { Accept: "application/json" } });
+      if (!res.ok) throw await failure(res);
+      return res.json();
+    },
+    async delete(path, signal) {
+      const res = await fetchImpl(url(path), { method: "DELETE", signal });
       if (!res.ok) throw await failure(res);
       return res.json();
     },
@@ -313,6 +319,13 @@ export function createClient(transport: Transport) {
           signal,
         ),
       ),
+    /** The judge is the Mastermind: a weight per agent (normalized by the fund; 0 benches one). */
+    setCapital: async (allocations: Record<string, number>, signal?: AbortSignal) =>
+      CapitalSchema.parse(await transport.post("/capital", { allocations }, signal)),
+    /** The judge fires an agent: it is deleted and the fund re-splits. */
+    fireAgent: async (id: string, signal?: AbortSignal) => {
+      await transport.delete(`/agents/${enc(id)}`, signal);
+    },
     /** POST /agents/{id}/recompile: the full pipeline again under the same identity. */
     async *recompile(id: string, recipe: RecipeOut, signal?: AbortSignal): AsyncGenerator<CreateEvent> {
       for await (const raw of transport.stream(`/agents/${enc(id)}/recompile`, { recipe }, signal)) {
@@ -393,6 +406,7 @@ function resolveTransport(): Promise<Transport> {
 const lazyTransport: Transport = {
   get: async (path, signal) => (await resolveTransport()).get(path, signal),
   post: async (path, body, signal) => (await resolveTransport()).post(path, body, signal),
+  delete: async (path, signal) => (await resolveTransport()).delete(path, signal),
   postAudio: async (path, body, signal) =>
     (await resolveTransport()).postAudio(path, body, signal),
   async *stream(path, body, signal) {

@@ -141,14 +141,14 @@ describe("recruitReducer", () => {
     expect(s.phase).toBe("introducing");
     expect(s.stage).toBeNull();
     expect(s.stored).toEqual(stored);
-    expect(s.lines.at(-1)?.text).toBe("RED TEAM VERDICT: PROBATION · THE SKEW HUNTER JOINS THE CREW");
+    expect(s.lines.at(-1)?.text).toBe("RED TEAM CAUTION · THE SKEW HUNTER JOINS THE CREW");
     expect(isRecruiting(s)).toBe(true);
   });
 
-  it("says a killed agent will not trade", () => {
+  it("lets an agent that failed the Red Team join anyway, warned", () => {
     const killed = { ...stored, verdict: "killed", redteam: { verdict: "killed", tests: [] } } as StoredAgent;
     const s = run([...fullStream.slice(0, 4), ev({ event: "done", data: { agent: killed } })]);
-    expect(s.lines.at(-1)?.text).toBe("RED TEAM VERDICT: KILLED · THE SKEW HUNTER WILL NOT TRADE");
+    expect(s.lines.at(-1)?.text).toBe("RED TEAM FAILED · THE SKEW HUNTER JOINS THE CREW");
   });
 
   it("ends ready once the agent introduces itself, evidence included", () => {

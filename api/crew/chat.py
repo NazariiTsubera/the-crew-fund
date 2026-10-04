@@ -128,6 +128,8 @@ def facts_for(
         f"{y} return: {pct(r)}" for y, r in sorted((agent.get("yearly_returns") or {}).items())
     ]
 
+    texts += _versus_market(store, agent["id"], _years(q))
+
     book = store.holdings(agent["id"])
     if book:
         last = max(h["month"] for h in book)
@@ -154,6 +156,38 @@ def facts_for(
     # A what-if the judge is testing comes first: it is what the question is about.
     texts = [*(whatif or []), *texts]
     return [{"id": f"F{i + 1}", "text": t} for i, t in enumerate(texts)]
+
+
+def _versus_market(store: Store, agent_id: str, years: list[str]) -> list[str]:
+    """The agent's months against the S&P 500 over the same holding months: a line per year,
+    and a line per month for any year the question names, so "what happened in 2022" has the
+    market beside the agent's own record."""
+    run = store.latest_run(agent_id) or {}
+    monthly = run.get("monthly") or []
+    if not monthly:
+        return []
+    firsts: dict[str, float] = {}
+    for p in sorted(store.curve("spx"), key=lambda p: p["date"]):
+        firsts.setdefault(p["date"][:7], p["value"])
+    months = sorted(firsts)
+    spx = {a: firsts[b] / firsts[a] - 1 for a, b in zip(months, months[1:], strict=False)}
+    out = []
+    by_year: dict[str, list[tuple[float, float]]] = {}
+    for row in monthly:
+        m = row["month"]
+        if m in spx:
+            by_year.setdefault(m[:4], []).append((row["ret"], spx[m]))
+        if m[:4] in years and m in spx:
+            cash = "" if row.get("invested", True) else " (in cash)"
+            out.append(f"{m}: me {pct(row['ret'])}{cash} vs S&P 500 {pct(spx[m])}")
+    for y in sorted(by_year):
+        me = 1.0
+        mkt = 1.0
+        for r, x in by_year[y]:
+            me *= 1 + r
+            mkt *= 1 + x
+        out.append(f"{y} vs market: me {pct(me - 1)}, S&P 500 {pct(mkt - 1)}")
+    return out
 
 
 def _find(facts: list[dict], prefix: str) -> list[str]:

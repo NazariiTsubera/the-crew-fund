@@ -1,17 +1,8 @@
-"""The Mastermind: splits the fund's capital across the crew and writes the fund's book.
+"""The fund: the judge splits capital across the crew and this writes the fund's book.
 
-Each month every surviving agent (red-team verdict not `killed`, not fired) gets capital by its
-trailing 6-month Sharpe: the positive part of the Sharpe, then a 10% floor and a 50% cap
-fitted by water-filling. Until an agent has three settled months, the split is equal. "Settled"
-means the month's holding period had closed by the decision date, so the Mastermind never
-reads a return it could not have known.
-
-An agent is fired, capital 0 from then on with the month recorded, when the trailing 24-month
-Sharpe of its picks' returns in excess of an equal-weight book of its own eligible names stays
-below -1.5 for six months in a row. The picks' paper returns, because firing judges the signal,
-not months the agent chose to sit in cash; excess over its own pool, because against the S&P
-500 a book of equal-weight mid caps is judged on size, and every long-only book has a negative
-Sharpe in a bear market; 24 months, because one bad year should trim an agent, not fire it.
+The judge is the Mastermind. Each agent's share of capital is the allocation the judge set
+(equal by default), normalized over the agents holding a book that month. Nothing is fired or
+benched automatically: a Red Team verdict is advice, and an allocation of 0 benches an agent.
 
 The fund's book is the invested agents' books weighted by capital. A sitting-out agent's share
 flows to the others, because the organizers' checker demands weights summing to 1.0; "invested"
@@ -26,17 +17,13 @@ from datetime import date
 
 import numpy as np
 
-from crew.backtest import fmt, kpis_from_curve
+from crew.backtest import kpis_from_curve
 from crew.features import PLANTED_TICKER
 
 FLOOR, CAP = 0.10, 0.50
 POSITION_CAP = 0.05
 TRAILING_MONTHS = 6
 MIN_HISTORY = 3
-# A 12-month Sharpe of a concentrated book against its pool has a standard error near 1, so a
-# 12-month window at -1.0 fired zero-skill agents on noise; 24 months at -1.5 held for 6 months
-# trips on a lag that is real (tests/test_mastermind.py).
-FIRE_WINDOW, FIRE_SHARPE, FIRE_MONTHS = 24, -1.5, 6
 MEMO_STEP = 0.03  # log a capital change of at least 3 points
 CLOSE = "16:00"
 
@@ -133,8 +120,6 @@ def allocate(agents: list[dict], universe: set[str], benchmark: list[dict] | Non
     crew = [a for a in agents if a["run"]["monthly"]]
     months = sorted({r["month"] for a in crew for r in a["run"]["monthly"]})
     monthly = {a["id"]: {r["month"]: r for r in a["run"]["monthly"]} for a in crew}
-    spx = benchmark_monthly(benchmark or [], months)
-    names = {a["id"]: a["name"] for a in crew}
     books: dict[tuple[str, str], list[dict]] = {}
     for a in crew:
         for h in a["run"]["holdings"]:
@@ -142,70 +127,28 @@ def allocate(agents: list[dict], universe: set[str], benchmark: list[dict] | Non
 
     shares, trailing, invested, holdings, log = {}, {}, {}, [], []
     fired: dict[str, str] = {}
-    strikes = dict.fromkeys(monthly, 0)
-    previous: dict[str, float] = {}
 
+    # The judge is the Mastermind: each agent's share is its allocation weight (equal by
+    # default), normalized over the agents with a book that month. No one is fired or benched
+    # automatically; a Red Team verdict is advice, and an allocation of 0 benches an agent.
+    weight = {a["id"]: max(float(a.get("allocation", 1.0)), 0.0) for a in crew}
     for k, month in enumerate(months):
-        # Settled by this decision: months up to k-2 (month k-1 closes the day after it).
         settled = months[: max(0, k - 1)]
         sharpe: dict[str, float | None] = {}
         for a in crew:
             rets = [monthly[a["id"]][m]["ret"] for m in settled if m in monthly[a["id"]]]
             recent = rets[-TRAILING_MONTHS:]
             sharpe[a["id"]] = _sharpe(recent) if len(recent) >= MIN_HISTORY else None
-            # Red-team kills never held capital; there is nothing to fire.
-            if a["id"] in fired or a["verdict"] == "killed" or len(rets) < FIRE_WINDOW:
-                continue
-            window = [m for m in settled if m in monthly[a["id"]]][-FIRE_WINDOW:]
-            excess = [_excess(monthly[a["id"]][m], spx.get(m, 0.0)) for m in window]
-            long_run = _sharpe(excess)
-            strikes[a["id"]] = strikes[a["id"]] + 1 if long_run < FIRE_SHARPE else 0
-            if strikes[a["id"]] >= FIRE_MONTHS:
-                fired[a["id"]] = month
-                log.append(
-                    {
-                        "ts": f"{month}-01 {CLOSE}",
-                        "type": "mastermind",
-                        "agent_id": a["id"],
-                        "text": f"Fired {a['name']} · picks' {FIRE_WINDOW}-month Sharpe "
-                        "vs its eligible names "
-                        f"{fmt(long_run, 1)} for {FIRE_MONTHS} months, capital → 0%",
-                    }
-                )
         trailing[month] = sharpe
 
-        alive = [
-            a["id"]
-            for a in crew
-            if a["verdict"] != "killed" and a["id"] not in fired and month in monthly[a["id"]]
-        ]
-        if any(sharpe[i] is None for i in alive):
-            raw = dict.fromkeys(alive, 1.0)
-        else:
-            raw = {i: max(sharpe[i], 0.0) for i in alive}
-        split = bounded_split(raw)
+        present = [a["id"] for a in crew if month in monthly[a["id"]]]
+        total = sum(weight[i] for i in present)
+        split = {i: weight[i] / total for i in present} if total > 0 else {}
         shares[month] = {a["id"]: split.get(a["id"], 0.0) for a in crew}
 
-        trading = {i: s for i, s in split.items() if monthly[i][month]["invested"]}
+        trading = {i: s for i, s in split.items() if s > 0 and monthly[i][month]["invested"]}
         invested[month] = sum(trading.values())
         holdings += _fund_book(month, trading, books, universe)
-
-        for i, s in shares[month].items():
-            before = previous.get(i)
-            if before is None or i in fired and fired[i] == month:
-                continue
-            if abs(s - before) >= MEMO_STEP:
-                verb = "Raised" if s > before else "Cut"
-                why = f" · trailing Sharpe {fmt(sharpe[i], 1)}" if sharpe[i] is not None else ""
-                log.append(
-                    {
-                        "ts": f"{month}-01 {CLOSE}",
-                        "type": "mastermind",
-                        "agent_id": i,
-                        "text": f"{verb} {names[i]} {before:.0%} → {s:.0%}{why}",
-                    }
-                )
-        previous = shares[month]
 
     curve = _fund_curve(crew, months, shares, monthly)
     values = np.array([p["value"] for p in curve])

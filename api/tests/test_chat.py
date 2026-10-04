@@ -351,3 +351,33 @@ def test_the_draft_on_screen_is_what_the_agent_edits(store):
 
     prompt = llm.calls[0][1]
     assert '"top_n": 20' in prompt and "not compiled" in prompt
+
+
+def test_the_agent_knows_how_it_did_against_the_market_month_by_month(store):
+    store.put_run(
+        "lookout",
+        {
+            "monthly": [
+                {"month": "2022-01", "ret": -0.05, "invested": True},
+                {"month": "2022-02", "ret": 0.02, "invested": False},
+                {"month": "2023-01", "ret": 0.01, "invested": True},
+            ]
+        },
+    )
+    store.put_curve(
+        "spx",
+        [
+            {"date": "2022-01-03", "value": 1.0},
+            {"date": "2022-02-01", "value": 0.9},
+            {"date": "2022-03-01", "value": 0.99},
+            {"date": "2023-01-03", "value": 1.0},
+            {"date": "2023-02-01", "value": 1.05},
+        ],
+    )
+
+    texts = [f["text"] for f in facts_for(store, AGENT, "What happened in January 2022?")]
+
+    assert "2022-01: me −5.0% vs S&P 500 −10.0%" in texts
+    assert "2022-02: me +2.0% (in cash) vs S&P 500 +10.0%" in texts
+    assert not any(t.startswith("2023-01: me") for t in texts)  # only the year asked about
+    assert any(t.startswith("2022 vs market: me") for t in texts)

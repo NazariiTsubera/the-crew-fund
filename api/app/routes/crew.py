@@ -16,6 +16,7 @@ from app.models import (
     Agent,
     AgentSummary,
     Capital,
+    CapitalRequest,
     ChatRequest,
     CreateAgentFromStrategyRequest,
     CreateAgentRequest,
@@ -211,6 +212,26 @@ def agent_log(
 def fund_log(limit: Annotated[int, Query(ge=1, le=500)] = 100, type: str | None = None):  # noqa: A002
     """Fund-wide log, newest first: the Live floor's replay tape."""
     return vault.fund_log(limit, type)
+
+
+@router.post("/capital", response_model=Capital)
+def set_capital(req: CapitalRequest):
+    """The judge sets each agent's share (weights, normalized); returns the new capital history."""
+    try:
+        agents.set_allocations(req.allocations)
+    except agents.AgentNotFound as exc:
+        raise HTTPException(404, f"no agent {exc}") from exc
+    return _found(vault.capital, None)
+
+
+@router.delete("/agents/{agent_id}")
+def fire_agent(agent_id: str) -> dict:
+    """The judge fires an agent: deleted with its runs, book, log and chat; the fund re-splits."""
+    try:
+        agents.fire(agent_id)
+    except agents.AgentNotFound as exc:
+        raise HTTPException(404, f"no agent {exc}") from exc
+    return {"fired": agent_id}
 
 
 @router.get("/capital", response_model=Capital)

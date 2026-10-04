@@ -5,8 +5,8 @@ import { useEffect, useState } from "react";
 import { agentColorVar, Glyph } from "@/components/glyph";
 import { useReducedMotion } from "@/components/use-reduced-motion";
 import { KICKER } from "@/components/war-room/page-frame";
+import { SplitEditor } from "@/components/war-room/split-editor";
 import type { Load } from "@/components/war-room/use-fund-data";
-import { isFired } from "@/lib/agent-status";
 import type { AgentSummary, Capital } from "@/lib/api";
 import { clampIndex, formatChange, replayStart, shareRows, type ShareRow } from "@/lib/capital";
 import { formatMonth, formatShare } from "@/lib/format";
@@ -24,10 +24,13 @@ type Props = {
   agents: AgentSummary[];
   capital: Load<Capital>;
   latestMemo: string | null;
+  /** Reloads the fund after the judge saves a new split. */
+  onSplitSaved?: () => void;
 };
 
 /** "Who runs the money": each agent's slice of capital, month by month, from GET /capital. */
-export function CapitalPanel({ agents, capital, latestMemo }: Props) {
+export function CapitalPanel({ agents, capital, latestMemo, onSplitSaved }: Props) {
+  const [editing, setEditing] = useState(false);
   const months = capital.status === "ready" ? capital.data.months : [];
   const count = months.length;
   // null follows the latest month, so a refetch that adds a month keeps the panel current.
@@ -75,7 +78,16 @@ export function CapitalPanel({ agents, capital, latestMemo }: Props) {
   return (
     <section aria-label="Who runs the money" className="flex min-w-0 flex-col gap-2.5">
       <div className="flex items-center justify-between gap-3">
-        <div className={KICKER}>WHO RUNS THE MONEY</div>
+        <div className={KICKER}>WHO RUNS THE MONEY · YOU DO</div>
+        <div className="flex gap-1.5">
+        <button
+          type="button"
+          onClick={() => setEditing(!editing)}
+          aria-pressed={editing}
+          className="h-[26px] flex-none cursor-pointer rounded-[2px] border border-accent bg-transparent px-2.5 font-mono text-[10.5px] leading-none font-semibold tracking-[0.08em] whitespace-nowrap text-accent hover:bg-accent hover:text-on-accent"
+        >
+          {editing ? "CLOSE" : "SET SPLIT"}
+        </button>
         {history && count > 1 && (
           <button
             type="button"
@@ -86,8 +98,18 @@ export function CapitalPanel({ agents, capital, latestMemo }: Props) {
             {replaying ? "■ STOP" : `▶ REPLAY ${Math.min(REPLAY_MONTHS, count)}M`}
           </button>
         )}
+        </div>
       </div>
       <div className="flex flex-col gap-3.5 border border-line bg-panel p-4">
+        {editing && (
+          <SplitEditor
+            agents={agents}
+            onSaved={() => {
+              setEditing(false);
+              onSplitSaved?.();
+            }}
+          />
+        )}
         <div className="flex items-baseline justify-between gap-3 font-mono text-xs leading-none font-medium tracking-[0.06em]">
           <span aria-live={replaying ? "off" : "polite"}>
             {month ? formatMonth(month.month).toUpperCase() : "LATEST"}
@@ -125,8 +147,8 @@ export function CapitalPanel({ agents, capital, latestMemo }: Props) {
         <ul className="m-0 flex list-none flex-col p-0">
           {rows.map((r) => {
             const a = byId.get(r.id);
-            const out = r.share < 0.001 && (a?.status === "killed" || !a);
-            const fired = out && a !== undefined && isFired(a);
+            // A 0 share is the judge benching the agent; nothing is fired automatically.
+            const out = r.share < 0.001;
             return (
               <li
                 key={r.id}
@@ -142,7 +164,7 @@ export function CapitalPanel({ agents, capital, latestMemo }: Props) {
                   className="text-right font-mono text-[11px] leading-none font-medium whitespace-nowrap"
                   style={{ color: changeTone(r, out) }}
                 >
-                  {out ? (fired ? "FIRED" : "KILLED") : formatChange(r.change)}
+                  {out ? "BENCHED" : formatChange(r.change)}
                 </span>
               </li>
             );

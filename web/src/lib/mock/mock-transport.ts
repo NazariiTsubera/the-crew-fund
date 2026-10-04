@@ -187,6 +187,16 @@ export function mockTransport({ stageDelay = () => 1000 + Math.random() * 1000 }
       return { months: capital.months.filter((m) => !from || m.month >= from) };
     }
     if (method === "POST" && url.pathname === "/agents/strategy-chat") return strategyChat(body);
+    if (method === "POST" && url.pathname === "/capital") {
+      // Mock mode keeps the fixture history; the judge's split shows as the latest month.
+      const allocations = (body.allocations ?? {}) as Record<string, number>;
+      const total = Object.values(allocations).reduce((t, w) => t + w, 0) || 1;
+      for (const [id, w] of Object.entries(allocations)) {
+        const agent = agents.get(id);
+        if (agent) agents.set(id, { ...agent, capital_share: w / total });
+      }
+      return capital;
+    }
     if (parts[0] === "agents" && parts.length >= 2) {
       const agent = findAgent(parts[1]);
       if (method === "GET" && parts.length === 2) return agent;
@@ -229,6 +239,12 @@ export function mockTransport({ stageDelay = () => 1000 + Math.random() * 1000 }
     },
     async post(path, body) {
       return structuredClone(route("POST", path, (body ?? {}) as Json));
+    },
+    async delete(path) {
+      const id = decodeURIComponent(path.split("/").pop() ?? "");
+      findAgent(id);
+      agents.delete(id);
+      return { fired: id };
     },
     async postAudio() {
       throw new ApiError(503, "speech playback is unavailable in mock mode");

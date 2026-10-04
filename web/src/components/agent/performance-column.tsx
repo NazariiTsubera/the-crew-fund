@@ -7,6 +7,7 @@ import { EquityChart } from "@/components/agent/equity-chart";
 import { KpiTiles } from "@/components/agent/kpi-tiles";
 import { LogFeed } from "@/components/agent/log-feed";
 import { RedTeamCard } from "@/components/agent/red-team-card";
+import { FireButton } from "@/components/agent/fire-button";
 import { statusDotStyle } from "@/components/agent/tags";
 import { isFired, statusLabel } from "@/lib/agent-status";
 import { VerdictBadge } from "@/components/agent/verdict-badge";
@@ -106,6 +107,7 @@ export function PerformanceColumn({
             <span style={statusDotStyle(agent.status)} />
             {statusLabel(agent)}
           </span>
+          <FireButton id={agent.id} name={agent.name} />
           {killed && agent.stop_month && (
             <span className="text-down">
               {isFired(agent) ? "FIRED BY THE MASTERMIND" : "STOPPED"} {formatMonth(agent.stop_month).toUpperCase()}

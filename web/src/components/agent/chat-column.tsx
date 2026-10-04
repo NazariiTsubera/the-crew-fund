@@ -9,6 +9,7 @@ import { SpeakButton } from "@/components/speak-button";
 import { api, type Agent, type ChatMessage, type RecipeOut } from "@/lib/api";
 import { formatNum, formatPct } from "@/lib/format";
 import { isEdited } from "@/lib/whatif";
+import { verdictLabel } from "@/lib/agent-status";
 
 export type ChatLine = ChatMessage | { role: "system"; ts: string; text: string };
 
@@ -212,7 +213,7 @@ export function ChatColumn({
           system(`BACKTESTED · SHARPE ${formatNum(k.sharpe)} · TOTAL RETURN ${formatPct(k.total_return)} · RED TEAM ATTACKING…`);
         } else if (event.event === "done") {
           done = true;
-          system(`RECOMPILED · RED TEAM VERDICT ${event.data.agent.redteam.verdict.toUpperCase()}`);
+          system(`RECOMPILED · RED TEAM ${verdictLabel(event.data.agent.redteam.verdict)}`);
         } else if (event.event === "error") {
           system(`RECOMPILE FAILED · ${event.data.message}`);
         }

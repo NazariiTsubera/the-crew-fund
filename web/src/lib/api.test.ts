@@ -275,6 +275,20 @@ describe("httpTransport", () => {
     expect(JSON.parse(String(calls[0].init?.body))).toEqual({ recipe });
   });
 
+  it("sets the judge's capital split and fires an agent", async () => {
+    const { impl, calls } = fakeFetch((url, init) =>
+      init?.method === "DELETE" ? Response.json({ fired: "fence" }) : Response.json({ months: [] }),
+    );
+    const client = createClient(httpTransport("http://api.test", impl));
+
+    await client.setCapital({ fence: 2, lookout: 0 });
+    await client.fireAgent("fence");
+
+    expect(calls[0].url).toBe("http://api.test/capital");
+    expect(JSON.parse(String(calls[0].init?.body))).toEqual({ allocations: { fence: 2, lookout: 0 } });
+    expect(calls[1]).toMatchObject({ url: "http://api.test/agents/fence", init: { method: "DELETE" } });
+  });
+
   it("streams POST /agents as parsed creation events", async () => {
     const body = 'event: compiling\ndata: {}\n\nevent: error\ndata: {"message": "no Gemini key"}\n\n';
     const { impl, calls } = fakeFetch(() => new Response(body, { headers: { "Content-Type": "text/event-stream" } }));

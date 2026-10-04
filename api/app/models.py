@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from datetime import date
-from typing import Literal
+from typing import Annotated, Literal
 
 from pydantic import BaseModel, Field
 
@@ -54,6 +54,11 @@ class ChatRequest(BaseModel):
     whatif: StrategyRequest | None = None
     # The recipe as edited in the recipe card, not yet recompiled; the agent edits from it.
     draft: StrategyRequest | None = None
+
+
+class CapitalRequest(BaseModel):
+    # The judge's split: a non-negative weight per agent, normalized by the fund; 0 benches one.
+    allocations: dict[str, Annotated[float, Field(ge=0)]] = Field(min_length=1)
 
 
 class WhatIfRequest(BaseModel):

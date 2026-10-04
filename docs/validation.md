@@ -58,20 +58,18 @@ judge only the picks: same pool, same size, no signal. In a crash every name fal
 so the bar is the worst decile of random books, not their median. The S&P 500 stays in the
 detail line for context.
 
-Verdict: no failures pass, one probation, two or more killed. A failed lookahead test kills on
-its own, because a leaky backtest makes the other three numbers meaningless.
+Verdict: no failures pass, one probation (shown as CAUTION), two or more killed (shown as
+FAILED). The Red Team advises; it never stops an agent from trading. A failed lookahead test
+earns FAILED on its own, because a leaky backtest makes the other three numbers meaningless.
 
-## The Mastermind (`crew/mastermind.py`)
+## The Mastermind is the judge (`crew/mastermind.py`)
 
-- Capital across agents that are not killed or fired, by the positive part of each one's
-  trailing 6-month Sharpe, with a 10% floor and a 50% cap, using only months settled by the
-  decision date; equal until three such months exist.
-- Fired when the trailing 24-month Sharpe of its picks' returns in excess of an equal-weight
-  book of its own eligible names stays below −1.5 for six months. Excess over its own pool,
-  so neither a bear market nor a small-cap crash fires anyone; only picks that lag the names
-  they were chosen from. A 12-month Sharpe of a concentrated book has a standard error near 1,
-  so the earlier rule (12 months, −1.0, three months) fired zero-skill agents on noise and,
-  since firing is final, eventually fired everyone.
+- The judge sets each agent's share of capital in the War Room (SET SPLIT); every agent starts
+  equal. Shares are normalized over the agents holding a book that month, and the fund's curve
+  is a backtest of the judge's current split over the whole history.
+- Nothing is fired or benched automatically. A share of 0 benches an agent; FIRE on its page
+  deletes it. (An earlier version fired agents on a trailing Sharpe rule; a concentrated book's
+  12-month Sharpe has a standard error near 1, so it fired zero-skill agents on noise.)
 - The fund book: invested agents' books weighted by capital, universe only, every position
   capped at 5%, re-scaled to sum to 1 (the organizers' checker requires it). A sitting-out
   agent's capital flows to the others; "invested" is shown separately.

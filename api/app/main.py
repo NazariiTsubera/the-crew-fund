@@ -32,7 +32,7 @@ app.add_middleware(
     allow_origins=os.environ.get(
         "CORS_ORIGINS", "https://crewfund.vodka,http://localhost:3000"
     ).split(","),
-    allow_methods=["GET", "POST"],
+    allow_methods=["GET", "POST", "DELETE"],
     allow_headers=["Content-Type"],
 )
 app.include_router(judged.router)

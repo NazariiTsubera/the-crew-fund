@@ -167,6 +167,7 @@ IDENTITY = (
     "color",
     "prompt",
     "created_at",
+    "allocation",
 )
 
 
@@ -218,6 +219,29 @@ def _recompiled_line(before: dict, after: dict, verdict: str) -> str:
         f"Recompiled. Total return {f('total_return')}, Sharpe {f('sharpe', False)}, "
         f"max drawdown {f('max_drawdown')}. Red Team verdict {verdict.upper()}."
     )
+
+
+def set_allocations(allocations: dict[str, float]) -> None:
+    """The judge's split of capital; the fund is re-split and rewritten."""
+    with _lock:
+        store = crew_repository.store()
+        agents = {a["id"]: a for a in store.list_agents()}
+        unknown = sorted(set(allocations) - set(agents))
+        if unknown:
+            raise AgentNotFound(", ".join(unknown))
+        for agent_id, weight in allocations.items():
+            store.put_agent({**agents[agent_id], "allocation": weight})
+        rebalance(store, crew_repository.panel())
+
+
+def fire(agent_id: str) -> None:
+    """The judge fires an agent: it and everything stored under it are deleted."""
+    with _lock:
+        store = crew_repository.store()
+        if store.get_agent(agent_id) is None:
+            raise AgentNotFound(agent_id)
+        store.delete_agent(agent_id)
+        rebalance(store, crew_repository.panel())
 
 
 class AgentNotFound(LookupError):

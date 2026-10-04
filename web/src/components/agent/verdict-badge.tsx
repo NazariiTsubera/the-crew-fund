@@ -5,6 +5,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { RedTeamTestRow } from "@/components/agent/red-team-card";
 import { badgeStyle } from "@/components/agent/tags";
 import type { RedTeam } from "@/lib/api";
+import { verdictLabel } from "@/lib/agent-status";
 
 /** The Red Team verdict; clicking it opens the four tests with what each one found. */
 export function VerdictBadge({ redteam }: { redteam: RedTeam }) {
@@ -40,7 +41,7 @@ export function VerdictBadge({ redteam }: { redteam: RedTeam }) {
         onClick={() => setOpen((o) => !o)}
         className="cursor-pointer border-0 bg-transparent p-0 focus-visible:outline focus-visible:outline-offset-[3px] focus-visible:outline-ink"
       >
-        <span style={badgeStyle(redteam.verdict)}>{redteam.verdict.toUpperCase()}</span>
+        <span style={badgeStyle(redteam.verdict)}>{verdictLabel(redteam.verdict)}</span>
       </button>
       {open && (
         <div

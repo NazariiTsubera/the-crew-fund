@@ -1,4 +1,4 @@
-"""The Mastermind: capital by trailing Sharpe, caps, and a fund book that always sums to 1."""
+"""The fund: the judge splits capital across the crew; the book always sums to 1."""
 
 import pytest
 
@@ -63,39 +63,6 @@ def test_no_position_above_five_percent(plan):
     assert max(h["weight"] for h in plan.fund_holdings) <= POSITION_CAP + 1e-9
 
 
-def test_capital_shares_respect_floor_cap_and_sum_to_one(plan):
-    for month, shares in plan.shares.items():
-        live = {a: s for a, s in shares.items() if s > 0}
-        lo, hi = min(0.1, 1 / len(live)), max(0.5, 1 / len(live))
-        assert sum(shares.values()) == pytest.approx(1.0), month
-        assert all(lo - 1e-9 <= s <= hi + 1e-9 for s in live.values()), (month, shares)
-
-
-def test_a_losing_agent_loses_capital_and_is_fired(plan):
-    months = sorted(plan.shares)
-    loser = [plan.shares[m]["loser"] for m in months]
-
-    assert any(b < a for a, b in zip(loser, loser[1:], strict=False))
-    assert "loser" in plan.fired
-    assert loser[-1] == 0.0
-    assert any(e["agent_id"] == "loser" and e["text"].startswith("Fired ") for e in plan.log)
-
-
-def test_the_winner_ends_with_more_capital_than_it_started(plan):
-    months = sorted(plan.shares)
-
-    assert plan.shares[months[-1]]["winner"] > plan.shares[months[0]]["winner"]
-
-
-def test_a_killed_agent_gets_nothing(agents, panel):
-    universe = set(panel.vectors["ticker"].unique().to_list())
-    killed = [*agents[:2], {**agents[3], "verdict": "killed"}]
-
-    plan = allocate(killed, universe)
-
-    assert all(s["other"] == 0.0 for s in plan.shares.values())
-
-
 def test_planted_and_off_universe_names_never_reach_the_book(agents, panel):
     universe = set(panel.vectors["ticker"].unique().to_list())
     run = dict(agents[0]["run"])
@@ -123,53 +90,6 @@ def test_invested_fraction_counts_only_trading_agents(plan):
     assert all(0.0 <= x <= 1.0 for x in plan.invested.values())
 
 
-def test_a_bear_market_alone_does_not_fire_anyone():
-    panel = make_panel(
-        persistence=0.9, n_tickers=60, market_shocks={f"2022-{m:02d}": -0.06 for m in range(1, 13)}
-    )
-    agents = [
-        {"id": i, "name": i, "verdict": "pass", "run": run_recipe(r, panel).to_dict()}
-        for i, r in [("winner", recipe()), ("other", recipe("skew_25d", top_n=25))]
-    ]
-
-    plan = allocate(agents, set(panel.vectors["ticker"].unique().to_list()), spx(panel))
-
-    assert "winner" not in plan.fired
-
-
-def test_a_crash_in_every_name_alone_does_not_fire_anyone():
-    # Every name falls 1.5x the index all year: picks lag the S&P 500 but not their own pool.
-    panel = make_panel(
-        persistence=0.9,
-        n_tickers=60,
-        market_shocks={f"2020-{m:02d}": -0.06 for m in range(1, 13)},
-        name_beta=1.5,
-    )
-    agents = [
-        {"id": i, "name": i, "verdict": "pass", "run": run_recipe(r, panel).to_dict()}
-        for i, r in [("winner", recipe()), ("other", recipe("skew_25d", top_n=25))]
-    ]
-
-    plan = allocate(agents, set(panel.vectors["ticker"].unique().to_list()), spx(panel))
-
-    assert "winner" not in plan.fired
-
-
-@pytest.mark.parametrize("seed", range(6))
-def test_noise_alone_does_not_get_an_agent_fired(seed):
-    # A zero-skill agent's picks-vs-pool Sharpe wanders around 0 with a standard error near 1;
-    # a firing rule that trips on that fires everyone eventually.
-    panel = make_panel(persistence=0.9, n_tickers=60, seed=seed)
-    agents = [
-        {"id": i, "name": i, "verdict": "pass", "run": run_recipe(r, panel).to_dict()}
-        for i, r in [("noise", recipe("atm_iv", top_n=10)), ("winner", recipe())]
-    ]
-
-    plan = allocate(agents, set(panel.vectors["ticker"].unique().to_list()), spx(panel))
-
-    assert "noise" not in plan.fired
-
-
 def test_bounded_split_water_fills():
     shares = bounded_split({"a": 10.0, "b": 0.0, "c": 0.0}, lo=0.1, hi=0.5)
 
@@ -182,3 +102,31 @@ def test_cap_positions_redistributes_excess():
 
     assert sum(weights.values()) == pytest.approx(1.0)
     assert max(weights.values()) <= 0.05 + 1e-12
+
+
+def test_capital_is_split_equally_until_the_judge_sets_it(plan):
+    for month, shares in plan.shares.items():
+        live = [x for x in shares.values() if x > 0]
+        assert sum(shares.values()) == pytest.approx(1.0), month
+        assert max(live) - min(live) < 1e-9, (month, shares)
+
+
+def test_capital_follows_the_judges_split(agents, panel):
+    universe = set(panel.vectors["ticker"].unique().to_list())
+    split = {"winner": 3.0, "noise": 1.0, "loser": 0.0, "other": 0.0}
+    plan = allocate([{**a, "allocation": split[a["id"]]} for a in agents], universe)
+
+    last = plan.shares[plan.months[-1]]
+    assert last["winner"] == pytest.approx(0.75) and last["noise"] == pytest.approx(0.25)
+    assert last["loser"] == 0.0 and last["other"] == 0.0
+
+
+def test_nobody_is_fired_and_a_red_team_kill_still_trades(agents, panel):
+    universe = set(panel.vectors["ticker"].unique().to_list())
+    killed = [*agents[:2], {**agents[2], "verdict": "killed"}]
+
+    plan = allocate(killed, universe)
+
+    assert plan.fired == {}
+    assert not any(e["text"].startswith("Fired ") for e in plan.log)
+    assert all(s["loser"] > 0 for s in plan.shares.values())

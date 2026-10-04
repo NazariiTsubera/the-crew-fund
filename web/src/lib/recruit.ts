@@ -9,6 +9,7 @@ import type {
 } from "@/lib/api";
 
 import { formatNum, formatPct } from "@/lib/format";
+import { verdictLabel } from "@/lib/agent-status";
 
 export type RecruitLine =
 | ChatMessage
@@ -190,10 +191,6 @@ export type RecruitStage =
         const { agent } = event.data;
         const verdict = agent.redteam.verdict;
 
-        const fate =
-        verdict === "killed"
-        ? "WILL NOT TRADE"
-        : "JOINS THE CREW";
 
         return {
           ...state,
@@ -206,7 +203,8 @@ export type RecruitStage =
           lines: system(
             state,
             ts,
-            `RED TEAM VERDICT: ${verdict.toUpperCase()} · ${agent.name.toUpperCase()} ${fate}`,
+            // The Red Team advises; every recruit trades.
+            `RED TEAM ${verdictLabel(verdict)} · ${agent.name.toUpperCase()} JOINS THE CREW`,
           ),
         };
       }

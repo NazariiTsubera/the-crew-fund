@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { statusLabel } from "@/lib/agent-status";
+import { statusLabel, verdictLabel } from "@/lib/agent-status";
 
 describe("statusLabel", () => {
   it("names a Red Team kill a kill", () => {
@@ -14,5 +14,13 @@ describe("statusLabel", () => {
   it("keeps the live statuses", () => {
     expect(statusLabel({ status: "trading", verdict: "pass", stop_month: null })).toBe("Trading");
     expect(statusLabel({ status: "sitting_out", verdict: "probation", stop_month: null })).toBe("Sitting out");
+  });
+});
+
+describe("verdictLabel", () => {
+  it("reads the Red Team as advice, never as a kill", () => {
+    expect(verdictLabel("pass")).toBe("PASSED");
+    expect(verdictLabel("probation")).toBe("CAUTION");
+    expect(verdictLabel("killed")).toBe("FAILED");
   });
 });

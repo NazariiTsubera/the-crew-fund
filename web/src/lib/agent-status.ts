@@ -19,3 +19,15 @@ export function isFired(a: StatusFields): boolean {
 export function statusLabel(a: StatusFields): string {
   return isFired(a) ? "Fired" : STATUS_TEXT[a.status];
 }
+
+// The Red Team advises; it never stops an agent. "killed" stays the API's word for a failed
+// attack, but on screen it reads as a warning the judge can weigh.
+const VERDICT_TEXT: Record<AgentSummary["verdict"], string> = {
+  pass: "PASSED",
+  probation: "CAUTION",
+  killed: "FAILED",
+};
+
+export function verdictLabel(verdict: AgentSummary["verdict"]): string {
+  return VERDICT_TEXT[verdict];
+}

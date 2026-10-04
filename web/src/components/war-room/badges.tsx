@@ -2,6 +2,7 @@ import type { CSSProperties } from "react";
 
 import { statusLabel } from "@/lib/agent-status";
 import type { AgentSummary, Verdict } from "@/lib/api";
+import { verdictLabel } from "@/lib/agent-status";
 
 const BADGE: CSSProperties = {
   display: "inline-block",
@@ -30,7 +31,7 @@ const VERDICT_STYLE: Record<Verdict, CSSProperties> = {
   },
 };
 
-/** The Red Team verdict: PASS, PROBATION or KILLED. */
+/** The Red Team verdict as advice: PASSED, CAUTION or FAILED. */
 export function VerdictBadge({ verdict }: { verdict: Verdict }) {
   return (
     <span
@@ -38,7 +39,7 @@ export function VerdictBadge({ verdict }: { verdict: Verdict }) {
       style={{ ...BADGE, ...VERDICT_STYLE[verdict] }}
     >
       <span className="sr-only">Red Team verdict: </span>
-      {verdict.toUpperCase()}
+      {verdictLabel(verdict)}
     </span>
   );
 }

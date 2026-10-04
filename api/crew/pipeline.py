@@ -36,7 +36,8 @@ def publish(store: Store, meta: dict, recipe: Recipe, run: Run, report: dict) ->
         "recipe": recipe.model_dump(),
         "verdict": report["verdict"],
         "redteam": report,
-        "status": "killed" if report["verdict"] == "killed" else run.status,
+        # The Red Team advises; it never stops an agent from trading.
+        "status": run.status,
         "kpis": run.kpis,
         "yearly_returns": run.yearly_returns,
         "capital_share": 0.0,
@@ -79,7 +80,13 @@ def rebalance(store: Store, panel: Panel) -> Plan:
     """Re-split capital across every stored agent and write the fund."""
     agents = store.list_agents()
     crew = [
-        {"id": a["id"], "name": a["name"], "verdict": a["verdict"], "run": run}
+        {
+            "id": a["id"],
+            "name": a["name"],
+            "verdict": a["verdict"],
+            "run": run,
+            "allocation": a.get("allocation", 1.0),
+        }
         for a in agents
         if (run := store.latest_run(a["id"])) is not None
     ]
@@ -101,7 +108,7 @@ def rebalance(store: Store, panel: Panel) -> Plan:
         trend = "flat" if abs(share - before) < TREND_STEP else ("up" if share > before else "down")
         fired = plan.fired.get(a["id"])
         run = store.latest_run(a["id"]) or {}
-        status = "killed" if a["verdict"] == "killed" or fired else run.get("status", a["status"])
+        status = run.get("status", a["status"])
         store.put_agent(
             {
                 **a,

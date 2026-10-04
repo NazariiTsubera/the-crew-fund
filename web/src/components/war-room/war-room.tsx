@@ -47,7 +47,7 @@ export function WarRoom() {
             <div className="min-w-0 @4xl:col-span-2">
               <FundChart vault={fund} />
             </div>
-            <CapitalPanel agents={fund.agents} capital={capital} latestMemo={fund.latest_memo} />
+            <CapitalPanel agents={fund.agents} capital={capital} latestMemo={fund.latest_memo} onSplitSaved={retry} />
           </div>
         </div>
         <AgentsTable agents={fund.agents} slots={slots} />
